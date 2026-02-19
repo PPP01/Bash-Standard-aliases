@@ -82,10 +82,28 @@ _alias_setup_prompt_yes_no() {
   esac
 }
 
+_alias_setup_prompt_choice_root_target() {
+  local user_target="$1"
+  local answer=""
+
+  echo "Root-Setup Ziel waehlen:"
+  echo "  1) ${user_target}"
+  echo "  2) /etc/bash.bashrc"
+  echo "  3) ueberspringen"
+  read -r -p "Auswahl [1/2/3]: " answer
+
+  case "${answer}" in
+    1) printf "%s" "${user_target}" ;;
+    2) printf "/etc/bash.bashrc" ;;
+    *) printf "" ;;
+  esac
+}
+
 alias_setup() {
   local loader_path="${BASH_ALIAS_REPO_DIR}/bash_alias_std.sh"
   local user_rc="${HOME}/.bashrc"
   local user_target="${user_rc}"
+  local final_target=""
   local detected_alias_file=""
 
   if [ -z "${BASH_ALIAS_REPO_DIR:-}" ]; then
@@ -105,18 +123,17 @@ alias_setup() {
     fi
   fi
 
-  if _alias_setup_prompt_yes_no "Setup in ${user_target} eintragen?"; then
+  if [ "${EUID}" -eq 0 ] && [ -f /etc/bash.bashrc ]; then
+    final_target="$(_alias_setup_prompt_choice_root_target "${user_target}")"
+    if [ -n "${final_target}" ]; then
+      _alias_setup_add_to_file "${final_target}" "${loader_path}" || return 1
+    else
+      echo "Root-Setup uebersprungen."
+    fi
+  elif _alias_setup_prompt_yes_no "Setup in ${user_target} eintragen?"; then
     _alias_setup_add_to_file "${user_target}" "${loader_path}" || return 1
   else
     echo "User-Setup uebersprungen."
-  fi
-
-  if [ "${EUID}" -eq 0 ] && [ -f /etc/bash.bashrc ]; then
-    if _alias_setup_prompt_yes_no "Zusatzlich global in /etc/bash.bashrc eintragen?"; then
-      _alias_setup_add_to_file "/etc/bash.bashrc" "${loader_path}" || return 1
-    else
-      echo "Globales Setup uebersprungen."
-    fi
   fi
 
   echo "Setup abgeschlossen."

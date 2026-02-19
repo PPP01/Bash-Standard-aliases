@@ -2,6 +2,12 @@
 # version 2026-02-19
 # Loader fuer modulare Aliase mit konfigurierbarer Modul-Liste
 
+# Schutz vor doppeltem Laden in derselben Shell-Session.
+if [ -n "${BASH_ALIAS_STD_LOADED:-}" ]; then
+  return 0 2>/dev/null || exit 0
+fi
+BASH_ALIAS_STD_LOADED=1
+
 _alias_base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _alias_config_file_default="${_alias_base_dir}/alias_files.conf"
 _alias_config_file_local="${_alias_base_dir}/alias_files.local.conf"

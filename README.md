@@ -72,4 +72,4 @@ asetup
 
 `alias_setup` fragt:
 - ob in `~/.bashrc` oder einer erkannten Alias-Datei eingetragen werden soll
-- und bei root zusaetzlich, ob `/etc/bash.bashrc` erweitert werden soll
+- und bei root (falls vorhanden) per Entweder-oder-Auswahl nach `~/.bashrc`/Alias-Datei oder `/etc/bash.bashrc`

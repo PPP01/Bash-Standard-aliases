@@ -11,7 +11,11 @@ Interaktives Setup-Modul fuer die Einbindung von `bash_alias_std.sh`.
   - Standardziel ist `~/.bashrc`.
   - Falls in `~/.bashrc` eine Alias-Datei erkannt wird (z. B. `~/.bash_aliases`), kann stattdessen dort eingetragen werden.
 - Root-Setup:
-  - Wenn als root ausgefuehrt und `/etc/bash.bashrc` vorhanden ist, wird optional ein globaler Eintrag angeboten.
+  - Wenn als root ausgefuehrt und `/etc/bash.bashrc` vorhanden ist, gibt es eine Entweder-oder-Auswahl:
+    - `~/.bashrc` bzw. erkannte Alias-Datei
+    - oder `/etc/bash.bashrc`
+    - oder ueberspringen
 
 ## Sicherheit
 - Mehrfache Eintraege werden vermieden (Marker-/Pfad-Pruefung).
+- Doppelladen in derselben Shell wird im Loader per Guard verhindert.
