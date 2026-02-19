@@ -5,11 +5,15 @@ Modulare Bash-Aliase fuer mehrere Linux-Server.
 ## Zielstruktur
 - `bash_alias_std.sh`: Loader-Datei.
 - `alias_files/`: Alle verfuegbaren Alias-Module.
-- `alias_files.conf`: Steuerdatei mit Beschreibung pro Modul.
+- `alias_files.conf`: Standard-Steuerdatei (versioniert).
+- `alias_files.local.conf`: Lokale Steuerdatei pro Server (nicht versioniert).
+- `alias_files.local.conf.example`: Vorlage fuer lokale Konfiguration.
 - `docs/alias_files/*.md`: Dokumentation je Modul.
 
 ## Module aktivieren/deaktivieren
-Datei: `alias_files.conf`
+Dateien:
+- `alias_files.local.conf` (hat Prioritaet, wenn vorhanden)
+- sonst `alias_files.conf`
 
 Format pro Modul:
 
@@ -22,6 +26,15 @@ Format pro Modul:
 Moeglichkeiten:
 - Aktiv: Datei-Zeile ohne `#`
 - Deaktiviert: Datei-Zeile auskommentiert, z. B. `# 00-core.sh`
+
+## Lokale Konfiguration ohne Git-Aenderung
+
+```bash
+cp alias_files.local.conf.example alias_files.local.conf
+```
+
+Danach in `alias_files.local.conf` Module pro Server ein-/auskommentieren.
+Die Datei `alias_files.local.conf` ist in `.gitignore` und erzeugt keine Git-Diffs.
 
 ## Einbindung in ~/.bashrc
 

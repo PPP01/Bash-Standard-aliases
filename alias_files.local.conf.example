@@ -1,0 +1,18 @@
+# Lokale Konfiguration pro Installation/Server.
+# Diese Datei nach alias_files.local.conf kopieren und anpassen.
+# Datei alias_files.local.conf ist in .gitignore und wird nicht versioniert.
+#
+# Beispiel:
+# cp alias_files.local.conf.example alias_files.local.conf
+
+# Modul: Core
+# Basis-Aliase fuer ls/grep und die taegliche Shell-Nutzung.
+# Dieses Modul ist bewusst klein und fuer alle Benutzer gedacht.
+# Empfohlen als immer aktives Grundmodul.
+00-core.sh
+
+# Modul: Navigation
+# Kurzbefehle fuer Verzeichniswechsel und sichere Defaults.
+# Enthaelt interaktives Loeschen mit rm -i.
+# Sinnvoll fuer alle Systeme.
+10-navigation.sh

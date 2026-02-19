@@ -3,11 +3,20 @@
 # Loader fuer modulare Aliase mit konfigurierbarer Modul-Liste
 
 _alias_base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_alias_config_file="${_alias_base_dir}/alias_files.conf"
+_alias_config_file_default="${_alias_base_dir}/alias_files.conf"
+_alias_config_file_local="${_alias_base_dir}/alias_files.local.conf"
 # Von Modulen/Funktionen nutzbar, um den Repo-Ordner sicher zu finden.
 BASH_ALIAS_REPO_DIR="${_alias_base_dir}"
 
-if [ -f "${_alias_config_file}" ]; then
+if [ -f "${_alias_config_file_local}" ]; then
+  _alias_config_file="${_alias_config_file_local}"
+elif [ -f "${_alias_config_file_default}" ]; then
+  _alias_config_file="${_alias_config_file_default}"
+else
+  _alias_config_file=""
+fi
+
+if [ -n "${_alias_config_file}" ]; then
   while IFS= read -r _entry; do
     # Leerzeilen und Kommentare ignorieren
     [ -z "${_entry}" ] && continue
@@ -25,7 +34,7 @@ if [ -f "${_alias_config_file}" ]; then
     unset _full_path
   done < "${_alias_config_file}"
 else
-  echo "Hinweis: Konfigurationsdatei fehlt: ${_alias_config_file}" >&2
+  echo "Hinweis: Konfigurationsdatei fehlt: ${_alias_config_file_local} oder ${_alias_config_file_default}" >&2
 fi
 
-unset _entry _alias_config_file _alias_base_dir
+unset _entry _alias_config_file _alias_config_file_default _alias_config_file_local _alias_base_dir
