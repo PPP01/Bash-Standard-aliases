@@ -5,22 +5,23 @@ Modulare Bash-Aliase fuer mehrere Linux-Server.
 ## Zielstruktur
 - `bash_alias_std.sh`: Loader-Datei.
 - `alias_files/`: Alle verfuegbaren Alias-Module.
-- `alias_files.conf`: Steuerdatei, welche Module aktiv sind.
+- `alias_files.conf`: Steuerdatei mit Beschreibung pro Modul.
 - `docs/alias_files/*.md`: Dokumentation je Modul.
 
 ## Module aktivieren/deaktivieren
 Datei: `alias_files.conf`
 
-Format pro Zeile:
+Format pro Modul:
 
 ```text
-enabled|00-core.sh|Basis-Aliase fuer alle Benutzer
+# 3-5 Zeilen Beschreibung
+# ...
+00-core.sh
 ```
 
 Moeglichkeiten:
-- Aktiv: `enabled|...`
-- Deaktiviert: `disabled|...`
-- Oder auskommentiert: `# enabled|...`
+- Aktiv: Datei-Zeile ohne `#`
+- Deaktiviert: Datei-Zeile auskommentiert, z. B. `# 00-core.sh`
 
 ## Einbindung in ~/.bashrc
 
@@ -30,10 +31,12 @@ if [ -f /opt/scripts/bash_alias_std.sh ]; then
 fi
 ```
 
-## GitHub Sync
+## Repo Update
+
+Nach dem Laden der Aliase steht dieser Befehl zur Verfuegung:
 
 ```bash
-git add .
-git commit -m "Rework alias architecture with config and docs"
-git push
+alias_update
 ```
+
+Er fuehrt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in welchem Verzeichnis du gerade bist.

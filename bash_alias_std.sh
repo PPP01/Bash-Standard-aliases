@@ -4,27 +4,28 @@
 
 _alias_base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _alias_config_file="${_alias_base_dir}/alias_files.conf"
+# Von Modulen/Funktionen nutzbar, um den Repo-Ordner sicher zu finden.
+BASH_ALIAS_REPO_DIR="${_alias_base_dir}"
 
 if [ -f "${_alias_config_file}" ]; then
-  while IFS='|' read -r _state _file _description; do
+  while IFS= read -r _entry; do
     # Leerzeilen und Kommentare ignorieren
-    [ -z "${_state}" ] && continue
-    case "${_state}" in
+    [ -z "${_entry}" ] && continue
+    case "${_entry}" in
       \#*) continue ;;
     esac
 
-    # Nur aktivierte Module laden
-    if [ "${_state}" = "enabled" ] && [ -n "${_file}" ]; then
-      _full_path="${_alias_base_dir}/alias_files/${_file}"
-      if [ -f "${_full_path}" ]; then
-        # shellcheck disable=SC1090
-        source "${_full_path}"
-      fi
-      unset _full_path
+    # Aktive Zeilen enthalten nur den Dateinamen aus alias_files/
+    _full_path="${_alias_base_dir}/alias_files/${_entry}"
+
+    if [ -f "${_full_path}" ]; then
+      # shellcheck disable=SC1090
+      source "${_full_path}"
     fi
+    unset _full_path
   done < "${_alias_config_file}"
 else
   echo "Hinweis: Konfigurationsdatei fehlt: ${_alias_config_file}" >&2
 fi
 
-unset _state _file _description _alias_config_file _alias_base_dir
+unset _entry _alias_config_file _alias_base_dir
