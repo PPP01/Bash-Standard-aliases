@@ -49,7 +49,7 @@ fi
 Nach dem Laden der Aliase steht dieser Befehl zur Verfuegung:
 
 ```bash
-alias_update
+_self_update
 ```
 
 Er fuehrt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in welchem Verzeichnis du gerade bist.
@@ -61,15 +61,9 @@ Hinweis: Fuer Pageant-Setups kann Git mit `core.sshCommand` auf `plink -agent` k
 Interaktives Setup fuer die Shell-Integration:
 
 ```bash
-alias_setup
+_self_setup
 ```
 
-Kurzform:
-
-```bash
-asetup
-```
-
-`alias_setup` fragt:
+`_self_setup` fragt:
 - ob in `~/.bashrc` oder einer erkannten Alias-Datei eingetragen werden soll
 - und bei root (falls vorhanden) per Entweder-oder-Auswahl nach `~/.bashrc`/Alias-Datei oder `/etc/bash.bashrc`

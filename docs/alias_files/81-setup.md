@@ -4,7 +4,7 @@ Interaktives Setup-Modul fuer die Einbindung von `bash_alias_std.sh`.
 
 ## Enthalten
 - `alias_setup`: Fragt interaktiv nach den Ziel-Dateien und fuegt den Source-Block ein.
-- `asetup`: Kurzer Alias auf `alias_setup`.
+- `_self_setup`: Kurzer Alias auf `alias_setup`.
 
 ## Verhalten
 - User-Setup:

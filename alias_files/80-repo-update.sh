@@ -17,4 +17,4 @@ alias_repo_update() {
   )
 }
 
-alias alias_update='alias_repo_update'
+alias _self_update='alias_repo_update'

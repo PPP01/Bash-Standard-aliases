@@ -139,4 +139,4 @@ alias_setup() {
   echo "Setup abgeschlossen."
 }
 
-alias asetup='alias_setup'
+alias _self_setup='alias_setup'
