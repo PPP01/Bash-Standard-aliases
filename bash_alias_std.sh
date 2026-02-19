@@ -1,27 +1,30 @@
 # shellcheck shell=bash
 # version 2026-02-19
-# Modulare Loader-Datei fuer gemeinsame Aliase
+# Loader fuer modulare Aliase mit konfigurierbarer Modul-Liste
 
 _alias_base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_alias_config_file="${_alias_base_dir}/alias_files.conf"
 
-_alias_modules=(
-  "aliases.d/00-core.sh"
-  "aliases.d/10-navigation.sh"
-  "aliases.d/20-files.sh"
-  "aliases.d/30-process.sh"
-  "aliases.d/40-network.sh"
-  "aliases.d/50-root-journal.sh"
-  "aliases.d/60-root-apt.sh"
-  "aliases.d/70-root-systemd.sh"
-  "aliases.d/90-overrides.sh"
-  "aliases.d/99-help.sh"
-)
+if [ -f "${_alias_config_file}" ]; then
+  while IFS='|' read -r _state _file _description; do
+    # Leerzeilen und Kommentare ignorieren
+    [ -z "${_state}" ] && continue
+    case "${_state}" in
+      \#*) continue ;;
+    esac
 
-for _module in "${_alias_modules[@]}"; do
-  if [ -f "${_alias_base_dir}/${_module}" ]; then
-    # shellcheck disable=SC1090
-    source "${_alias_base_dir}/${_module}"
-  fi
-done
+    # Nur aktivierte Module laden
+    if [ "${_state}" = "enabled" ] && [ -n "${_file}" ]; then
+      _full_path="${_alias_base_dir}/alias_files/${_file}"
+      if [ -f "${_full_path}" ]; then
+        # shellcheck disable=SC1090
+        source "${_full_path}"
+      fi
+      unset _full_path
+    fi
+  done < "${_alias_config_file}"
+else
+  echo "Hinweis: Konfigurationsdatei fehlt: ${_alias_config_file}" >&2
+fi
 
-unset _module _alias_modules _alias_base_dir
+unset _state _file _description _alias_config_file _alias_base_dir
