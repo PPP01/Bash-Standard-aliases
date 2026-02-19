@@ -14,14 +14,28 @@ alias cdl='dirs -v'
 alias p='pushd'
 alias o='popd'
 
-cd_prev2() {
+cd_stack() {
+  local idx="${1:-}"
   local target
-  target="$(dirs +1 2>/dev/null)"
+
+  if ! [[ "${idx}" =~ ^[+-][0-9]+$ ]]; then
+    echo "Usage: cd_stack [+N|-N]  (z. B. +1 oder -2)"
+    return 1
+  fi
+
+  target="$(dirs "${idx}" 2>/dev/null)"
   if [ -z "${target}" ]; then
-    echo "Kein zweitletztes Verzeichnis im Stack. Erst mit 'p' (pushd) arbeiten."
+    echo "Kein Verzeichnis fuer ${idx} im Stack. Erst mit 'p' (pushd) arbeiten."
     return 1
   fi
   cd "${target}" || return 1
 }
 
-alias -- -2='cd_prev2'
+alias -- +1='cd_stack +1'
+alias -- +2='cd_stack +2'
+alias -- +3='cd_stack +3'
+alias -- +4='cd_stack +4'
+alias -- -1='cd_stack -1'
+alias -- -2='cd_stack -2'
+alias -- -3='cd_stack -3'
+alias -- -4='cd_stack -4'
