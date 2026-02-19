@@ -55,3 +55,21 @@ alias_update
 Er fuehrt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in welchem Verzeichnis du gerade bist.
 
 Hinweis: Fuer Pageant-Setups kann Git mit `core.sshCommand` auf `plink -agent` konfiguriert sein.
+
+## Setup-Hilfe
+
+Interaktives Setup fuer die Shell-Integration:
+
+```bash
+alias_setup
+```
+
+Kurzform:
+
+```bash
+asetup
+```
+
+`alias_setup` fragt:
+- ob in `~/.bashrc` oder einer erkannten Alias-Datei eingetragen werden soll
+- und bei root zusaetzlich, ob `/etc/bash.bashrc` erweitert werden soll

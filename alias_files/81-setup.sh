@@ -1,0 +1,125 @@
+# shellcheck shell=bash
+
+_alias_setup_block() {
+  local loader_path="$1"
+  cat <<EOF
+# >>> bash_alias_std setup >>>
+if [ -f "${loader_path}" ]; then
+  source "${loader_path}"
+fi
+# <<< bash_alias_std setup <<<
+EOF
+}
+
+_alias_setup_add_to_file() {
+  local target_file="$1"
+  local loader_path="$2"
+  local marker_start="# >>> bash_alias_std setup >>>"
+
+  if [ -z "${target_file}" ]; then
+    echo "Fehler: Keine Zieldatei angegeben."
+    return 1
+  fi
+
+  if [ -e "${target_file}" ] && ! [ -w "${target_file}" ]; then
+    echo "Fehler: Datei ist nicht schreibbar: ${target_file}"
+    return 1
+  fi
+
+  if [ -f "${target_file}" ] && grep -Fq "${marker_start}" "${target_file}"; then
+    echo "Bereits eingerichtet in ${target_file} (Marker gefunden)."
+    return 0
+  fi
+
+  if [ -f "${target_file}" ] && grep -Fq "${loader_path}" "${target_file}"; then
+    echo "Bereits eingerichtet in ${target_file} (Loader-Pfad gefunden)."
+    return 0
+  fi
+
+  {
+    echo ""
+    _alias_setup_block "${loader_path}"
+  } >> "${target_file}"
+
+  echo "Eintrag hinzugefuegt: ${target_file}"
+}
+
+_alias_setup_detect_alias_file_from_bashrc() {
+  local rc_file="$1"
+  local match=""
+
+  if [ ! -f "${rc_file}" ]; then
+    return 0
+  fi
+
+  while IFS= read -r line; do
+    case "${line}" in
+      \#*|"") continue ;;
+    esac
+
+    if [[ "${line}" =~ ^[[:space:]]*(source|\.)[[:space:]]+([^[:space:];]+) ]]; then
+      match="${BASH_REMATCH[2]}"
+      match="${match/#\~/$HOME}"
+      match="${match/#\$HOME/$HOME}"
+
+      case "${match}" in
+        */.bash_aliases|*/bash_aliases|*.aliases.sh|*/aliases.sh)
+          printf "%s" "${match}"
+          return 0
+          ;;
+      esac
+    fi
+  done < "${rc_file}"
+}
+
+_alias_setup_prompt_yes_no() {
+  local question="$1"
+  local answer=""
+  read -r -p "${question} [y/N]: " answer
+  case "${answer}" in
+    y|Y|yes|YES) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+alias_setup() {
+  local loader_path="${BASH_ALIAS_REPO_DIR}/bash_alias_std.sh"
+  local user_rc="${HOME}/.bashrc"
+  local user_target="${user_rc}"
+  local detected_alias_file=""
+
+  if [ -z "${BASH_ALIAS_REPO_DIR:-}" ]; then
+    echo "Fehler: BASH_ALIAS_REPO_DIR ist nicht gesetzt."
+    return 1
+  fi
+
+  if [ ! -f "${loader_path}" ]; then
+    echo "Fehler: Loader nicht gefunden: ${loader_path}"
+    return 1
+  fi
+
+  detected_alias_file="$(_alias_setup_detect_alias_file_from_bashrc "${user_rc}")"
+  if [ -n "${detected_alias_file}" ] && [ "${detected_alias_file}" != "${user_rc}" ]; then
+    if _alias_setup_prompt_yes_no "Alias-Datei erkannt (${detected_alias_file}). Dort eintragen statt in ${user_rc}?"; then
+      user_target="${detected_alias_file}"
+    fi
+  fi
+
+  if _alias_setup_prompt_yes_no "Setup in ${user_target} eintragen?"; then
+    _alias_setup_add_to_file "${user_target}" "${loader_path}" || return 1
+  else
+    echo "User-Setup uebersprungen."
+  fi
+
+  if [ "${EUID}" -eq 0 ] && [ -f /etc/bash.bashrc ]; then
+    if _alias_setup_prompt_yes_no "Zusatzlich global in /etc/bash.bashrc eintragen?"; then
+      _alias_setup_add_to_file "/etc/bash.bashrc" "${loader_path}" || return 1
+    else
+      echo "Globales Setup uebersprungen."
+    fi
+  fi
+
+  echo "Setup abgeschlossen."
+}
+
+alias asetup='alias_setup'
