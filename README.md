@@ -40,3 +40,5 @@ alias_update
 ```
 
 Er fuehrt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in welchem Verzeichnis du gerade bist.
+
+Hinweis: Fuer Pageant-Setups kann Git mit `core.sshCommand` auf `plink -agent` konfiguriert sein.
