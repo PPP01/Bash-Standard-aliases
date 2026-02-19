@@ -86,10 +86,10 @@ _alias_setup_prompt_choice_root_target() {
   local user_target="$1"
   local answer=""
 
-  echo "Root-Setup Ziel waehlen:"
-  echo "  1) ${user_target}"
-  echo "  2) /etc/bash.bashrc"
-  echo "  3) ueberspringen"
+  echo "Root-Setup Ziel waehlen:" >&2
+  echo "  1) ${user_target}" >&2
+  echo "  2) /etc/bash.bashrc" >&2
+  echo "  3) ueberspringen" >&2
   read -r -p "Auswahl [1/2/3]: " answer
 
   case "${answer}" in
