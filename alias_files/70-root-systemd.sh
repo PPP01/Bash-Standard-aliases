@@ -1,30 +1,36 @@
 # shellcheck shell=bash
 
 if [ "${EUID}" -eq 0 ]; then
-  start() {
+  _alias_systemd_start() {
     if [ -z "$1" ]; then echo "Welcher Service?"; return 1; fi
     sudo systemctl start "$1" && systemctl status "$1" --no-pager
   }
 
-  restart() {
+  _alias_systemd_restart() {
     if [ -z "$1" ]; then echo "Welcher Service?"; return 1; fi
     sudo systemctl restart "$1" && systemctl status "$1" --no-pager
   }
 
-  stop() {
+  _alias_systemd_stop() {
     if [ -z "$1" ]; then echo "Welcher Service?"; return 1; fi
     sudo systemctl stop "$1" && systemctl status "$1" --no-pager
   }
 
-  reload() {
+  _alias_systemd_reload() {
     if [ -z "$1" ]; then echo "Welcher Service?"; return 1; fi
     sudo systemctl reload "$1" && systemctl status "$1" --no-pager
   }
 
-  status() {
+  _alias_systemd_status() {
     if [ -z "$1" ]; then echo "Welcher Service?"; return 1; fi
     systemctl status "$1" --no-pager
   }
+
+  alias start='_alias_systemd_start'
+  alias restart='_alias_systemd_restart'
+  alias stop='_alias_systemd_stop'
+  alias reload='_alias_systemd_reload'
+  alias status='_alias_systemd_status'
 
   _systemd_short_completion() {
     local cur="${COMP_WORDS[COMP_CWORD]}"
