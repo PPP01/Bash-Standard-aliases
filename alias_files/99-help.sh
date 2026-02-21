@@ -158,3 +158,14 @@ _alias_category_completion() {
 }
 
 complete -F _alias_category_completion a
+
+alias_self_test_reload() {
+  if [ -z "${BASH_ALIAS_REPO_DIR:-}" ]; then
+    echo "Fehler: BASH_ALIAS_REPO_DIR ist nicht gesetzt."
+    return 1
+  fi
+
+  bash "${BASH_ALIAS_REPO_DIR}/scripts/test_reload_category_mapping.sh"
+}
+
+alias _self_test_reload='alias_self_test_reload'

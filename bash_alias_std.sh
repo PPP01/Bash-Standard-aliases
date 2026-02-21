@@ -28,6 +28,16 @@ else
   _alias_config_file=""
 fi
 
+# Beim Reload existieren bereits Aliase aus dem vorherigen Lauf.
+# Diese zuerst entfernen, bevor die Mapping-Arrays neu initialisiert werden.
+if declare -p BASH_ALIAS_ALIAS_CATEGORY >/dev/null 2>&1; then
+  for _prev_alias_name in "${!BASH_ALIAS_ALIAS_CATEGORY[@]}"; do
+    [ -z "${_prev_alias_name}" ] && continue
+    unalias -- "${_prev_alias_name}" 2>/dev/null || true
+  done
+  unset _prev_alias_name
+fi
+
 declare -gA BASH_ALIAS_CATEGORY_ENABLED=()
 declare -gA BASH_ALIAS_ALIAS_CATEGORY=()
 declare -ga BASH_ALIAS_CATEGORY_ORDER=()
