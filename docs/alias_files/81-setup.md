@@ -26,6 +26,6 @@ Setup-Startpunkt mit markerbasierter Installation und Kategorie-Umschaltung.
 ## Alias-Hilfe (de)
 | alias | kurz | beschreibung | befehl |
 |---|---|---|---|
-| _self_setup | Marker-Setup starten | Prueft Marker und startet Kategorie-Umschaltung oder Setup. | alias_self_setup |
-| _self_setup_remove | Setup-Marker entfernen | Entfernt den markierten Setup-Block aus der erkannten Startdatei. | alias_setup_remove |
+| _self_setup | Marker-Setup starten | Prueft Marker und startet Kategorie-Umschaltung oder Setup. | bash "$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh" |
+| _self_setup_remove | Setup-Marker entfernen | Entfernt den markierten Setup-Block aus der erkannten Startdatei. | bash "$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh" --remove |
 | _self_category_setup | Kategorie-Setup starten | Startet den interaktiven Kategorie-Setup-Assistenten. | bash "$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh" |

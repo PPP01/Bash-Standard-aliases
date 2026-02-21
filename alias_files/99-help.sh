@@ -499,8 +499,8 @@ _alias_detail_command_for_name() {
     aua) REPLY='apt update && apt upgrade [-y] && apt autoremove [-y]' ;;
     _self_update) REPLY='git pull --ff-only && alias_repo_reload  (Standardmodus)' ;;
     _self_reload) REPLY='alias_repo_reload  (Alias-Loader in aktueller Shell neu laden)' ;;
-    _self_setup) REPLY='alias_self_setup  (Marker-Pruefung, dann Kategorie-Setup oder Installation)' ;;
-    _self_setup_remove) REPLY='alias_setup_remove  (Setup-Marker entfernen)' ;;
+    _self_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\"' ;;
+    _self_setup_remove) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --remove' ;;
     _self_category_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
     _self_test_reload) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"' ;;
     _self_edit) REPLY='alias_self_edit  (Alias-Assistent mit Ziel-Datei-Auswahl und Reload)' ;;
