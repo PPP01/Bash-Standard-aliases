@@ -644,6 +644,7 @@ _alias_show_alias_details() {
 
 _alias_menu_category() {
   local category="$1"
+  local show_back_entry="${2:-1}"
   local number_re='^[0-9]+$'
   local choice=""
   local idx=1
@@ -661,7 +662,9 @@ _alias_menu_category() {
 
     echo ""
     echo "=== ${category} ==="
-    printf ' %2d) %s\n' 0 "$(_alias_text category_back)"
+    if [ "${show_back_entry}" -eq 1 ]; then
+      printf ' %2d) %s\n' 0 "$(_alias_text category_back)"
+    fi
     printf ' %3s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
 
     if [ "${#names[@]}" -eq 0 ]; then
@@ -863,7 +866,7 @@ a() {
     return 0
   fi
 
-  _alias_menu_category "${category}"
+  _alias_menu_category "${category}" 0
   rc=$?
   case "${rc}" in
     130) return 0 ;;
