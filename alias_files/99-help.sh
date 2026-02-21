@@ -523,6 +523,7 @@ _alias_resolve_category_input() {
   }
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    _alias_category_is_visible "${category}" || continue
     if [ "${category}" = "${lowered}" ]; then
       printf '%s' "${category}"
       return 0
@@ -530,6 +531,7 @@ _alias_resolve_category_input() {
   done
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    _alias_category_is_visible "${category}" || continue
     case "${category}" in
       "${lowered}"*)
         found="${category}"
@@ -556,6 +558,7 @@ _alias_print_category_list() {
   printf ' %2d) %-12s\n' 0 "$(_alias_text categories_back)" >&2
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    _alias_category_is_visible "${category}" || continue
     state="off"
     if [ "${BASH_ALIAS_CATEGORY_ENABLED[${category}]:-0}" -eq 1 ]; then
       state="on"
@@ -571,6 +574,15 @@ _alias_names_for_category() {
   _alias_runtime_cache_build
   names_block="${BASH_ALIAS_RUNTIME_CATEGORY_NAMES[${category}]:-}"
   [ -n "${names_block}" ] && printf '%s' "${names_block}"
+}
+
+_alias_category_is_visible() {
+  local category="$1"
+  local names_block=""
+
+  _alias_runtime_cache_build
+  names_block="${BASH_ALIAS_RUNTIME_CATEGORY_NAMES[${category}]:-}"
+  [ -n "${names_block}" ]
 }
 
 _alias_reserved_number_for_category() {
@@ -590,6 +602,7 @@ _alias_category_number_for_name() {
   local reserved_number=""
 
   if reserved_number="$(_alias_reserved_number_for_category "${wanted}")"; then
+    _alias_category_is_visible "${wanted}" || return 1
     printf '%s' "${reserved_number}"
     return 0
   fi
@@ -597,6 +610,7 @@ _alias_category_number_for_name() {
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     [ "${category}" = "_own" ] && continue
     [ "${category}" = "_setup" ] && continue
+    _alias_category_is_visible "${category}" || continue
     if [ "${number}" -eq "${reserved_own}" ] || [ "${number}" -eq "${reserved_setup}" ]; then
       number=$((number + 1))
     fi
@@ -620,6 +634,7 @@ _alias_category_name_for_number() {
   if [ "${wanted}" -eq "${reserved_own}" ]; then
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
       if [ "${category}" = "_own" ]; then
+        _alias_category_is_visible "${category}" || return 1
         printf '%s' "${category}"
         return 0
       fi
@@ -630,6 +645,7 @@ _alias_category_name_for_number() {
   if [ "${wanted}" -eq "${reserved_setup}" ]; then
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
       if [ "${category}" = "_setup" ]; then
+        _alias_category_is_visible "${category}" || return 1
         printf '%s' "${category}"
         return 0
       fi
@@ -640,6 +656,7 @@ _alias_category_name_for_number() {
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     [ "${category}" = "_own" ] && continue
     [ "${category}" = "_setup" ] && continue
+    _alias_category_is_visible "${category}" || continue
     if [ "${number}" -eq "${reserved_own}" ] || [ "${number}" -eq "${reserved_setup}" ]; then
       number=$((number + 1))
     fi
@@ -743,6 +760,7 @@ _alias_show_all_categories() {
   local short_desc=""
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    _alias_category_is_visible "${category}" || continue
     echo ""
     echo "=== ${category} ==="
     printf ' %3s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
@@ -777,6 +795,7 @@ _alias_menu_all_categories() {
     printf ' %2d) %s\n' 0 "$(_alias_text all_categories_back)"
 
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+      _alias_category_is_visible "${category}" || continue
       number="$(_alias_category_number_for_name "${category}")" || continue
       printf ' %3d) %s\n' "${number}" "${category}"
     done
@@ -911,6 +930,7 @@ _alias_category_completion() {
   local category=""
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    _alias_category_is_visible "${category}" || continue
     words+=" ${category}"
   done
 
@@ -929,3 +949,4 @@ alias_self_test_reload() {
 }
 
 alias _self_test_reload='alias_self_test_reload'
+

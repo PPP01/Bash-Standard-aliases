@@ -9,6 +9,8 @@ _default_conf="${_repo_dir}/alias_files.conf"
 _local_conf="${_repo_dir}/alias_files.local.conf"
 _categories_file="${_repo_dir}/alias_categories.sh"
 
+declare -A _module_visible_cache=()
+
 if [ ! -f "${_default_conf}" ]; then
   echo "Fehler: alias_files.conf nicht gefunden: ${_default_conf}"
   exit 1
@@ -31,6 +33,58 @@ _escape_regex() {
   printf '%s' "$1" | sed -E 's/[][(){}.^$*+?|\\/]/\\&/g'
 }
 
+_module_visible_for_user() {
+  local module="$1"
+  local module_path=""
+  local cached=""
+
+  cached="${_module_visible_cache[${module}]:-}"
+  if [ -n "${cached}" ]; then
+    [ "${cached}" = "1" ]
+    return
+  fi
+
+  module_path="${_repo_dir}/alias_files/${module}"
+  if [ ! -f "${module_path}" ]; then
+    _module_visible_cache["${module}"]=0
+    return 1
+  fi
+
+  if bash --noprofile --norc -c '
+    module_path="$1"
+    # shellcheck disable=SC1090
+    source "${module_path}" >/dev/null 2>&1 || true
+    alias_count="$(alias | wc -l | tr -d "[:space:]")"
+    func_count="$(declare -F | wc -l | tr -d "[:space:]")"
+    if [ "${alias_count}" -gt 0 ] || [ "${func_count}" -gt 0 ]; then
+      exit 0
+    fi
+    exit 1
+  ' _ "${module_path}"; then
+    _module_visible_cache["${module}"]=1
+    return 0
+  fi
+
+  _module_visible_cache["${module}"]=0
+  return 1
+}
+
+_category_is_visible() {
+  local category="$1"
+  local modules=""
+  local module=""
+
+  if declare -F alias_modules_for_category >/dev/null 2>&1; then
+    modules="$(alias_modules_for_category "${category}")"
+  fi
+
+  for module in ${modules}; do
+    _module_visible_for_user "${module}" && return 0
+  done
+
+  return 1
+}
+
 _category_state() {
   local category="$1"
   local modules=""
@@ -44,6 +98,7 @@ _category_state() {
   fi
 
   for module in ${modules}; do
+    _module_visible_for_user "${module}" || continue
     total=$((total + 1))
     regex="$(_escape_regex "${module}")"
     if grep -Eq "^[[:space:]]*${regex}[[:space:]]*$" "${_target_conf}"; then
@@ -98,11 +153,13 @@ _toggle_category() {
 
   if [ "${state}" = "on" ]; then
     for module in ${modules}; do
+      _module_visible_for_user "${module}" || continue
       _disable_module "${module}"
     done
     echo "Kategorie '${category}' ausgeschaltet."
   else
     for module in ${modules}; do
+      _module_visible_for_user "${module}" || continue
       _enable_module "${module}"
     done
     echo "Kategorie '${category}' eingeschaltet."
@@ -120,6 +177,7 @@ _list_categories() {
   if declare -F alias_categories_list >/dev/null 2>&1; then
     while IFS= read -r category; do
       [ -z "${category}" ] && continue
+      _category_is_visible "${category}" || continue
       state="$(_category_state "${category}")"
       printf ' %2d) %-12s [%s]\n' "${idx}" "${category}" "${state}"
       idx=$((idx + 1))
@@ -139,6 +197,7 @@ _resolve_category_by_index() {
   if declare -F alias_categories_list >/dev/null 2>&1; then
     while IFS= read -r category; do
       [ -z "${category}" ] && continue
+      _category_is_visible "${category}" || continue
       if [ "${idx}" -eq "${wanted}" ]; then
         printf '%s' "${category}"
         return 0
