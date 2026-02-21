@@ -3,7 +3,7 @@
 
 alias _self_reload='alias_repo_reload'
 
-declare -g BASH_ALIAS_OVERRIDES_EDIT_IMPL_LOADED="${BASH_ALIAS_OVERRIDES_EDIT_IMPL_LOADED:-0}"
+declare -g BASH_ALIAS_OVERRIDES_EDIT_IMPL_LOADED=0
 
 _alias_overrides_repo_dir() {
   if [ -n "${BASH_ALIAS_REPO_DIR:-}" ]; then

@@ -1,6 +1,6 @@
 # shellcheck shell=bash
 
-declare -g BASH_ALIAS_HELP_IMPL_LOADED="${BASH_ALIAS_HELP_IMPL_LOADED:-0}"
+declare -g BASH_ALIAS_HELP_IMPL_LOADED=0
 
 _alias_help_repo_dir() {
   if [ -n "${BASH_ALIAS_REPO_DIR:-}" ]; then
