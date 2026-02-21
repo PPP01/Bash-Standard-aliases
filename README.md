@@ -67,7 +67,15 @@ Nach dem Laden der Aliase steht dieser Befehl zur Verfuegung:
 _self_update
 ```
 
-Er fuehrt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in welchem Verzeichnis du gerade bist.
+Er fuehrt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in welchem Verzeichnis du gerade bist, und laedt danach die Aliase neu.
+
+Optional:
+
+```bash
+_self_update --restart
+```
+
+Fuehrt nach dem Update einen Shell-Neustart (`exec $SHELL -l`) fuer einen komplett sauberen Zustand aus.
 
 Hinweis: Fuer Pageant-Setups kann Git mit `core.sshCommand` auf `plink -agent` konfiguriert sein.
 

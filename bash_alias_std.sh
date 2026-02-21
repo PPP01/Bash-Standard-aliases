@@ -103,7 +103,10 @@ if [ -n "${_alias_config_file}" ]; then
     if [ -f "${_full_path}" ]; then
       _aliases_before="$(_alias_collect_alias_names)"
       # shellcheck disable=SC1090
-      source "${_full_path}"
+      if ! source "${_full_path}"; then
+        echo "Fehler: Modul konnte nicht geladen werden: ${_entry}" >&2
+        return 1 2>/dev/null || exit 1
+      fi
       _aliases_after="$(_alias_collect_alias_names)"
       _alias_register_aliases_for_category "${_category}" "${_aliases_before}" "${_aliases_after}"
     fi
