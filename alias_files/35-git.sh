@@ -1,4 +1,4 @@
-# Gaengige Git-Aliase
+# Gängige Git-Aliase
 alias g='git'
 alias gs='git status -sb'
 alias ga='git add'

@@ -1,6 +1,6 @@
 # 60-root-apt.sh
 
-APT-Shortcuts und Update-Workflow fuer root.
+APT-Shortcuts und Update-Workflow für root.
 
 ## Enthalten
 - `agi`: `apt install`
@@ -13,7 +13,7 @@ APT-Shortcuts und Update-Workflow fuer root.
 - `aua`: `update-all` Wrapper
 
 ## Funktion
-- `update-all [-y]`: Fuehrt `apt update`, zeigt verfuegbare Updates, dann Upgrade + Autoremove aus.
+- `update-all [-y]`: Führt `apt update`, zeigt verfügbare Updates, dann Upgrade + Autoremove aus.
 
 ## Alias-Hilfe (de)
 | alias | kurz | beschreibung | befehl |
@@ -22,7 +22,7 @@ APT-Shortcuts und Update-Workflow fuer root.
 | agr | apt remove | Entfernt ein Paket via apt remove (root). | apt remove <paket> |
 | acs | apt search | Sucht Pakete via apt search. | apt search <pattern> |
 | agu | apt update | Aktualisiert Paketlisten via apt update (root). | apt update |
-| agg | apt upgrade | Fuehrt Paket-Upgrade via apt upgrade aus (root). | apt upgrade |
-| aga | apt autoremove | Entfernt unnoetige Pakete via apt autoremove (root). | apt autoremove |
-| agl | apt list --upgradable | Zeigt alle upgradefaehigen Pakete. | apt list --upgradable |
-| aua | apt Gesamt-Update | Fuehrt apt update, upgrade und autoremove als Gesamt-Update aus (root). | apt update && apt upgrade [-y] && apt autoremove [-y] |
+| agg | apt upgrade | Führt Paket-Upgrade via apt upgrade aus (root). | apt upgrade |
+| aga | apt autoremove | Entfernt unnötige Pakete via apt autoremove (root). | apt autoremove |
+| agl | apt list --upgradable | Zeigt alle upgradefähigen Pakete. | apt list --upgradable |
+| aua | apt Gesamt-Update | Führt apt update, upgrade und autoremove als Gesamt-Update aus (root). | apt update && apt upgrade [-y] && apt autoremove [-y] |

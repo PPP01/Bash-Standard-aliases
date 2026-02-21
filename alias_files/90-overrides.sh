@@ -60,7 +60,7 @@ _alias_self_edit_resolve_target_file() {
   repo_file="${BASH_ALIAS_REPO_DIR}/.bash_aliases_specific"
 
   echo ""
-  echo "_self_edit: Ziel-Datei waehlen"
+  echo "_self_edit: Ziel-Datei wählen"
   echo "  1) ${home_file} (root-eigen)"
   echo "  2) ${repo_file} (projektweit)"
   printf 'Auswahl [1/2, Enter=1]: '

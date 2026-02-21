@@ -6,18 +6,18 @@ Navigation und Sicherheits-Defaults.
 - `..`: Eine Ebene hoch
 - `...`: Zwei Ebenen hoch
 - `....` / `.....`: Drei bzw. vier Ebenen hoch
-- `-`: Zurueck ins vorherige Verzeichnis (`cd -`)
+- `-`: Zurück ins vorherige Verzeichnis (`cd -`)
 - `+1` bis `+4`: Wie `pushd +N` (Stack-Rotation)
 - `-1` bis `-4`: Wie `pushd -N` (Stack-Rotation)
 - `cdl`: Directory-Stack anzeigen (`dirs -v`)
 - `p`: `pushd`
 - `o`: `popd`
-- `rm`: Interaktives Loeschen (`rm -i`)
+- `rm`: Interaktives Löschen (`rm -i`)
 
 ## Alias-Hilfe (de)
 | alias | kurz | beschreibung | befehl |
 |---|---|---|---|
-| rm | rm -i | Loescht interaktiv mit Rueckfrage. | rm -i |
+| rm | rm -i | Löscht interaktiv mit Rückfrage. | rm -i |
 | .. | cd .. | Wechselt ein Verzeichnis nach oben. | cd .. |
 | ... | cd ../../ | Wechselt zwei Verzeichnisse nach oben. | cd ../../ |
 | .... | cd ../../../ | Wechselt drei Verzeichnisse nach oben. | cd ../../../ |
@@ -25,7 +25,7 @@ Navigation und Sicherheits-Defaults.
 | .2 | cd ../../ | Wechselt zwei Verzeichnisse nach oben. | cd ../../ |
 | .3 | cd ../../../ | Wechselt drei Verzeichnisse nach oben. | cd ../../../ |
 | .4 | cd ../../../../ | Wechselt vier Verzeichnisse nach oben. | cd ../../../../ |
-| .5 | cd ../../../../../ | Wechselt fuenf Verzeichnisse nach oben. | cd ../../../../../ |
+| .5 | cd ../../../../../ | Wechselt fünf Verzeichnisse nach oben. | cd ../../../../../ |
 | ~ | cd ~ | Wechselt ins Home-Verzeichnis. | cd ~ |
 | - | cd - | Wechselt ins vorherige Verzeichnis. | cd - |
 | cdl | dirs -v | Zeigt den Verzeichnis-Stack mit Indizes. | dirs -v |

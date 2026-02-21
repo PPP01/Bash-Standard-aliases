@@ -6,13 +6,13 @@
 # cp alias_files.local.conf.example alias_files.local.conf
 
 # Modul: Core
-# Basis-Aliase fuer ls/grep und die taegliche Shell-Nutzung.
-# Dieses Modul ist bewusst klein und fuer alle Benutzer gedacht.
+# Basis-Aliase für ls/grep und die tägliche Shell-Nutzung.
+# Dieses Modul ist bewusst klein und für alle Benutzer gedacht.
 # Empfohlen als immer aktives Grundmodul.
 00-core.sh
 
 # Modul: Navigation
-# Kurzbefehle fuer Verzeichniswechsel und sichere Defaults.
-# Enthaelt interaktives Loeschen mit rm -i.
-# Sinnvoll fuer alle Systeme.
+# Kurzbefehle für Verzeichniswechsel und sichere Defaults.
+# Enthält interaktives Löschen mit rm -i.
+# Sinnvoll für alle Systeme.
 10-navigation.sh

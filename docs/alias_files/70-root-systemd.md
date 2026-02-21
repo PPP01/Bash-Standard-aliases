@@ -1,6 +1,6 @@
 # 70-root-systemd.sh
 
-Systemd-Shortcuts fuer root, inklusive Completion.
+Systemd-Shortcuts für root, inklusive Completion.
 
 ## Enthalten
 - `start <service>`

@@ -132,7 +132,7 @@ _alias_setup_prompt_choice_root_target() {
   local user_target="$1"
   local answer=""
 
-  echo "Root-Setup Ziel waehlen:" >&2
+  echo "Root-Setup Ziel wählen:" >&2
   echo "  1) ${user_target}" >&2
   echo "  2) /etc/bash.bashrc" >&2
   echo "  3) ueberspringen" >&2
@@ -223,7 +223,7 @@ _alias_setup_remove_from_file() {
       ;;
     2)
       rm -f "${tmp_file}"
-      echo "Fehler: Marker-Block unvollstaendig in ${target_file} (End-Marker fehlt)."
+      echo "Fehler: Marker-Block unvollständig in ${target_file} (End-Marker fehlt)."
       return 1
       ;;
     3)
@@ -257,7 +257,7 @@ alias_setup_remove() {
 
   if [ "${EUID}" -eq 0 ] && [ -f /etc/bash.bashrc ]; then
     echo "Kein Marker gefunden."
-    echo "Entfernung aus Datei waehlen:"
+    echo "Entfernung aus Datei wählen:"
     echo "  1) /etc/bash.bashrc"
     echo "  2) ${user_target}"
     echo "  3) Abbrechen"

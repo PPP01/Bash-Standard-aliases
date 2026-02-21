@@ -1,20 +1,20 @@
 # 80-repo-update.sh
 
-Update-Funktion fuer dieses Alias-Repository.
+Update-Funktion für dieses Alias-Repository.
 
 ## Enthalten
-- `alias_repo_update`: Wechselt in den Repo-Ordner, fuehrt `git pull --ff-only` aus und laedt danach neu.
-- `alias_repo_reload`: Laedt `bash_alias_std.sh` in der aktuellen Session neu.
+- `alias_repo_update`: Wechselt in den Repo-Ordner, führt `git pull --ff-only` aus und lädt danach neu.
+- `alias_repo_reload`: Lädt `bash_alias_std.sh` in der aktüllen Session neu.
 - `_self_update`: Kurzer Alias auf `alias_repo_update`.
 
 ## Zweck
-Der Update-Befehl funktioniert von jedem aktuellen Verzeichnis aus und nutzt immer den Ordner, in dem `bash_alias_std.sh` liegt.
+Der Update-Befehl funktioniert von jedem aktüllen Verzeichnis aus und nutzt immer den Ordner, in dem `bash_alias_std.sh` liegt.
 
 ## Optionen
-- `_self_update` oder `_self_update --reload`: Update + Reload in aktueller Shell.
+- `_self_update` oder `_self_update --reload`: Update + Reload in aktüller Shell.
 - `_self_update --restart`: Update + Neustart als Login-Shell (`exec $SHELL -l`).
 
 ## Alias-Hilfe (de)
 | alias | kurz | beschreibung | befehl |
 |---|---|---|---|
-| _self_update | Repo-Update + Reload | Aktualisiert dieses Alias-Repository per git pull und laedt neu. | git pull --ff-only && alias_repo_reload |
+| _self_update | Repo-Update + Reload | Aktualisiert dieses Alias-Repository per git pull und lädt neu. | git pull --ff-only && alias_repo_reload |

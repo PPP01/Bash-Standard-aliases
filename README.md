@@ -1,6 +1,6 @@
 # Bash Standard Aliases
 
-Modulare Bash-Aliase fuer mehrere Linux-Server.
+Modulare Bash-Aliase für mehrere Linux-Server.
 
 ## Installation
 ```bash
@@ -9,16 +9,16 @@ git clone https://github.com/PPP01/Bash-Standard-aliases bash-standard-aliases
 
 ## Zielstruktur
 - `bash_alias_std.sh`: Loader-Datei.
-- `alias_files/`: Alle verfuegbaren Alias-Module.
-- `alias_files.conf`: Standard-Steuerdatei (versioniert).
-- `alias_files.local.conf`: Lokale Steuerdatei pro Server (nicht versioniert).
-- `alias_files.local.conf.example`: Vorlage fuer lokale Konfiguration.
+- `alias_files/`: Alle verfügbaren Alias-Module.
+- `alias_files.conf`: Standard-Steürdatei (versioniert).
+- `alias_files.local.conf`: Lokale Steürdatei pro Server (nicht versioniert).
+- `alias_files.local.conf.example`: Vorlage für lokale Konfiguration.
 - `alias_categories.sh`: Kategorie-Zuordnung Modul <-> Kategorie.
 - `docs/alias_files/*.md`: Dokumentation je Modul.
 
 ## Module aktivieren/deaktivieren
 Dateien:
-- `alias_files.local.conf` (hat Prioritaet, wenn vorhanden)
+- `alias_files.local.conf` (hat Priorität, wenn vorhanden)
 - sonst `alias_files.conf`
 
 Format pro Modul:
@@ -29,7 +29,7 @@ Format pro Modul:
 00-core.sh
 ```
 
-Moeglichkeiten:
+Möglichkeiten:
 - Aktiv: Datei-Zeile ohne `#`
 - Deaktiviert: Datei-Zeile auskommentiert, z. B. `# 00-core.sh`
 
@@ -40,8 +40,8 @@ _self_setup
 ```
 
 `_self_setup` arbeitet markerbasiert:
-1. Sucht zuerst nach dem Setup-Marker.
-2. Bei root zuerst in `/etc/bash.bashrc`, danach analog User in erkannter Alias-Datei oder `~/.bashrc`.
+1. Sucht zürst nach dem Setup-Marker.
+2. Bei root zürst in `/etc/bash.bashrc`, danach analog User in erkannter Alias-Datei oder `~/.bashrc`.
 3. Wenn Marker gefunden: startet direkt die Kategorie-Umschaltung.
 4. Wenn kein Marker gefunden: startet den Setup-Assistenten und danach die Kategorie-Umschaltung.
 
@@ -85,13 +85,13 @@ fi
 
 ## Repo Update
 
-Nach dem Laden der Aliase steht dieser Befehl zur Verfuegung:
+Nach dem Laden der Aliase steht dieser Befehl zur Verfügung:
 
 ```bash
 _self_update
 ```
 
-Er fuehrt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in welchem Verzeichnis du gerade bist, und laedt danach die Aliase neu.
+Er führt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in welchem Verzeichnis du gerade bist, und lädt danach die Aliase neu.
 
 Optional:
 
@@ -99,9 +99,9 @@ Optional:
 _self_update --restart
 ```
 
-Fuehrt nach dem Update einen Shell-Neustart (`exec $SHELL -l`) fuer einen komplett sauberen Zustand aus.
+Führt nach dem Update einen Shell-Neustart (`exec $SHELL -l`) für einen komplett sauberen Zustand aus.
 
-Hinweis: Fuer Pageant-Setups kann Git mit `core.sshCommand` auf `plink -agent` konfiguriert sein.
+Hinweis: Für Pageant-Setups kann Git mit `core.sshCommand` auf `plink -agent` konfiguriert sein.
 
 ## Alias-Liste nach Kategorie
 
@@ -111,4 +111,4 @@ a
 
 Ohne Parameter bietet `a` eine Kategorie-Auswahl an.
 Mit Parameter filtert `a` direkt, z. B. `a git` oder `a all`.
-Fuer Kategorien ist Tab-Completion aktiv.
+Für Kategorien ist Tab-Completion aktiv.

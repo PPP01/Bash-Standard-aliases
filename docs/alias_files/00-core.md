@@ -1,6 +1,6 @@
 # 00-core.sh
 
-Basis-Aliase fuer den Alltag.
+Basis-Aliase für den Alltag.
 
 ## Enthalten
 - `ls`: Farbige Ausgabe (`ls --color=auto`)
@@ -11,7 +11,7 @@ Basis-Aliase fuer den Alltag.
 ## Alias-Hilfe (de)
 | alias | kurz | beschreibung | befehl |
 |---|---|---|---|
-| ls | ls --color=auto | Listet Dateien im aktuellen Verzeichnis farbig auf. | ls --color=auto |
+| ls | ls --color=auto | Listet Dateien im aktüllen Verzeichnis farbig auf. | ls --color=auto |
 | la | ls -alhF | Listet alle Dateien inkl. versteckter Dateien im langen, menschenlesbaren Format. | ls -alhF |
 | ll | ls -alhF | Listet alle Dateien inkl. versteckter Dateien im langen, menschenlesbaren Format. | ls -alhF |
 | grep | grep --color=auto | Sucht Textmuster farbig hervorgehoben. | grep --color=auto |

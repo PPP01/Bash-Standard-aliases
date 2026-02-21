@@ -1,6 +1,6 @@
 # 85-mysql.sh
 
-Optionales MySQL-Modul fuer CLI- und Backup-Aufgaben.
+Optionales MySQL-Modul für CLI- und Backup-Aufgaben.
 
 ## Enthalten
 - `my`: `mysql`
@@ -11,12 +11,12 @@ Optionales MySQL-Modul fuer CLI- und Backup-Aufgaben.
 - `mysql_dump_gz <db> [out.sql.gz]`: Komprimierter SQL-Dump
 
 ## Hinweise
-- Das Modul ist in `alias_files.conf` standardmaessig auskommentiert.
+- Das Modul ist in `alias_files.conf` standardmässig auskommentiert.
 - Zugangsdaten sollten ueber `~/.my.cnf` oder passende Umgebungsparameter erfolgen.
 
 ## Alias-Hilfe (de)
 | alias | kurz | beschreibung | befehl |
 |---|---|---|---|
 | my | mysql | Startet die MySQL-CLI. | mysql |
-| mya | mysqladmin | Startet mysqladmin fuer Admin-Operationen. | mysqladmin |
-| myping | mysqladmin ping | Prueft, ob der MySQL-Server antwortet. | mysqladmin ping |
+| mya | mysqladmin | Startet mysqladmin für Admin-Operationen. | mysqladmin |
+| myping | mysqladmin ping | Prüft, ob der MySQL-Server antwortet. | mysqladmin ping |
