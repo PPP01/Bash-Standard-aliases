@@ -2,6 +2,11 @@
 
 Modulare Bash-Aliase fuer mehrere Linux-Server.
 
+## Installation
+```bash
+git clone https://github.com/PPP01/Bash-Standard-aliases bash-standard-aliases
+```
+
 ## Zielstruktur
 - `bash_alias_std.sh`: Loader-Datei.
 - `alias_files/`: Alle verfuegbaren Alias-Module.

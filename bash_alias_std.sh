@@ -61,7 +61,7 @@ _alias_init_categories() {
 }
 
 _alias_collect_alias_names() {
-  alias | sed -E "s/^alias ([^=]+)=.*/\1/" | LC_ALL=C sort -u
+  alias | sed -E "s/^alias[[:space:]]+--[[:space:]]+([^=]+)=.*/\1/; t; s/^alias[[:space:]]+([^=]+)=.*/\1/" | LC_ALL=C sort -u
 }
 
 _alias_register_aliases_for_category() {

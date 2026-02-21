@@ -5,7 +5,7 @@ show_aliases_functions() {
 }
 
 _alias_sorted_names() {
-  alias | sed -E "s/^alias ([^=]+)=.*/\1/" | LC_ALL=C sort -u
+  alias | sed -E "s/^alias[[:space:]]+--[[:space:]]+([^=]+)=.*/\1/; t; s/^alias[[:space:]]+([^=]+)=.*/\1/" | LC_ALL=C sort -u
 }
 
 _alias_resolve_category_input() {
@@ -51,16 +51,16 @@ _alias_print_category_list() {
   local category=""
   local state=""
 
-  echo ""
-  echo "Alias-Kategorien:"
-  printf ' %2d) %-12s\n' 0 "all"
+  echo "" >&2
+  echo "Alias-Kategorien:" >&2
+  printf ' %2d) %-12s\n' 0 "all" >&2
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     state="off"
     if [ "${BASH_ALIAS_CATEGORY_ENABLED[${category}]:-0}" -eq 1 ]; then
       state="on"
     fi
-    printf ' %2d) %-12s [%s]\n' "${idx}" "${category}" "${state}"
+    printf ' %2d) %-12s [%s]\n' "${idx}" "${category}" "${state}" >&2
     idx=$((idx + 1))
   done
 }
@@ -76,7 +76,7 @@ _alias_show_one_category() {
   while IFS= read -r name; do
     [ -z "${name}" ] && continue
     if [ "${BASH_ALIAS_ALIAS_CATEGORY[${name}]:-}" = "${category}" ]; then
-      builtin alias "${name}"
+      builtin alias -- "${name}"
       found=1
     fi
   done < <(_alias_sorted_names)
