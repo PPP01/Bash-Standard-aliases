@@ -15,6 +15,7 @@ Gaengige Git-Aliase fuer den Alltag.
 - `gpl`: `git pull --ff-only`
 - `gp` / `gpf`: Push / Force-Push mit `--force-with-lease`
 - `gr` / `grs`: `git restore` / `git restore --staged`
+- `grsoft1` / `grhard1`: Letzten Commit soft/hard zuruecksetzen (`HEAD~1`)
 - `gst` / `gstp`: `git stash` / `git stash pop`
 
 ## Alias-Hilfe (de)
@@ -42,5 +43,7 @@ Gaengige Git-Aliase fuer den Alltag.
 | gpf | git push --force-with-lease | Fuehrt git push mit --force-with-lease aus (sicherer Force-Push). | git push --force-with-lease |
 | gr | git restore | Setzt Aenderungen im Working Tree auf HEAD zurueck. | git restore <file> |
 | grs | git restore --staged | Entfernt Dateien aus der Staging-Area. | git restore --staged <file> |
+| grsoft1 | git reset --soft HEAD~1 | Setzt den letzten Commit zurueck und behaelt alle Aenderungen im Staging-Bereich. | git reset --soft HEAD~1 |
+| grhard1 | git reset --hard HEAD~1 | Verwirft den letzten Commit inklusive Working-Tree-Aenderungen unwiderruflich. | git reset --hard HEAD~1 |
 | gst | git stash | Speichert den aktuellen Arbeitsstand in einem Stash. | git stash |
 | gstp | git stash pop | Spielt den letzten Git-Stash wieder ein. | git stash pop |
