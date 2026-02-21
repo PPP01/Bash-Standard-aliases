@@ -1,6 +1,6 @@
 # Bash Standard Aliases
 
-Modulare Bash-Aliase für mehrere Linux-Server.
+Modulare Bash-Aliase fuer mehrere Linux-Server.
 
 ## Installation
 ```bash
@@ -9,17 +9,20 @@ git clone https://github.com/PPP01/Bash-Standard-aliases bash-standard-aliases
 
 ## Zielstruktur
 - `bash_alias_std.sh`: Loader-Datei.
-- `alias_files/`: Alle verfügbaren Alias-Module.
-- `alias_files.conf`: Standard-Steürdatei (versioniert).
-- `alias_files.local.conf`: Lokale Steürdatei pro Server (nicht versioniert).
-- `alias_files.local.conf.example`: Vorlage für lokale Konfiguration.
+- `alias_files/`: Alle verfuegbaren Alias-Module.
+- `alias_files.conf`: Standard-Steuerdatei (versioniert, Basis).
+- `alias_files.local.conf`: Globale Delta-Konfiguration pro Server (nicht versioniert).
+- `~/.config/bash-standard-aliases/config.conf`: Benutzer-Delta-Konfiguration.
 - `alias_categories.sh`: Kategorie-Zuordnung Modul <-> Kategorie.
 - `docs/alias_files/*.md`: Dokumentation je Modul.
 
-## Module aktivieren/deaktivieren
-Dateien:
-- `alias_files.local.conf` (hat Priorität, wenn vorhanden)
-- sonst `alias_files.conf`
+## Konfigurationsmodell
+Der Loader kombiniert die Konfigurationen in dieser Reihenfolge:
+1. `alias_files.conf` (Basis)
+2. `alias_files.local.conf` (globale Abweichungen)
+3. `~/.config/bash-standard-aliases/config.conf` (Benutzer-Abweichungen)
+
+Damit ueberschreibt User-Konfiguration globale Abweichungen, und globale Abweichungen ueberschreiben die Basis.
 
 Format pro Modul:
 
@@ -29,9 +32,11 @@ Format pro Modul:
 00-core.sh
 ```
 
-Möglichkeiten:
+Moeglichkeiten:
 - Aktiv: Datei-Zeile ohne `#`
 - Deaktiviert: Datei-Zeile auskommentiert, z. B. `# 00-core.sh`
+
+In Delta-Dateien (`alias_files.local.conf`, `~/.config/bash-standard-aliases/config.conf`) sollen nur Abweichungen stehen.
 
 ## Alias-Setup in Bash-Startdatei
 
@@ -66,14 +71,26 @@ _self_category_setup
 `_self_category_setup` startet das Kategorie-Script mit nummerierter Liste, z. B. `git`, `journald`, `mysql`, `systemd`.
 Mit der Nummer wird die jeweilige Kategorie ein-/ausgeschaltet.
 
+- Als normaler User werden Aenderungen in `~/.config/bash-standard-aliases/config.conf` gespeichert.
+- Als root wirst du gefragt:
+  - global (`alias_files.local.conf`)
+  - nur fuer root (`~/.config/bash-standard-aliases/config.conf`)
+
 ## Lokale Konfiguration ohne Git-Aenderung
 
+Fuer globale serverweite Abweichungen (typisch: root/Admin):
+
 ```bash
-cp alias_files.local.conf.example alias_files.local.conf
+alias_files.local.conf
 ```
 
-Danach in `alias_files.local.conf` Module pro Server ein-/auskommentieren.
-Die Datei `alias_files.local.conf` ist in `.gitignore` und erzeugt keine Git-Diffs.
+Fuer benutzerspezifische Abweichungen:
+
+```bash
+~/.config/bash-standard-aliases/config.conf
+```
+
+Beide Dateien sind Delta-Dateien relativ zur `alias_files.conf` und enthalten nur Abweichungen.
 
 ## Einbindung in ~/.bashrc
 
@@ -88,13 +105,13 @@ fi
 
 ## Repo Update
 
-Nach dem Laden der Aliase steht dieser Befehl zur Verfügung:
+Nach dem Laden der Aliase steht dieser Befehl zur Verfuegung:
 
 ```bash
 _self_update
 ```
 
-Er führt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in welchem Verzeichnis du gerade bist, und lädt danach die Aliase neu.
+Er fuehrt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in welchem Verzeichnis du gerade bist, und laedt danach die Aliase neu.
 
 Optional:
 
@@ -102,9 +119,9 @@ Optional:
 _self_update --restart
 ```
 
-Führt nach dem Update einen Shell-Neustart (`exec $SHELL -l`) für einen komplett sauberen Zustand aus.
+Fuehrt nach dem Update einen Shell-Neustart (`exec $SHELL -l`) fuer einen komplett sauberen Zustand aus.
 
-Hinweis: Für Pageant-Setups kann Git mit `core.sshCommand` auf `plink -agent` konfiguriert sein.
+Hinweis: Fuer Pageant-Setups kann Git mit `core.sshCommand` auf `plink -agent` konfiguriert sein.
 
 ## Alias-Liste nach Kategorie
 
@@ -114,4 +131,4 @@ a
 
 Ohne Parameter bietet `a` eine Kategorie-Auswahl an.
 Mit Parameter filtert `a` direkt, z. B. `a git` oder `a all`.
-Für Kategorien ist Tab-Completion aktiv.
+Fuer Kategorien ist Tab-Completion aktiv.

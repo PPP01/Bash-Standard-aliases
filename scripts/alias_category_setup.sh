@@ -7,8 +7,12 @@ _script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _repo_dir="$(cd "${_script_dir}/.." && pwd)"
 _default_conf="${_repo_dir}/alias_files.conf"
 _local_conf="${_repo_dir}/alias_files.local.conf"
-_home_conf="${HOME}/.bash-standard-aliases.conf"
+_user_conf_dir="${HOME}/.config/bash-standard-aliases"
+_user_conf="${_user_conf_dir}/config.conf"
 _categories_file="${_repo_dir}/alias_categories.sh"
+
+_target_conf=""
+_target_kind=""
 
 declare -A _module_visible_cache=()
 
@@ -22,37 +26,49 @@ if [ -f "${_categories_file}" ]; then
   source "${_categories_file}"
 fi
 
-_choose_target_conf() {
-  _seed_conf=""
+_escape_regex() {
+  printf '%s' "$1" | sed -E 's/[][(){}.^$*+?|\\/]/\\&/g'
+}
 
-  if [ -f "${_home_conf}" ]; then
-    _target_conf="${_home_conf}"
+_select_target_conf() {
+  local answer=""
+
+  if [ "${EUID}" -ne 0 ]; then
+    _target_kind="user"
+    _target_conf="${_user_conf}"
     return 0
   fi
 
-  if [ -f "${_local_conf}" ]; then
-    if [ -w "${_local_conf}" ]; then
+  echo ""
+  echo "Root-Ausfuehrung: Wo sollen Aenderungen gespeichert werden?"
+  echo "  1) global (${_local_conf})"
+  echo "  2) nur fuer root (${_user_conf})"
+  echo "  3) abbrechen"
+  read -r -p "Auswahl [1/2/3]: " answer
+
+  case "${answer}" in
+    1)
+      _target_kind="global"
       _target_conf="${_local_conf}"
-      return 0
-    fi
-
-    _target_conf="${_home_conf}"
-    _seed_conf="${_local_conf}"
-    return 0
-  fi
-
-  if [ -w "${_repo_dir}" ]; then
-    _target_conf="${_local_conf}"
-    _seed_conf="${_default_conf}"
-    return 0
-  fi
-
-  _target_conf="${_home_conf}"
-  _seed_conf="${_default_conf}"
+      ;;
+    2|"")
+      _target_kind="user"
+      _target_conf="${_user_conf}"
+      ;;
+    *)
+      echo "Abgebrochen."
+      exit 1
+      ;;
+  esac
 }
 
 _prepare_target_conf() {
-  _choose_target_conf
+  if [ "${_target_kind}" = "user" ]; then
+    mkdir -p "${_user_conf_dir}" || {
+      echo "Fehler: Konnte Verzeichnis nicht erstellen: ${_user_conf_dir}"
+      exit 1
+    }
+  fi
 
   if [ -f "${_target_conf}" ]; then
     if [ ! -w "${_target_conf}" ]; then
@@ -62,27 +78,118 @@ _prepare_target_conf() {
     return 0
   fi
 
-  if [ -z "${_seed_conf}" ]; then
-    _seed_conf="${_default_conf}"
-  fi
-
-  if ! cp "${_seed_conf}" "${_target_conf}"; then
+  {
+    echo "# Delta-Konfiguration fuer bash-standard-aliases"
+    echo "# Nur Abweichungen von alias_files.conf"
+    if [ "${_target_kind}" = "user" ]; then
+      echo "# Basis: alias_files.conf + alias_files.local.conf (falls vorhanden)"
+    else
+      echo "# Basis: alias_files.conf"
+    fi
+    echo "# Aktivieren: modulname.sh"
+    echo "# Deaktivieren: # modulname.sh"
+  } > "${_target_conf}" || {
     echo "Fehler: Konnte Konfiguration nicht erzeugen: ${_target_conf}"
     exit 1
-  fi
+  }
 
   echo "Lokale Konfiguration erzeugt: ${_target_conf}"
+}
 
-  if [ ! -w "${_target_conf}" ]; then
-    echo "Fehler: Datei ist nicht schreibbar: ${_target_conf}"
-    exit 1
+_module_state_in_file() {
+  local file_path="$1"
+  local module="$2"
+  local regex=""
+  local line=""
+
+  [ -f "${file_path}" ] || {
+    printf 'none'
+    return 0
+  }
+
+  regex="$(_escape_regex "${module}")"
+  line="$(grep -E "^[[:space:]]*#?[[:space:]]*${regex}[[:space:]]*$" "${file_path}" | tail -n 1)"
+
+  if [ -z "${line}" ]; then
+    printf 'none'
+    return 0
+  fi
+
+  if [[ "${line}" =~ ^[[:space:]]*# ]]; then
+    printf 'off'
+  else
+    printf 'on'
   fi
 }
 
-_prepare_target_conf
+_base_state_for_module() {
+  local module="$1"
+  local state=""
+  local global_state=""
 
-_escape_regex() {
-  printf '%s' "$1" | sed -E 's/[][(){}.^$*+?|\\/]/\\&/g'
+  state="$(_module_state_in_file "${_default_conf}" "${module}")"
+  if [ "${state}" = "none" ]; then
+    state='off'
+  fi
+
+  if [ "${_target_kind}" = "user" ]; then
+    global_state="$(_module_state_in_file "${_local_conf}" "${module}")"
+    if [ "${global_state}" != "none" ]; then
+      state="${global_state}"
+    fi
+  fi
+
+  printf '%s' "${state}"
+}
+
+_effective_state_for_module() {
+  local module="$1"
+  local base_state=""
+  local override_state=""
+
+  base_state="$(_base_state_for_module "${module}")"
+  override_state="$(_module_state_in_file "${_target_conf}" "${module}")"
+
+  if [ "${override_state}" != "none" ]; then
+    printf '%s' "${override_state}"
+  else
+    printf '%s' "${base_state}"
+  fi
+}
+
+_remove_module_override() {
+  local module="$1"
+  local regex=""
+
+  regex="$(_escape_regex "${module}")"
+  sed -i -E "/^[[:space:]]*#?[[:space:]]*${regex}[[:space:]]*$/d" "${_target_conf}"
+}
+
+_write_module_override() {
+  local module="$1"
+  local desired_state="$2"
+
+  _remove_module_override "${module}"
+
+  if [ "${desired_state}" = "on" ]; then
+    printf '%s\n' "${module}" >> "${_target_conf}"
+  else
+    printf '# %s\n' "${module}" >> "${_target_conf}"
+  fi
+}
+
+_set_module_desired_state() {
+  local module="$1"
+  local desired_state="$2"
+  local base_state=""
+
+  base_state="$(_base_state_for_module "${module}")"
+
+  if [ "${desired_state}" = "${base_state}" ]; then
+    _remove_module_override "${module}"
+  else
+    _write_module_override "${module}" "${desired_state}"
+  fi
 }
 
 _module_visible_for_user() {
@@ -141,9 +248,9 @@ _category_state() {
   local category="$1"
   local modules=""
   local module=""
-  local regex=""
   local total=0
   local active=0
+  local state=""
 
   if declare -F alias_modules_for_category >/dev/null 2>&1; then
     modules="$(alias_modules_for_category "${category}")"
@@ -152,8 +259,8 @@ _category_state() {
   for module in ${modules}; do
     _module_visible_for_user "${module}" || continue
     total=$((total + 1))
-    regex="$(_escape_regex "${module}")"
-    if grep -Eq "^[[:space:]]*${regex}[[:space:]]*$" "${_target_conf}"; then
+    state="$(_effective_state_for_module "${module}")"
+    if [ "${state}" = "on" ]; then
       active=$((active + 1))
     fi
   done
@@ -167,54 +274,33 @@ _category_state() {
   fi
 }
 
-_enable_module() {
-  local module="$1"
-  local regex=""
-
-  regex="$(_escape_regex "${module}")"
-
-  if grep -Eq "^[[:space:]]*${regex}[[:space:]]*$" "${_target_conf}"; then
-    return 0
-  fi
-
-  if grep -Eq "^[[:space:]]*#[[:space:]]*${regex}[[:space:]]*$" "${_target_conf}"; then
-    sed -i -E "s|^[[:space:]]*#[[:space:]]*${regex}[[:space:]]*$|${module}|" "${_target_conf}"
-  else
-    printf '\n%s\n' "${module}" >> "${_target_conf}"
-  fi
-}
-
-_disable_module() {
-  local module="$1"
-  local regex=""
-
-  regex="$(_escape_regex "${module}")"
-  sed -i -E "s|^[[:space:]]*${regex}[[:space:]]*$|# ${module}|" "${_target_conf}"
-}
-
 _toggle_category() {
   local category="$1"
   local state=""
+  local desired_state=""
   local modules=""
   local module=""
 
   state="$(_category_state "${category}")"
+  if [ "${state}" = "on" ]; then
+    desired_state='off'
+  else
+    desired_state='on'
+  fi
+
   if declare -F alias_modules_for_category >/dev/null 2>&1; then
     modules="$(alias_modules_for_category "${category}")"
   fi
 
-  if [ "${state}" = "on" ]; then
-    for module in ${modules}; do
-      _module_visible_for_user "${module}" || continue
-      _disable_module "${module}"
-    done
-    echo "Kategorie '${category}' ausgeschaltet."
-  else
-    for module in ${modules}; do
-      _module_visible_for_user "${module}" || continue
-      _enable_module "${module}"
-    done
+  for module in ${modules}; do
+    _module_visible_for_user "${module}" || continue
+    _set_module_desired_state "${module}" "${desired_state}"
+  done
+
+  if [ "${desired_state}" = "on" ]; then
     echo "Kategorie '${category}' eingeschaltet."
+  else
+    echo "Kategorie '${category}' ausgeschaltet."
   fi
 }
 
@@ -261,6 +347,9 @@ _resolve_category_by_index() {
   return 1
 }
 
+_select_target_conf
+_prepare_target_conf
+
 while true; do
   _list_categories
   read -r -p "Kategorie-Nummer zum Umschalten (q zum Beenden): " _choice
@@ -284,4 +373,3 @@ while true; do
 done
 
 echo "Fertig. Fuer die aktuelle Shell ggf. '_self_reload' oder 'source ~/.bashrc' ausfuehren."
-
