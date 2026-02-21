@@ -39,9 +39,23 @@ Moeglichkeiten:
 _self_setup
 ```
 
-`_self_setup` startet ein Menue:
-- `1)` Einrichtungs-Assistent fuer `~/.bashrc` bzw. erkannte Alias-Datei (bei root auch `/etc/bash.bashrc`)
-- `2)` Kategorie-Umschaltung
+`_self_setup` arbeitet markerbasiert:
+1. Sucht zuerst nach dem Setup-Marker.
+2. Bei root zuerst in `/etc/bash.bashrc`, danach analog User in erkannter Alias-Datei oder `~/.bashrc`.
+3. Wenn Marker gefunden: startet direkt die Kategorie-Umschaltung.
+4. Wenn kein Marker gefunden: startet den Setup-Assistenten und danach die Kategorie-Umschaltung.
+
+Marker entfernen:
+
+```bash
+_self_setup_remove
+```
+
+Alternativ:
+
+```bash
+_self_setup --remove
+```
 
 ## Kategorien interaktiv umschalten
 
