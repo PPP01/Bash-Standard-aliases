@@ -25,11 +25,15 @@ _alias_text() {
         category_prompt) printf 'Alias-Nummer waehlen (0 = Zurueck): ' ;;
         category_empty) printf '(keine geladenen Aliase)' ;;
         category_back) printf 'Zurueck zur Kategorienauswahl' ;;
+        table_col_no) printf 'no)' ;;
+        table_col_alias) printf 'alias' ;;
+        table_col_short) printf 'kurzbeschreibung' ;;
         alias_invalid) printf 'Ungueltige Eingabe. Menue wird beendet.' ;;
         alias_detail_title) printf 'Alias-Details' ;;
         alias_detail_desc) printf 'Beschreibung' ;;
         alias_detail_cmd) printf 'Befehl' ;;
-        alias_detail_prompt) printf '0 = Zurueck zur Kategorie, Enter = weiter: ' ;;
+        alias_unknown) printf 'Unbekannter Alias: %s' ;;
+        short_internal) printf 'Interner Helfer: %s' ;;
         desc_fallback) printf 'Fuehrt aus: %s' ;;
         *) printf '%s' "${key}" ;;
       esac
@@ -46,11 +50,15 @@ _alias_text() {
         category_prompt) printf 'Choose alias number (0 = back): ' ;;
         category_empty) printf '(no loaded aliases)' ;;
         category_back) printf 'Back to category menu' ;;
+        table_col_no) printf 'no)' ;;
+        table_col_alias) printf 'alias' ;;
+        table_col_short) printf 'short description' ;;
         alias_invalid) printf 'Invalid input. Exiting menu.' ;;
         alias_detail_title) printf 'Alias details' ;;
         alias_detail_desc) printf 'Description' ;;
         alias_detail_cmd) printf 'Command' ;;
-        alias_detail_prompt) printf '0 = back to category, Enter = continue: ' ;;
+        alias_unknown) printf 'Unknown alias: %s' ;;
+        short_internal) printf 'Internal helper: %s' ;;
         desc_fallback) printf 'Runs: %s' ;;
         *) printf '%s' "${key}" ;;
       esac
@@ -68,6 +76,36 @@ _alias_value_for_name() {
   value="${value#\'}"
   value="${value%\'}"
   printf '%s' "${value}"
+}
+
+_alias_short_description_for_name() {
+  local name="$1"
+  local cmd="$2"
+  local first_word="${cmd%%[[:space:]]*}"
+
+  case "${name}" in
+    psg) printf 'Prozesse per Suchbegriff filtern.' ;;
+    psmem) printf 'Top-20 Prozesse nach RAM-Verbrauch.' ;;
+    pscpu) printf 'Top-20 Prozesse nach CPU-Verbrauch.' ;;
+    log) printf 'journalctl: letzte 50 Zeilen (Standard).' ;;
+    logs) printf 'journalctl: Service-Logs, Standard 50 Zeilen.' ;;
+    log_min) printf 'journalctl: seit X Minuten (Standard 10).' ;;
+    log_hour) printf 'journalctl: seit X Stunden (Standard 1).' ;;
+    log_clean) printf 'journalctl bereinigen (Standard 2d / 100M).' ;;
+    aua) printf 'APT-Update mit Upgrade + Autoremove (optional -y).' ;;
+    _self_update) printf 'Repository aktualisieren und Aliase neu laden.' ;;
+    _self_setup) printf 'Interaktives Kategorie-Setup starten.' ;;
+    _self_reload) printf 'Alias-Module in aktueller Shell neu laden.' ;;
+    _self_edit) printf 'Alias-Datei bearbeiten und ~/.bashrc neu laden.' ;;
+    _self_test_reload) printf 'Reload-Konsistenztest fuer Alias-Kategorien.' ;;
+    *)
+      if [[ "${cmd}" == *"|"* || "${cmd}" == *"&&"* || "${cmd}" == *";"* ]] || declare -F "${first_word}" >/dev/null 2>&1; then
+        printf "$(_alias_text short_internal)" "${cmd}"
+      else
+        printf '%s' "${cmd}"
+      fi
+      ;;
+  esac
 }
 
 _alias_description_for_name() {
@@ -111,6 +149,9 @@ _alias_description_for_name() {
         pingg) printf 'Testet Netzwerkverbindung zu google.com.' ;;
         log|logs|log_min|log_hour|log_clean) printf 'Zeigt/bereinigt Journal-Logs (root-Funktionen).' ;;
         agi|agr|acs|agu|agg|aga|agl|aua) printf 'APT-Shortcuts fuer Paketverwaltung und Updates (root).' ;;
+        my) printf 'Startet die MySQL-CLI.' ;;
+        mya) printf 'Startet mysqladmin fuer Admin-Operationen.' ;;
+        myping) printf 'Prueft, ob der MySQL-Server antwortet.' ;;
         _self_update) printf 'Aktualisiert dieses Alias-Repository per git pull und laedt neu.' ;;
         _self_setup) printf 'Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
         _self_reload) printf 'Laedt die Alias-Module in der aktuellen Shell neu (Repo-Reload).' ;;
@@ -227,13 +268,14 @@ _alias_menu_category() {
     echo ""
     echo "=== ${category} ==="
     printf ' %2d) %s\n' 0 "$(_alias_text category_back)"
+    printf ' %3s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
 
     if [ "${#names[@]}" -eq 0 ]; then
       echo "$(_alias_text category_empty)"
     else
       idx=1
       for name in "${names[@]}"; do
-        printf ' %2d) %s\n' "${idx}" "${name}"
+        printf ' %3d) | %-18s | %s\n' "${idx}" "${name}" "$(_alias_short_description_for_name "${name}" "$(_alias_value_for_name "${name}")")"
         idx=$((idx + 1))
       done
     fi
@@ -261,14 +303,18 @@ _alias_show_all_categories() {
   local category=""
   local name=""
   local found=0
+  local idx=1
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     echo ""
     echo "=== ${category} ==="
+    printf ' %3s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
     found=0
+    idx=1
     while IFS= read -r name; do
       [ -z "${name}" ] && continue
-      printf ' - %s\n' "${name}"
+      printf ' %3d) | %-18s | %s\n' "${idx}" "${name}" "$(_alias_short_description_for_name "${name}" "$(_alias_value_for_name "${name}")")"
+      idx=$((idx + 1))
       found=1
     done < <(_alias_names_for_category "${category}")
 
@@ -371,8 +417,13 @@ a() {
   local category=""
 
   if [ -n "${1:-}" ]; then
+    if builtin alias -- "$1" >/dev/null 2>&1; then
+      _alias_show_alias_details "$1"
+      return $?
+    fi
+
     category="$(_alias_resolve_category_input "$1")" || {
-      echo "Unbekannte Kategorie: $1"
+      echo "Unbekannter Alias oder Kategorie: $1"
       echo "Nutze 'a' fuer Auswahl."
       return 1
     }

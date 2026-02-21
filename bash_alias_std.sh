@@ -55,6 +55,62 @@ _alias_add_category_if_missing() {
   BASH_ALIAS_CATEGORY_ORDER+=("${category}")
 }
 
+_alias_sort_key_for_category() {
+  local category="$1"
+  local key="50000"
+
+  if declare -F alias_category_sort_key >/dev/null 2>&1; then
+    key="$(alias_category_sort_key "${category}")"
+  fi
+
+  if [[ ! "${key}" =~ ^[0-9]+$ ]]; then
+    key="50000"
+  fi
+
+  printf '%s' "${key}"
+}
+
+_alias_sort_categories() {
+  local i=0
+  local category=""
+  local key=""
+  local existing=""
+  local existing_key=""
+  local inserted=0
+  local -a sorted=()
+  local -a keys=()
+
+  for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    key="$(_alias_sort_key_for_category "${category}")"
+    inserted=0
+
+    if [ "${#sorted[@]}" -eq 0 ]; then
+      sorted+=("${category}")
+      keys+=("${key}")
+      continue
+    fi
+
+    for i in "${!sorted[@]}"; do
+      existing="${sorted[$i]}"
+      existing_key="${keys[$i]}"
+
+      if [ "${key}" -lt "${existing_key}" ] || { [ "${key}" -eq "${existing_key}" ] && [ "${category}" \< "${existing}" ]; }; then
+        sorted=("${sorted[@]:0:$i}" "${category}" "${sorted[@]:$i}")
+        keys=("${keys[@]:0:$i}" "${key}" "${keys[@]:$i}")
+        inserted=1
+        break
+      fi
+    done
+
+    if [ "${inserted}" -eq 0 ]; then
+      sorted+=("${category}")
+      keys+=("${key}")
+    fi
+  done
+
+  BASH_ALIAS_CATEGORY_ORDER=("${sorted[@]}")
+}
+
 _alias_init_categories() {
   local category=""
 
@@ -136,5 +192,7 @@ else
   echo "Hinweis: Konfigurationsdatei fehlt: ${_alias_config_file_local} oder ${_alias_config_file_default}" >&2
 fi
 
+_alias_sort_categories
+
 unset _entry _alias_config_file _alias_config_file_default _alias_config_file_local _alias_base_dir _alias_categories_file
-unset -f _alias_add_category_if_missing _alias_init_categories _alias_collect_alias_names _alias_register_aliases_for_category
+unset -f _alias_add_category_if_missing _alias_sort_key_for_category _alias_sort_categories _alias_init_categories _alias_collect_alias_names _alias_register_aliases_for_category

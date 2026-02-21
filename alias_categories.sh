@@ -20,6 +20,28 @@ help
 EOF
 }
 
+alias_category_sort_key() {
+  case "$1" in
+    core) printf '1000' ;;
+    navigation) printf '2000' ;;
+    files) printf '3000' ;;
+    process) printf '4000' ;;
+    git) printf '5000' ;;
+    network) printf '6000' ;;
+    journald) printf '7000' ;;
+    apt) printf '8000' ;;
+    systemd) printf '9000' ;;
+    repo) printf '10000' ;;
+    setup) printf '11000' ;;
+    mysql) printf '12000' ;;
+    overrides) printf '13000' ;;
+    help) printf '14000' ;;
+    misc) printf '90000' ;;
+    _setup) printf '99999999' ;;
+    *) printf '50000' ;;
+  esac
+}
+
 alias_category_for_module() {
   case "$1" in
     00-core.sh) printf 'core' ;;
