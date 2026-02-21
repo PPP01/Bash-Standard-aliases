@@ -22,21 +22,20 @@ alias_repo_reload() {
 
 alias_repo_update() {
   local mode="${1:-reload}"
+  local pull_script=""
 
   if [ -z "${BASH_ALIAS_REPO_DIR:-}" ]; then
     echo "Fehler: BASH_ALIAS_REPO_DIR ist nicht gesetzt."
     return 1
   fi
 
-  if [ ! -d "${BASH_ALIAS_REPO_DIR}/.git" ]; then
-    echo "Fehler: Kein Git-Repository gefunden unter ${BASH_ALIAS_REPO_DIR}"
+  pull_script="${BASH_ALIAS_REPO_DIR}/scripts/alias_repo_pull.sh"
+  if [ ! -f "${pull_script}" ]; then
+    echo "Fehler: Script nicht gefunden: ${pull_script}"
     return 1
   fi
 
-  (
-    cd "${BASH_ALIAS_REPO_DIR}" || exit 1
-    git pull --ff-only
-  ) || return 1
+  bash "${pull_script}" "${BASH_ALIAS_REPO_DIR}" || return 1
 
   case "${mode}" in
     --restart)

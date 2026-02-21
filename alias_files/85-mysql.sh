@@ -1,42 +1,13 @@
 # shellcheck shell=bash
 
-# MySQL CLI shortcuts (erwartet passende Rechte oder ~/.my.cnf)
-alias my='mysql'
-alias mya='mysqladmin'
-alias myping='mysqladmin ping'
+_alias_module_base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+_alias_mysql_lib="${BASH_ALIAS_REPO_DIR:-${_alias_module_base_dir}}/lib/alias_mysql.sh"
 
-mysql_databases() {
-  mysql -e "SHOW DATABASES;"
-}
+if [ -f "${_alias_mysql_lib}" ]; then
+  # shellcheck disable=SC1090
+  source "${_alias_mysql_lib}"
+else
+  echo "Fehler: MySQL-Library nicht gefunden: ${_alias_mysql_lib}" >&2
+fi
 
-mysql_dump() {
-  local db="$1"
-  local out="$2"
-
-  if [ -z "${db}" ]; then
-    echo "Usage: mysql_dump <database> [output.sql]"
-    return 1
-  fi
-
-  if [ -z "${out}" ]; then
-    out="${db}_$(date +%Y%m%d_%H%M%S).sql"
-  fi
-
-  mysqldump --single-transaction --quick --routines --triggers "${db}" > "${out}"
-}
-
-mysql_dump_gz() {
-  local db="$1"
-  local out="$2"
-
-  if [ -z "${db}" ]; then
-    echo "Usage: mysql_dump_gz <database> [output.sql.gz]"
-    return 1
-  fi
-
-  if [ -z "${out}" ]; then
-    out="${db}_$(date +%Y%m%d_%H%M%S).sql.gz"
-  fi
-
-  mysqldump --single-transaction --quick --routines --triggers "${db}" | gzip -c > "${out}"
-}
+unset _alias_module_base_dir _alias_mysql_lib
