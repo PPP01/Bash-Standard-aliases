@@ -33,13 +33,22 @@ Moeglichkeiten:
 - Aktiv: Datei-Zeile ohne `#`
 - Deaktiviert: Datei-Zeile auskommentiert, z. B. `# 00-core.sh`
 
-## Kategorien interaktiv umschalten
+## Alias-Setup in Bash-Startdatei
 
 ```bash
 _self_setup
 ```
 
-`_self_setup` startet ein externes Script und zeigt eine nummerierte Kategorie-Liste, z. B. `git`, `journald`, `mysql`, `systemd`.
+`_self_setup` startet den Einrichtungs-Assistenten und fragt, ob die Einbindung in `~/.bashrc` oder in eine erkannte Alias-Datei erfolgen soll.
+Bei root kann alternativ `/etc/bash.bashrc` ausgewaehlt werden.
+
+## Kategorien interaktiv umschalten
+
+```bash
+_self_category_setup
+```
+
+`_self_category_setup` startet das Kategorie-Script mit nummerierter Liste, z. B. `git`, `journald`, `mysql`, `systemd`.
 Mit der Nummer wird die jeweilige Kategorie ein-/ausgeschaltet.
 
 ## Lokale Konfiguration ohne Git-Aenderung
