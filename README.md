@@ -40,8 +40,8 @@ _self_setup
 ```
 
 `_self_setup` arbeitet markerbasiert:
-1. Sucht zürst nach dem Setup-Marker.
-2. Bei root zürst in `/etc/bash.bashrc`, danach analog User in erkannter Alias-Datei oder `~/.bashrc`.
+1. Sucht zuerst nach dem Setup-Marker.
+2. Bei root zuerst in `/etc/bash.bashrc`, danach analog User in erkannter Alias-Datei oder `~/.bashrc`.
 3. Wenn Marker gefunden: startet direkt die Kategorie-Umschaltung.
 4. Wenn kein Marker gefunden: startet den Setup-Assistenten und danach die Kategorie-Umschaltung.
 
@@ -78,8 +78,11 @@ Die Datei `alias_files.local.conf` ist in `.gitignore` und erzeugt keine Git-Dif
 ## Einbindung in ~/.bashrc
 
 ```bash
-if [ -f /opt/scripts/bash_alias_std.sh ]; then
-  source /opt/scripts/bash_alias_std.sh
+# besser _self_setup nutzen (!)
+
+# Alternativ
+if [ -f /pfad/zu/bash_alias_std.sh ]; then
+  source /pfad/zu/bash_alias_std.sh
 fi
 ```
 

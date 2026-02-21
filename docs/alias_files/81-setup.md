@@ -9,8 +9,8 @@ Setup-Startpunkt mit markerbasierter Installation und Kategorie-Umschaltung.
 
 ## Verhalten
 - `_self_setup`:
-- Sucht zürst nach dem Setup-Marker.
-- Bei root zürst in `/etc/bash.bashrc`, danach in erkannter Alias-Datei oder `~/.bashrc`.
+- Sucht zuerst nach dem Setup-Marker.
+- Bei root zuerst in `/etc/bash.bashrc`, danach in erkannter Alias-Datei oder `~/.bashrc`.
 - Wenn Marker gefunden: startet direkt Kategorie-Umschaltung.
 - Wenn kein Marker gefunden: startet Setup-Assistent und danach Kategorie-Umschaltung.
 - Setup schreibt einen markierten Source-Block nur einmal (idempotent).
