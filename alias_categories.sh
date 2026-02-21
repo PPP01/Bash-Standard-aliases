@@ -33,6 +33,7 @@ alias_category_sort_key() {
     systemd) printf '9000' ;;
     repo) printf '10000' ;;
     setup) printf '11000' ;;
+    _own) printf '99999998' ;;
     mysql) printf '12000' ;;
     overrides) printf '13000' ;;
     help) printf '14000' ;;
@@ -75,6 +76,7 @@ alias_modules_for_category() {
     systemd) printf '70-root-systemd.sh' ;;
     repo) printf '80-repo-update.sh' ;;
     setup) printf '81-setup.sh' ;;
+    _own) printf '90-overrides.sh' ;;
     _setup) printf '80-repo-update.sh 81-setup.sh 90-overrides.sh 99-help.sh' ;;
     mysql) printf '85-mysql.sh' ;;
     overrides) printf '90-overrides.sh' ;;

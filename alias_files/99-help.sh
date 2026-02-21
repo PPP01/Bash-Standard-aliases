@@ -197,6 +197,7 @@ _alias_help_load_data() {
   local short_text=""
   local desc_text=""
   local cmd_text=""
+  local custom_file=""
 
   if [ "${BASH_ALIAS_HELP_DATA_LOADED}" -eq 1 ]; then
     return 0
@@ -215,6 +216,18 @@ _alias_help_load_data() {
     selected_file="$(_alias_help_select_doc_variant "${file}" "${lang}" "${doc_dir}")"
     files+=( "${selected_file}" )
   done < <(printf '%s\n' "${base_files[@]}" | LC_ALL=C sort)
+
+  if [ -n "${BASH_ALIAS_REPO_DIR:-}" ]; then
+    custom_file="${BASH_ALIAS_REPO_DIR}/.bash_aliases_specific.md"
+    if [ -f "${custom_file}" ]; then
+      files+=( "${custom_file}" )
+    fi
+  fi
+
+  custom_file="${HOME}/.bash_aliases_specific.md"
+  if [ -f "${custom_file}" ]; then
+    files+=( "${custom_file}" )
+  fi
 
   for file in "${files[@]}"; do
     in_help_section=0
@@ -354,7 +367,7 @@ _alias_short_description_for_name() {
     _self_update) REPLY='Repository aktualisieren und Aliase neu laden.' ;;
     _self_setup) REPLY='Interaktives Kategorie-Setup starten.' ;;
     _self_reload) REPLY='Alias-Module in aktueller Shell neu laden.' ;;
-    _self_edit) REPLY='Alias-Datei bearbeiten und ~/.bashrc neu laden.' ;;
+    _self_edit) REPLY='Gefuehrter Assistent fuer eigenes Alias und Reload.' ;;
     _self_test_reload) REPLY='Reload-Konsistenztest fuer Alias-Kategorien.' ;;
     *)
       REPLY="${cmd}"
@@ -450,7 +463,7 @@ _alias_description_for_name() {
         _self_update) REPLY='Aktualisiert dieses Alias-Repository per git pull und laedt neu.' ;;
         _self_setup) REPLY='Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
         _self_reload) REPLY='Laedt die Alias-Module in der aktuellen Shell neu (Repo-Reload).' ;;
-        _self_edit) REPLY='Oeffnet ~/.bash_aliases zum Bearbeiten und laedt neu.' ;;
+        _self_edit) REPLY='Startet einen Assistenten und legt ein Alias mit Beschreibung an; danach Reload.' ;;
         _self_test_reload) REPLY='Prueft automatisiert, ob Alias-Kategorien nach Reload konsistent bleiben.' ;;
         *) REPLY="$(printf "$(_alias_text desc_fallback)" "${cmd}")" ;;
       esac
@@ -484,7 +497,7 @@ _alias_detail_command_for_name() {
     _self_reload) REPLY='alias_repo_reload  (Alias-Loader in aktueller Shell neu laden)' ;;
     _self_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
     _self_test_reload) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"' ;;
-    _self_edit) REPLY='nano ~/.bash_aliases && source ~/.bashrc' ;;
+    _self_edit) REPLY='alias_self_edit  (Alias-Assistent mit Ziel-Datei-Auswahl und Reload)' ;;
     *) REPLY="${cmd}" ;;
   esac
 }
@@ -554,30 +567,31 @@ _alias_names_for_category() {
   [ -n "${names_block}" ] && printf '%s' "${names_block}"
 }
 
-_alias_setup_special_number() {
-  if [ "${#BASH_ALIAS_CATEGORY_ORDER[@]}" -le 99 ]; then
-    printf '99'
-  else
-    printf '999'
-  fi
+_alias_reserved_number_for_category() {
+  case "$1" in
+    _own) printf '98' ;;
+    _setup) printf '99' ;;
+    *) return 1 ;;
+  esac
 }
 
 _alias_category_number_for_name() {
   local wanted="$1"
   local category=""
   local number=1
-  local reserved=0
+  local reserved_own=98
+  local reserved_setup=99
+  local reserved_number=""
 
-  reserved="$(_alias_setup_special_number)"
-
-  if [ "${wanted}" = "_setup" ]; then
-    printf '%s' "${reserved}"
+  if reserved_number="$(_alias_reserved_number_for_category "${wanted}")"; then
+    printf '%s' "${reserved_number}"
     return 0
   fi
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    [ "${category}" = "_own" ] && continue
     [ "${category}" = "_setup" ] && continue
-    if [ "${number}" -eq "${reserved}" ]; then
+    if [ "${number}" -eq "${reserved_own}" ] || [ "${number}" -eq "${reserved_setup}" ]; then
       number=$((number + 1))
     fi
     if [ "${category}" = "${wanted}" ]; then
@@ -594,10 +608,20 @@ _alias_category_name_for_number() {
   local wanted="$1"
   local category=""
   local number=1
-  local reserved=0
+  local reserved_own=98
+  local reserved_setup=99
 
-  reserved="$(_alias_setup_special_number)"
-  if [ "${wanted}" -eq "${reserved}" ]; then
+  if [ "${wanted}" -eq "${reserved_own}" ]; then
+    for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+      if [ "${category}" = "_own" ]; then
+        printf '%s' "${category}"
+        return 0
+      fi
+    done
+    return 1
+  fi
+
+  if [ "${wanted}" -eq "${reserved_setup}" ]; then
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
       if [ "${category}" = "_setup" ]; then
         printf '%s' "${category}"
@@ -608,8 +632,9 @@ _alias_category_name_for_number() {
   fi
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    [ "${category}" = "_own" ] && continue
     [ "${category}" = "_setup" ] && continue
-    if [ "${number}" -eq "${reserved}" ]; then
+    if [ "${number}" -eq "${reserved_own}" ] || [ "${number}" -eq "${reserved_setup}" ]; then
       number=$((number + 1))
     fi
     if [ "${number}" -eq "${wanted}" ]; then

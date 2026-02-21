@@ -14,6 +14,9 @@ Hilfsfunktionen fuer Alias-Listen.
 
 ## Lokalisierbare Texte
 - Alias-Texte fuer Tabelle/Details werden pro Kategorie aus `docs/alias_files/[0-9][0-9]-*.md` geladen.
+- Zusaetzlich werden eigene Hilfetexte aus folgenden Dateien geladen, falls vorhanden:
+  - `$BASH_ALIAS_REPO_DIR/.bash_aliases_specific.md`
+  - `~/.bash_aliases_specific.md`
 - Je Datei sind Sprachvarianten moeglich:
   - Unterordner: `docs/alias_files/<lang>/35-git.md`
   - Suffix: `docs/alias_files/35-git.<lang>.md`

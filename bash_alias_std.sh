@@ -141,6 +141,9 @@ _alias_register_aliases_for_category() {
     [ -z "${alias_name}" ] && continue
 
     if ! grep -Fxq -- "${alias_name}" <<< "${aliases_before}"; then
+      if [ -n "${BASH_ALIAS_ALIAS_CATEGORY[${alias_name}]:-}" ]; then
+        continue
+      fi
       mapped_category="${category}"
       case "${alias_name}" in
         _self_*)
