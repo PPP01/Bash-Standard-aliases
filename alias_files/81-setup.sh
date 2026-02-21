@@ -139,7 +139,39 @@ alias_setup() {
   echo "Setup abgeschlossen."
 }
 
-alias _self_setup='alias_setup'
+alias_self_setup() {
+  local choice=""
+
+  echo ""
+  echo "_self_setup: Aktion waehlen"
+  echo "  1) Bash-Startdatei einrichten (~/.bashrc oder /etc/bash.bashrc)"
+  echo "  2) Kategorien ein-/ausschalten"
+  echo "  3) Abbrechen"
+  read -r -p "Auswahl [1/2/3, Enter=1]: " choice
+
+  case "${choice}" in
+    ""|1)
+      alias_setup
+      ;;
+    2)
+      if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -f "${BASH_ALIAS_REPO_DIR}/scripts/alias_category_setup.sh" ]; then
+        bash "${BASH_ALIAS_REPO_DIR}/scripts/alias_category_setup.sh"
+      else
+        echo "Fehler: scripts/alias_category_setup.sh nicht gefunden."
+        return 1
+      fi
+      ;;
+    3)
+      echo "Abgebrochen."
+      ;;
+    *)
+      echo "Ungueltige Auswahl."
+      return 1
+      ;;
+  esac
+}
+
+alias _self_setup='alias_self_setup'
 
 if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -f "${BASH_ALIAS_REPO_DIR}/scripts/alias_category_setup.sh" ]; then
   alias _self_category_setup='bash "${BASH_ALIAS_REPO_DIR}/scripts/alias_category_setup.sh"'

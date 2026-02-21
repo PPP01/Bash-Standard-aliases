@@ -39,8 +39,9 @@ Moeglichkeiten:
 _self_setup
 ```
 
-`_self_setup` startet den Einrichtungs-Assistenten und fragt, ob die Einbindung in `~/.bashrc` oder in eine erkannte Alias-Datei erfolgen soll.
-Bei root kann alternativ `/etc/bash.bashrc` ausgewaehlt werden.
+`_self_setup` startet ein Menue:
+- `1)` Einrichtungs-Assistent fuer `~/.bashrc` bzw. erkannte Alias-Datei (bei root auch `/etc/bash.bashrc`)
+- `2)` Kategorie-Umschaltung
 
 ## Kategorien interaktiv umschalten
 

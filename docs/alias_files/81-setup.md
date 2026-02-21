@@ -3,14 +3,15 @@
 Setup-Startpunkt fuer Bash-Startdatei und Kategorie-Umschaltung.
 
 ## Enthalten
-- `_self_setup`: Interaktiver Assistent zur Einbindung von `bash_alias_std.sh` in Bash-Startdateien.
+- `_self_setup`: Interaktives Menue fuer Setup und Kategorie-Umschaltung.
 - `_self_category_setup`: Alias, der das externe Script `scripts/alias_category_setup.sh` startet.
 
 ## Verhalten
 - `_self_setup`:
-- Erkennt optionale Alias-Datei aus `~/.bashrc` und bietet diese als Ziel an.
-- Fragt bei root nach Zielauswahl `~/.bashrc` oder `/etc/bash.bashrc`.
-- Schreibt einen markierten Source-Block nur einmal (idempotent).
+- Menue mit Auswahl fuer Bash-Setup oder Kategorie-Umschaltung.
+- Beim Bash-Setup: erkennt optionale Alias-Datei aus `~/.bashrc` und bietet diese als Ziel an.
+- Beim Bash-Setup: fragt bei root nach Zielauswahl `~/.bashrc` oder `/etc/bash.bashrc`.
+- Beim Bash-Setup: schreibt einen markierten Source-Block nur einmal (idempotent).
 - `_self_category_setup`:
 - Nutzt `alias_files.local.conf` als Ziel.
 - Falls nicht vorhanden, wird sie aus `alias_files.conf` erzeugt.
@@ -20,5 +21,5 @@ Setup-Startpunkt fuer Bash-Startdatei und Kategorie-Umschaltung.
 ## Alias-Hilfe (de)
 | alias | kurz | beschreibung | befehl |
 |---|---|---|---|
-| _self_setup | Alias-Setup starten | Startet den interaktiven Setup-Assistenten fuer ~/.bashrc oder /etc/bash.bashrc. | alias_setup |
+| _self_setup | Setup-Menue starten | Startet ein Menue fuer Bash-Setup oder Kategorie-Umschaltung. | alias_self_setup |
 | _self_category_setup | Kategorie-Setup starten | Startet den interaktiven Kategorie-Setup-Assistenten. | bash "$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh" |

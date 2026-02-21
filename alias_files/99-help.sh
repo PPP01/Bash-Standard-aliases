@@ -365,7 +365,7 @@ _alias_short_description_for_name() {
     log_clean) REPLY='Journal aufbewahren/bereinigen (Tage/Groesse).' ;;
     aua) REPLY='APT Update/Upgrade/Autoremove in einem Lauf.' ;;
     _self_update) REPLY='Repository aktualisieren und Aliase neu laden.' ;;
-    _self_setup) REPLY='Interaktives Alias-Setup fuer Bash-Startdatei.' ;;
+    _self_setup) REPLY='Setup-Menue (Bash-Setup oder Kategorien).' ;;
     _self_category_setup) REPLY='Interaktives Kategorie-Setup starten.' ;;
     _self_reload) REPLY='Alias-Module in aktueller Shell neu laden.' ;;
     _self_edit) REPLY='Gefuehrter Assistent fuer eigenes Alias und Reload.' ;;
@@ -462,7 +462,7 @@ _alias_description_for_name() {
         mya) REPLY='Startet mysqladmin fuer Admin-Operationen.' ;;
         myping) REPLY='Prueft, ob der MySQL-Server antwortet.' ;;
         _self_update) REPLY='Aktualisiert dieses Alias-Repository per git pull und laedt neu.' ;;
-        _self_setup) REPLY='Startet den interaktiven Setup-Assistenten fuer ~/.bashrc oder /etc/bash.bashrc.' ;;
+        _self_setup) REPLY='Startet ein Menue: Bash-Setup fuer Startdateien oder Kategorie-Umschaltung.' ;;
         _self_category_setup) REPLY='Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
         _self_reload) REPLY='Laedt die Alias-Module in der aktuellen Shell neu (Repo-Reload).' ;;
         _self_edit) REPLY='Startet einen Assistenten und legt ein Alias mit Beschreibung an; danach Reload.' ;;
@@ -497,7 +497,7 @@ _alias_detail_command_for_name() {
     aua) REPLY='apt update && apt upgrade [-y] && apt autoremove [-y]' ;;
     _self_update) REPLY='git pull --ff-only && alias_repo_reload  (Standardmodus)' ;;
     _self_reload) REPLY='alias_repo_reload  (Alias-Loader in aktueller Shell neu laden)' ;;
-    _self_setup) REPLY='alias_setup  (Einbindung in ~/.bashrc oder /etc/bash.bashrc)' ;;
+    _self_setup) REPLY='alias_self_setup  (Menue fuer Bash-Setup oder Kategorie-Umschaltung)' ;;
     _self_category_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
     _self_test_reload) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"' ;;
     _self_edit) REPLY='alias_self_edit  (Alias-Assistent mit Ziel-Datei-Auswahl und Reload)' ;;
