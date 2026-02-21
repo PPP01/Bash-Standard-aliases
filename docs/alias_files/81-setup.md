@@ -1,21 +1,12 @@
 # 81-setup.sh
 
-Interaktives Setup-Modul fuer die Einbindung von `bash_alias_std.sh`.
+Setup-Startpunkt fuer Kategorie-Umschaltung.
 
 ## Enthalten
-- `alias_setup`: Fragt interaktiv nach den Ziel-Dateien und fuegt den Source-Block ein.
-- `_self_setup`: Kurzer Alias auf `alias_setup`.
+- `_self_setup`: Alias, der das externe Script `scripts/alias_category_setup.sh` startet.
 
 ## Verhalten
-- User-Setup:
-  - Standardziel ist `~/.bashrc`.
-  - Falls in `~/.bashrc` eine Alias-Datei erkannt wird (z. B. `~/.bash_aliases`), kann stattdessen dort eingetragen werden.
-- Root-Setup:
-  - Wenn als root ausgefuehrt und `/etc/bash.bashrc` vorhanden ist, gibt es eine Entweder-oder-Auswahl:
-    - `~/.bashrc` bzw. erkannte Alias-Datei
-    - oder `/etc/bash.bashrc`
-    - oder ueberspringen
-
-## Sicherheit
-- Mehrfache Eintraege werden vermieden (Marker-/Pfad-Pruefung).
-- Doppelladen in derselben Shell wird im Loader per Guard verhindert.
+- Nutzt `alias_files.local.conf` als Ziel.
+- Falls nicht vorhanden, wird sie aus `alias_files.conf` erzeugt.
+- Zeigt nummerierte Kategorien mit Status `[on/off/partial]`.
+- Mit der Nummer wird die Kategorie ein-/ausgeschaltet.

@@ -8,6 +8,7 @@ Modulare Bash-Aliase fuer mehrere Linux-Server.
 - `alias_files.conf`: Standard-Steuerdatei (versioniert).
 - `alias_files.local.conf`: Lokale Steuerdatei pro Server (nicht versioniert).
 - `alias_files.local.conf.example`: Vorlage fuer lokale Konfiguration.
+- `alias_categories.sh`: Kategorie-Zuordnung Modul <-> Kategorie.
 - `docs/alias_files/*.md`: Dokumentation je Modul.
 
 ## Module aktivieren/deaktivieren
@@ -26,6 +27,15 @@ Format pro Modul:
 Moeglichkeiten:
 - Aktiv: Datei-Zeile ohne `#`
 - Deaktiviert: Datei-Zeile auskommentiert, z. B. `# 00-core.sh`
+
+## Kategorien interaktiv umschalten
+
+```bash
+_self_setup
+```
+
+`_self_setup` startet ein externes Script und zeigt eine nummerierte Kategorie-Liste, z. B. `git`, `journald`, `mysql`, `systemd`.
+Mit der Nummer wird die jeweilige Kategorie ein-/ausgeschaltet.
 
 ## Lokale Konfiguration ohne Git-Aenderung
 
@@ -56,14 +66,12 @@ Er fuehrt `git pull --ff-only` immer im Ordner dieses Repositories aus, egal in 
 
 Hinweis: Fuer Pageant-Setups kann Git mit `core.sshCommand` auf `plink -agent` konfiguriert sein.
 
-## Setup-Hilfe
-
-Interaktives Setup fuer die Shell-Integration:
+## Alias-Liste nach Kategorie
 
 ```bash
-_self_setup
+a
 ```
 
-`_self_setup` fragt:
-- ob in `~/.bashrc` oder einer erkannten Alias-Datei eingetragen werden soll
-- und bei root (falls vorhanden) per Entweder-oder-Auswahl nach `~/.bashrc`/Alias-Datei oder `/etc/bash.bashrc`
+Ohne Parameter bietet `a` eine Kategorie-Auswahl an.
+Mit Parameter filtert `a` direkt, z. B. `a git` oder `a all`.
+Fuer Kategorien ist Tab-Completion aktiv.
