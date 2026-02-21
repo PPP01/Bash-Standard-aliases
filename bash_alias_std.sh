@@ -11,6 +11,7 @@ BASH_ALIAS_STD_LOADED=1
 _alias_base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _alias_config_file_default="${_alias_base_dir}/alias_files.conf"
 _alias_config_file_local="${_alias_base_dir}/alias_files.local.conf"
+_alias_config_file_user="${HOME}/.bash-standard-aliases.conf"
 _alias_categories_file="${_alias_base_dir}/alias_categories.sh"
 # Von Modulen/Funktionen nutzbar, um den Repo-Ordner sicher zu finden.
 BASH_ALIAS_REPO_DIR="${_alias_base_dir}"
@@ -20,7 +21,9 @@ if [ -f "${_alias_categories_file}" ]; then
   source "${_alias_categories_file}"
 fi
 
-if [ -f "${_alias_config_file_local}" ]; then
+if [ -f "${_alias_config_file_user}" ]; then
+  _alias_config_file="${_alias_config_file_user}"
+elif [ -f "${_alias_config_file_local}" ]; then
   _alias_config_file="${_alias_config_file_local}"
 elif [ -f "${_alias_config_file_default}" ]; then
   _alias_config_file="${_alias_config_file_default}"
@@ -192,10 +195,11 @@ if [ -n "${_alias_config_file}" ]; then
     unset _full_path _category _aliases_before _aliases_after
   done < "${_alias_config_file}"
 else
-  echo "Hinweis: Konfigurationsdatei fehlt: ${_alias_config_file_local} oder ${_alias_config_file_default}" >&2
+  echo "Hinweis: Konfigurationsdatei fehlt: ${_alias_config_file_user} oder ${_alias_config_file_local} oder ${_alias_config_file_default}" >&2
 fi
 
 _alias_sort_categories
 
-unset _entry _alias_config_file _alias_config_file_default _alias_config_file_local _alias_base_dir _alias_categories_file
+unset _entry _alias_config_file _alias_config_file_default _alias_config_file_local _alias_config_file_user _alias_base_dir _alias_categories_file
 unset -f _alias_add_category_if_missing _alias_sort_key_for_category _alias_sort_categories _alias_init_categories _alias_collect_alias_names _alias_register_aliases_for_category
+

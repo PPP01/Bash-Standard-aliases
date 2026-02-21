@@ -7,6 +7,7 @@ _script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _repo_dir="$(cd "${_script_dir}/.." && pwd)"
 _default_conf="${_repo_dir}/alias_files.conf"
 _local_conf="${_repo_dir}/alias_files.local.conf"
+_home_conf="${HOME}/.bash-standard-aliases.conf"
 _categories_file="${_repo_dir}/alias_categories.sh"
 
 declare -A _module_visible_cache=()
@@ -21,13 +22,64 @@ if [ -f "${_categories_file}" ]; then
   source "${_categories_file}"
 fi
 
-if [ -f "${_local_conf}" ]; then
-  _target_conf="${_local_conf}"
-else
-  cp "${_default_conf}" "${_local_conf}"
-  _target_conf="${_local_conf}"
-  echo "Lokale Konfiguration erzeugt: ${_local_conf}"
-fi
+_choose_target_conf() {
+  _seed_conf=""
+
+  if [ -f "${_home_conf}" ]; then
+    _target_conf="${_home_conf}"
+    return 0
+  fi
+
+  if [ -f "${_local_conf}" ]; then
+    if [ -w "${_local_conf}" ]; then
+      _target_conf="${_local_conf}"
+      return 0
+    fi
+
+    _target_conf="${_home_conf}"
+    _seed_conf="${_local_conf}"
+    return 0
+  fi
+
+  if [ -w "${_repo_dir}" ]; then
+    _target_conf="${_local_conf}"
+    _seed_conf="${_default_conf}"
+    return 0
+  fi
+
+  _target_conf="${_home_conf}"
+  _seed_conf="${_default_conf}"
+}
+
+_prepare_target_conf() {
+  _choose_target_conf
+
+  if [ -f "${_target_conf}" ]; then
+    if [ ! -w "${_target_conf}" ]; then
+      echo "Fehler: Datei ist nicht schreibbar: ${_target_conf}"
+      exit 1
+    fi
+    return 0
+  fi
+
+  if [ -z "${_seed_conf}" ]; then
+    _seed_conf="${_default_conf}"
+  fi
+
+  if ! cp "${_seed_conf}" "${_target_conf}"; then
+    echo "Fehler: Konnte Konfiguration nicht erzeugen: ${_target_conf}"
+    exit 1
+  fi
+
+  echo "Lokale Konfiguration erzeugt: ${_target_conf}"
+
+  if [ ! -w "${_target_conf}" ]; then
+    echo "Fehler: Datei ist nicht schreibbar: ${_target_conf}"
+    exit 1
+  fi
+}
+
+_prepare_target_conf
 
 _escape_regex() {
   printf '%s' "$1" | sed -E 's/[][(){}.^$*+?|\\/]/\\&/g'
@@ -232,3 +284,4 @@ while true; do
 done
 
 echo "Fertig. Fuer die aktuelle Shell ggf. '_self_reload' oder 'source ~/.bashrc' ausfuehren."
+
