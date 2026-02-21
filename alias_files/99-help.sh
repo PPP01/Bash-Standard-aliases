@@ -8,6 +8,119 @@ _alias_sorted_names() {
   alias | sed -E "s/^alias[[:space:]]+--[[:space:]]+([^=]+)=.*/\1/; t; s/^alias[[:space:]]+([^=]+)=.*/\1/" | LC_ALL=C sort -u
 }
 
+_alias_text() {
+  local key="$1"
+  local locale="${BASH_ALIAS_LOCALE:-de}"
+
+  case "${locale}" in
+    de*)
+      case "${key}" in
+        categories_title) printf 'Alias-Kategorien:' ;;
+        categories_prompt) printf 'Kategorie (Name oder Nummer, 0 = Ende): ' ;;
+        categories_invalid) printf 'Ungueltige Eingabe. Menue wird beendet.' ;;
+        categories_exit) printf 'Menue beendet.' ;;
+        categories_back) printf 'Zurueck/Ende' ;;
+        category_prompt) printf 'Alias-Nummer waehlen (0 = Zurueck): ' ;;
+        category_empty) printf '(keine geladenen Aliase)' ;;
+        category_back) printf 'Zurueck zur Kategorienauswahl' ;;
+        alias_invalid) printf 'Ungueltige Eingabe. Menue wird beendet.' ;;
+        alias_detail_title) printf 'Alias-Details' ;;
+        alias_detail_desc) printf 'Beschreibung' ;;
+        alias_detail_cmd) printf 'Befehl' ;;
+        alias_detail_prompt) printf '0 = Zurueck zur Kategorie, Enter = weiter: ' ;;
+        desc_fallback) printf 'Fuehrt aus: %s' ;;
+        *) printf '%s' "${key}" ;;
+      esac
+      ;;
+    *)
+      case "${key}" in
+        categories_title) printf 'Alias categories:' ;;
+        categories_prompt) printf 'Category (name or number, 0 = exit): ' ;;
+        categories_invalid) printf 'Invalid input. Exiting menu.' ;;
+        categories_exit) printf 'Menu closed.' ;;
+        categories_back) printf 'Back/Exit' ;;
+        category_prompt) printf 'Choose alias number (0 = back): ' ;;
+        category_empty) printf '(no loaded aliases)' ;;
+        category_back) printf 'Back to category menu' ;;
+        alias_invalid) printf 'Invalid input. Exiting menu.' ;;
+        alias_detail_title) printf 'Alias details' ;;
+        alias_detail_desc) printf 'Description' ;;
+        alias_detail_cmd) printf 'Command' ;;
+        alias_detail_prompt) printf '0 = back to category, Enter = continue: ' ;;
+        desc_fallback) printf 'Runs: %s' ;;
+        *) printf '%s' "${key}" ;;
+      esac
+      ;;
+  esac
+}
+
+_alias_value_for_name() {
+  local name="$1"
+  local line=""
+  local value=""
+
+  line="$(builtin alias -- "${name}" 2>/dev/null)" || return 1
+  value="${line#*=}"
+  value="${value#\'}"
+  value="${value%\'}"
+  printf '%s' "${value}"
+}
+
+_alias_description_for_name() {
+  local name="$1"
+  local cmd="$2"
+  local locale="${BASH_ALIAS_LOCALE:-de}"
+
+  case "${locale}" in
+    de*)
+      case "${name}" in
+        ls) printf 'Listet Dateien im aktuellen Verzeichnis farbig auf.' ;;
+        la|ll) printf 'Zeigt Dateien inkl. versteckter Dateien im langen Format.' ;;
+        grep) printf 'Sucht Textmuster farbig hervorgehoben.' ;;
+        rm) printf 'Loescht interaktiv mit Rueckfrage.' ;;
+        ..|...|....|.....|.2|.3|.4|.5) printf 'Wechselt schnell in uebergeordnete Verzeichnisse.' ;;
+        '~') printf 'Wechselt ins Home-Verzeichnis.' ;;
+        -|+1|+2|+3|+4|-1|-2|-3|-4|p|o|cdl) printf 'Hilft beim Navigieren im Verzeichnis-Stack (pushd/popd/dirs).' ;;
+        h) printf 'Zeigt die Shell-History.' ;;
+        dfh) printf 'Zeigt Dateisystem-Auslastung in menschenlesbarer Form.' ;;
+        duh) printf 'Zeigt Speicherverbrauch pro Unterordner bis Tiefe 1.' ;;
+        freeh) printf 'Zeigt RAM- und Swap-Auslastung in menschenlesbarer Form.' ;;
+        psg) printf 'Sucht Prozesse per grep in der Prozessliste.' ;;
+        psmem) printf 'Zeigt Top-Prozesse nach RAM-Verbrauch.' ;;
+        pscpu) printf 'Zeigt Top-Prozesse nach CPU-Verbrauch.' ;;
+        g) printf 'Kurzform fuer git.' ;;
+        gs|gst) printf 'Zeigt den Git-Status (kurz).' ;;
+        ga) printf 'Fuegt Dateien zur Git-Staging-Area hinzu.' ;;
+        gaa) printf 'Fuegt alle Aenderungen zur Git-Staging-Area hinzu.' ;;
+        gb|gba|gbd) printf 'Arbeitet mit Git-Branches (anzeigen/alle/loeschen).' ;;
+        gco|gcb) printf 'Checkout eines Branches bzw. neuen Branch erstellen.' ;;
+        gc|gcm|gca|gcan) printf 'Erstellt/veraendert Git-Commits.' ;;
+        gd|gds) printf 'Zeigt Git-Diffs (normal bzw. staged).' ;;
+        gl) printf 'Zeigt kompakten Git-Graph-Log.' ;;
+        gf) printf 'Holt alle Remotes und bereinigt veraltete Referenzen.' ;;
+        gpl) printf 'Fuehrt git pull mit --ff-only aus.' ;;
+        gp|gpf) printf 'Fuehrt git push aus (normal bzw. force-with-lease).' ;;
+        gr|grs) printf 'Stellt Dateien aus Git wieder her (working tree/staged).' ;;
+        gstp) printf 'Spielt den letzten Git-Stash wieder ein.' ;;
+        ports) printf 'Zeigt offene Ports und zugehoerige Prozesse.' ;;
+        myip) printf 'Zeigt lokale IP-Adressen kompakt an.' ;;
+        pingg) printf 'Testet Netzwerkverbindung zu google.com.' ;;
+        log|logs|log_min|log_hour|log_clean) printf 'Zeigt/bereinigt Journal-Logs (root-Funktionen).' ;;
+        agi|agr|acs|agu|agg|aga|agl|aua) printf 'APT-Shortcuts fuer Paketverwaltung und Updates (root).' ;;
+        _self_update) printf 'Aktualisiert dieses Alias-Repository per git pull und laedt neu.' ;;
+        _self_setup) printf 'Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
+        _self_reload) printf 'Laedt die Shell-Konfiguration neu.' ;;
+        _self_edit) printf 'Oeffnet ~/.bash_aliases zum Bearbeiten und laedt neu.' ;;
+        _self_test_reload) printf 'Prueft automatisiert, ob Alias-Kategorien nach Reload konsistent bleiben.' ;;
+        *) printf "$(_alias_text desc_fallback)" "${cmd}" ;;
+      esac
+      ;;
+    *)
+      printf "$(_alias_text desc_fallback)" "${cmd}"
+      ;;
+  esac
+}
+
 _alias_resolve_category_input() {
   local raw="$1"
   local lowered=""
@@ -52,8 +165,8 @@ _alias_print_category_list() {
   local state=""
 
   echo "" >&2
-  echo "Alias-Kategorien:" >&2
-  printf ' %2d) %-12s\n' 0 "all" >&2
+  echo "$(_alias_text categories_title)" >&2
+  printf ' %2d) %-12s\n' 0 "$(_alias_text categories_back)" >&2
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     state="off"
@@ -65,32 +178,106 @@ _alias_print_category_list() {
   done
 }
 
-_alias_show_one_category() {
+_alias_names_for_category() {
   local category="$1"
   local name=""
-  local found=0
-
-  echo ""
-  echo "=== ${category} ==="
 
   while IFS= read -r name; do
     [ -z "${name}" ] && continue
     if [ "${BASH_ALIAS_ALIAS_CATEGORY[${name}]:-}" = "${category}" ]; then
-      builtin alias -- "${name}"
-      found=1
+      printf '%s\n' "${name}"
     fi
   done < <(_alias_sorted_names)
+}
 
-  if [ "${found}" -eq 0 ]; then
-    echo "(keine geladenen Aliase)"
+_alias_show_alias_details() {
+  local name="$1"
+  local cmd=""
+  local desc=""
+  local choice=""
+
+  cmd="$(_alias_value_for_name "${name}")"
+  desc="$(_alias_description_for_name "${name}" "${cmd}")"
+
+  echo ""
+  echo "=== $(_alias_text alias_detail_title): ${name} ==="
+  echo "$(_alias_text alias_detail_desc): ${desc}"
+  echo "$(_alias_text alias_detail_cmd): ${cmd}"
+
+  read -r -p "$(_alias_text alias_detail_prompt)" choice
+  if [ -n "${choice}" ] && [ "${choice}" != "0" ]; then
+    echo "$(_alias_text alias_invalid)"
+    return 1
   fi
+  return 0
+}
+
+_alias_menu_category() {
+  local category="$1"
+  local number_re='^[0-9]+$'
+  local choice=""
+  local idx=1
+  local name=""
+  local -a names=()
+
+  while true; do
+    names=()
+    while IFS= read -r name; do
+      [ -z "${name}" ] && continue
+      names+=("${name}")
+    done < <(_alias_names_for_category "${category}")
+
+    echo ""
+    echo "=== ${category} ==="
+    printf ' %2d) %s\n' 0 "$(_alias_text category_back)"
+
+    if [ "${#names[@]}" -eq 0 ]; then
+      echo "$(_alias_text category_empty)"
+    else
+      idx=1
+      for name in "${names[@]}"; do
+        printf ' %2d) %s\n' "${idx}" "${name}"
+        idx=$((idx + 1))
+      done
+    fi
+
+    read -r -p "$(_alias_text category_prompt)" choice
+    if ! [[ "${choice}" =~ ${number_re} ]]; then
+      echo "$(_alias_text alias_invalid)"
+      return 1
+    fi
+
+    if [ "${choice}" -eq 0 ]; then
+      return 0
+    fi
+
+    if [ "${choice}" -lt 1 ] || [ "${choice}" -gt "${#names[@]}" ]; then
+      echo "$(_alias_text alias_invalid)"
+      return 1
+    fi
+
+    _alias_show_alias_details "${names[$((choice - 1))]}" || return 1
+  done
 }
 
 _alias_show_all_categories() {
   local category=""
+  local name=""
+  local found=0
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
-    _alias_show_one_category "${category}"
+    echo ""
+    echo "=== ${category} ==="
+    found=0
+    while IFS= read -r name; do
+      [ -z "${name}" ] && continue
+      printf ' - %s\n' "${name}"
+      found=1
+    done < <(_alias_names_for_category "${category}")
+
+    if [ "${found}" -eq 0 ]; then
+      echo "$(_alias_text category_empty)"
+    fi
   done
 }
 
@@ -100,29 +287,42 @@ _alias_pick_category_interactive() {
   local idx=1
   local category=""
 
-  _alias_print_category_list
-  read -r -p "Kategorie (Name oder Nummer): " choice
+  while true; do
+    _alias_print_category_list
+    read -r -p "$(_alias_text categories_prompt)" choice
+    [ -z "${choice}" ] && {
+      echo "$(_alias_text categories_invalid)"
+      return 1
+    }
 
-  [ -z "${choice}" ] && return 1
-
-  if [[ "${choice}" =~ ${number_re} ]]; then
-    if [ "${choice}" -eq 0 ]; then
-      printf 'all'
-      return 0
-    fi
-
-    for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
-      if [ "${idx}" -eq "${choice}" ]; then
-        printf '%s' "${category}"
+    if [[ "${choice}" =~ ${number_re} ]]; then
+      if [ "${choice}" -eq 0 ]; then
+        echo "$(_alias_text categories_exit)"
         return 0
       fi
-      idx=$((idx + 1))
-    done
 
-    return 1
-  fi
+      idx=1
+      for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+        if [ "${idx}" -eq "${choice}" ]; then
+          _alias_menu_category "${category}" || return 1
+          break
+        fi
+        idx=$((idx + 1))
+      done
 
-  _alias_resolve_category_input "${choice}"
+      if [ "${idx}" -le "${#BASH_ALIAS_CATEGORY_ORDER[@]}" ]; then
+        continue
+      fi
+
+      echo "$(_alias_text categories_invalid)"
+      return 1
+    fi
+    category="$(_alias_resolve_category_input "${choice}")" || {
+      echo "$(_alias_text categories_invalid)"
+      return 1
+    }
+    _alias_menu_category "${category}" || return 1
+  done
 }
 
 a() {
@@ -131,18 +331,20 @@ a() {
   if [ -n "${1:-}" ]; then
     category="$(_alias_resolve_category_input "$1")" || {
       echo "Unbekannte Kategorie: $1"
-      echo "Nutze 'a' fuer Auswahl oder 'a all'."
+      echo "Nutze 'a' fuer Auswahl."
       return 1
     }
   else
-    category="$(_alias_pick_category_interactive)" || return 1
+    _alias_pick_category_interactive
+    return $?
   fi
 
   if [ "${category}" = "all" ]; then
     _alias_show_all_categories
-  else
-    _alias_show_one_category "${category}"
+    return 0
   fi
+
+  _alias_menu_category "${category}"
 }
 
 _alias_category_completion() {
