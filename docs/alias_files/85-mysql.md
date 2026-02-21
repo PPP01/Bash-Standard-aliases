@@ -13,3 +13,10 @@ Optionales MySQL-Modul fuer CLI- und Backup-Aufgaben.
 ## Hinweise
 - Das Modul ist in `alias_files.conf` standardmaessig auskommentiert.
 - Zugangsdaten sollten ueber `~/.my.cnf` oder passende Umgebungsparameter erfolgen.
+
+## Alias-Hilfe (de)
+| alias | kurz | beschreibung | befehl |
+|---|---|---|---|
+| my | mysql | Startet die MySQL-CLI. | mysql |
+| mya | mysqladmin | Startet mysqladmin fuer Admin-Operationen. | mysqladmin |
+| myping | mysqladmin ping | Prueft, ob der MySQL-Server antwortet. | mysqladmin ping |

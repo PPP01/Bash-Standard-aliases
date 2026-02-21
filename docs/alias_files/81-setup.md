@@ -10,3 +10,8 @@ Setup-Startpunkt fuer Kategorie-Umschaltung.
 - Falls nicht vorhanden, wird sie aus `alias_files.conf` erzeugt.
 - Zeigt nummerierte Kategorien mit Status `[on/off/partial]`.
 - Mit der Nummer wird die Kategorie ein-/ausgeschaltet.
+
+## Alias-Hilfe (de)
+| alias | kurz | beschreibung | befehl |
+|---|---|---|---|
+| _self_setup | Kategorie-Setup starten | Startet den interaktiven Kategorie-Setup-Assistenten. | bash "$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh" |

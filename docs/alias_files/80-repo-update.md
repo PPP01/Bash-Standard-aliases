@@ -13,3 +13,8 @@ Der Update-Befehl funktioniert von jedem aktuellen Verzeichnis aus und nutzt imm
 ## Optionen
 - `_self_update` oder `_self_update --reload`: Update + Reload in aktueller Shell.
 - `_self_update --restart`: Update + Neustart als Login-Shell (`exec $SHELL -l`).
+
+## Alias-Hilfe (de)
+| alias | kurz | beschreibung | befehl |
+|---|---|---|---|
+| _self_update | Repo-Update + Reload | Aktualisiert dieses Alias-Repository per git pull und laedt neu. | git pull --ff-only && alias_repo_reload |

@@ -8,6 +8,132 @@ _alias_sorted_names() {
   alias | sed -E "s/^alias[[:space:]]+--[[:space:]]+([^=]+)=.*/\1/; t; s/^alias[[:space:]]+([^=]+)=.*/\1/" | LC_ALL=C sort -u
 }
 
+declare -gA BASH_ALIAS_HELP_SHORT=()
+declare -gA BASH_ALIAS_HELP_DESC=()
+declare -gA BASH_ALIAS_HELP_CMD=()
+declare -g BASH_ALIAS_HELP_DATA_LOADED=0
+
+_alias_trim() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "${value}"
+}
+
+_alias_help_doc_path() {
+  local base_dir="${BASH_ALIAS_REPO_DIR:-}"
+
+  if [ -z "${base_dir}" ]; then
+    base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  fi
+
+  printf '%s/docs/alias_files' "${base_dir}"
+}
+
+_alias_help_select_doc_variant() {
+  local base_file="$1"
+  local lang="$2"
+  local doc_dir="$3"
+  local base_name=""
+  local stem=""
+
+  base_name="$(basename "${base_file}")"
+  stem="${base_name%.md}"
+
+  if [ -f "${doc_dir}/${lang}/${base_name}" ]; then
+    printf '%s' "${doc_dir}/${lang}/${base_name}"
+    return 0
+  fi
+
+  if [ -f "${doc_dir}/${stem}.${lang}.md" ]; then
+    printf '%s' "${doc_dir}/${stem}.${lang}.md"
+    return 0
+  fi
+
+  printf '%s' "${base_file}"
+}
+
+_alias_help_load_data() {
+  local doc_dir=""
+  local locale="${BASH_ALIAS_LOCALE:-de}"
+  local lang="${locale%%_*}"
+  local -a base_files=()
+  local -a files=()
+  local selected_file=""
+  local file=""
+  local line=""
+  local in_help_section=0
+  local alias_name=""
+  local short_text=""
+  local desc_text=""
+  local cmd_text=""
+
+  if [ "${BASH_ALIAS_HELP_DATA_LOADED}" -eq 1 ]; then
+    return 0
+  fi
+  BASH_ALIAS_HELP_DATA_LOADED=1
+
+  doc_dir="$(_alias_help_doc_path)"
+  [ -d "${doc_dir}" ] || return 0
+
+  shopt -s nullglob
+  base_files=( "${doc_dir}"/[0-9][0-9]-*.md )
+  shopt -u nullglob
+  [ "${#base_files[@]}" -eq 0 ] && return 0
+
+  while IFS= read -r file; do
+    selected_file="$(_alias_help_select_doc_variant "${file}" "${lang}" "${doc_dir}")"
+    files+=( "${selected_file}" )
+  done < <(printf '%s\n' "${base_files[@]}" | LC_ALL=C sort)
+
+  for file in "${files[@]}"; do
+    in_help_section=0
+    while IFS= read -r line; do
+      if [[ "${line}" =~ ^##[[:space:]]+Alias-Hilfe ]]; then
+        in_help_section=1
+        continue
+      fi
+      if [[ "${line}" =~ ^##[[:space:]]+ ]] && [ "${in_help_section}" -eq 1 ]; then
+        in_help_section=0
+      fi
+      [ "${in_help_section}" -eq 1 ] || continue
+      [[ "${line}" != \|* ]] && continue
+      IFS='|' read -r _ alias_name short_text desc_text cmd_text _ <<< "${line}"
+
+      alias_name="$(_alias_trim "${alias_name}")"
+      short_text="$(_alias_trim "${short_text}")"
+      desc_text="$(_alias_trim "${desc_text}")"
+      cmd_text="$(_alias_trim "${cmd_text}")"
+
+      [ -z "${alias_name}" ] && continue
+      [ "${alias_name}" = "alias" ] && continue
+      [ "${alias_name}" = "---" ] && continue
+
+      short_text="${short_text//\\|/|}"
+      desc_text="${desc_text//\\|/|}"
+      cmd_text="${cmd_text//\\|/|}"
+
+      BASH_ALIAS_HELP_SHORT["${alias_name}"]="${short_text}"
+      BASH_ALIAS_HELP_DESC["${alias_name}"]="${desc_text}"
+      BASH_ALIAS_HELP_CMD["${alias_name}"]="${cmd_text}"
+    done < "${file}"
+  done
+}
+
+_alias_help_get() {
+  local field="$1"
+  local name="$2"
+
+  _alias_help_load_data
+
+  case "${field}" in
+    short) printf '%s' "${BASH_ALIAS_HELP_SHORT[${name}]:-}" ;;
+    desc) printf '%s' "${BASH_ALIAS_HELP_DESC[${name}]:-}" ;;
+    cmd) printf '%s' "${BASH_ALIAS_HELP_CMD[${name}]:-}" ;;
+    *) printf '' ;;
+  esac
+}
+
 _alias_text() {
   local key="$1"
   local locale="${BASH_ALIAS_LOCALE:-de}"
@@ -81,29 +207,28 @@ _alias_value_for_name() {
 _alias_short_description_for_name() {
   local name="$1"
   local cmd="$2"
-  local first_word="${cmd%%[[:space:]]*}"
+  local from_docs=""
+
+  from_docs="$(_alias_help_get short "${name}")"
+  if [ -n "${from_docs}" ]; then
+    printf '%s' "${from_docs}"
+    return 0
+  fi
 
   case "${name}" in
-    psg) printf 'Prozesse per Suchbegriff filtern.' ;;
-    psmem) printf 'Top-20 Prozesse nach RAM-Verbrauch.' ;;
-    pscpu) printf 'Top-20 Prozesse nach CPU-Verbrauch.' ;;
-    log) printf 'journalctl: letzte 50 Zeilen (Standard).' ;;
-    logs) printf 'journalctl: Service-Logs, Standard 50 Zeilen.' ;;
-    log_min) printf 'journalctl: seit X Minuten (Standard 10).' ;;
-    log_hour) printf 'journalctl: seit X Stunden (Standard 1).' ;;
-    log_clean) printf 'journalctl bereinigen (Standard 2d / 100M).' ;;
-    aua) printf 'APT-Update mit Upgrade + Autoremove (optional -y).' ;;
+    log) printf 'Journal: letzte X Zeilen (Standard 50).' ;;
+    logs) printf 'Journal: Service-Logs der letzten X Zeilen.' ;;
+    log_min) printf 'Journal seit X Minuten (Standard 10).' ;;
+    log_hour) printf 'Journal seit X Stunden (Standard 1).' ;;
+    log_clean) printf 'Journal aufbewahren/bereinigen (Tage/Groesse).' ;;
+    aua) printf 'APT Update/Upgrade/Autoremove in einem Lauf.' ;;
     _self_update) printf 'Repository aktualisieren und Aliase neu laden.' ;;
     _self_setup) printf 'Interaktives Kategorie-Setup starten.' ;;
     _self_reload) printf 'Alias-Module in aktueller Shell neu laden.' ;;
     _self_edit) printf 'Alias-Datei bearbeiten und ~/.bashrc neu laden.' ;;
     _self_test_reload) printf 'Reload-Konsistenztest fuer Alias-Kategorien.' ;;
     *)
-      if [[ "${cmd}" == *"|"* || "${cmd}" == *"&&"* || "${cmd}" == *";"* ]] || declare -F "${first_word}" >/dev/null 2>&1; then
-        printf "$(_alias_text short_internal)" "${cmd}"
-      else
-        printf '%s' "${cmd}"
-      fi
+      printf '%s' "${cmd}"
       ;;
   esac
 }
@@ -112,17 +237,36 @@ _alias_description_for_name() {
   local name="$1"
   local cmd="$2"
   local locale="${BASH_ALIAS_LOCALE:-de}"
+  local from_docs=""
+
+  from_docs="$(_alias_help_get desc "${name}")"
+  if [ -n "${from_docs}" ]; then
+    printf '%s' "${from_docs}"
+    return 0
+  fi
 
   case "${locale}" in
     de*)
       case "${name}" in
         ls) printf 'Listet Dateien im aktuellen Verzeichnis farbig auf.' ;;
-        la|ll) printf 'Zeigt Dateien inkl. versteckter Dateien im langen Format.' ;;
+        la) printf 'Listet alle Dateien inkl. versteckter Dateien im langen, menschenlesbaren Format.' ;;
+        ll) printf 'Listet alle Dateien inkl. versteckter Dateien im langen, menschenlesbaren Format.' ;;
         grep) printf 'Sucht Textmuster farbig hervorgehoben.' ;;
         rm) printf 'Loescht interaktiv mit Rueckfrage.' ;;
-        ..|...|....|.....|.2|.3|.4|.5) printf 'Wechselt schnell in uebergeordnete Verzeichnisse.' ;;
+        ..) printf 'Wechselt ein Verzeichnis nach oben.' ;;
+        ...) printf 'Wechselt zwei Verzeichnisse nach oben.' ;;
+        ....) printf 'Wechselt drei Verzeichnisse nach oben.' ;;
+        .....) printf 'Wechselt vier Verzeichnisse nach oben.' ;;
+        .2) printf 'Wechselt zwei Verzeichnisse nach oben.' ;;
+        .3) printf 'Wechselt drei Verzeichnisse nach oben.' ;;
+        .4) printf 'Wechselt vier Verzeichnisse nach oben.' ;;
+        .5) printf 'Wechselt fuenf Verzeichnisse nach oben.' ;;
         '~') printf 'Wechselt ins Home-Verzeichnis.' ;;
-        -|+1|+2|+3|+4|-1|-2|-3|-4|p|o|cdl) printf 'Hilft beim Navigieren im Verzeichnis-Stack (pushd/popd/dirs).' ;;
+        -) printf 'Wechselt ins vorherige Verzeichnis.' ;;
+        cdl) printf 'Zeigt den Verzeichnis-Stack mit Indizes.' ;;
+        p) printf 'Legt Verzeichnisse per pushd auf den Stack.' ;;
+        o) printf 'Nimmt das oberste Verzeichnis per popd vom Stack.' ;;
+        +1|+2|+3|+4|-1|-2|-3|-4) printf 'Springt zu einem Eintrag im Verzeichnis-Stack.' ;;
         h) printf 'Zeigt die Shell-History.' ;;
         dfh) printf 'Zeigt Dateisystem-Auslastung in menschenlesbarer Form.' ;;
         duh) printf 'Zeigt Speicherverbrauch pro Unterordner bis Tiefe 1.' ;;
@@ -131,24 +275,45 @@ _alias_description_for_name() {
         psmem) printf 'Zeigt Top-Prozesse nach RAM-Verbrauch.' ;;
         pscpu) printf 'Zeigt Top-Prozesse nach CPU-Verbrauch.' ;;
         g) printf 'Kurzform fuer git.' ;;
-        gs|gst) printf 'Zeigt den Git-Status (kurz).' ;;
+        gs) printf 'Zeigt den Git-Status kurz inkl. Branch-Info.' ;;
         ga) printf 'Fuegt Dateien zur Git-Staging-Area hinzu.' ;;
         gaa) printf 'Fuegt alle Aenderungen zur Git-Staging-Area hinzu.' ;;
-        gb|gba|gbd) printf 'Arbeitet mit Git-Branches (anzeigen/alle/loeschen).' ;;
-        gco|gcb) printf 'Checkout eines Branches bzw. neuen Branch erstellen.' ;;
-        gc|gcm|gca|gcan) printf 'Erstellt/veraendert Git-Commits.' ;;
-        gd|gds) printf 'Zeigt Git-Diffs (normal bzw. staged).' ;;
+        gb) printf 'Zeigt lokale Git-Branches.' ;;
+        gba) printf 'Zeigt lokale und Remote-Branches.' ;;
+        gbd) printf 'Loescht einen lokalen Branch.' ;;
+        gco) printf 'Wechselt auf einen Branch oder Commit.' ;;
+        gcb) printf 'Erstellt einen neuen Branch und wechselt darauf.' ;;
+        gc) printf 'Erstellt einen neuen Commit (Editor).' ;;
+        gcm) printf 'Erstellt einen Commit mit direkter Nachricht.' ;;
+        gca) printf 'Aendert den letzten Commit (amend).' ;;
+        gcan) printf 'Aendert den letzten Commit ohne neue Nachricht.' ;;
+        gd) printf 'Zeigt nicht gestagte Aenderungen.' ;;
+        gds) printf 'Zeigt gestagte Aenderungen.' ;;
         gl) printf 'Zeigt kompakten Git-Graph-Log.' ;;
         gf) printf 'Holt alle Remotes und bereinigt veraltete Referenzen.' ;;
-        gpl) printf 'Fuehrt git pull mit --ff-only aus.' ;;
-        gp|gpf) printf 'Fuehrt git push aus (normal bzw. force-with-lease).' ;;
-        gr|grs) printf 'Stellt Dateien aus Git wieder her (working tree/staged).' ;;
+        gpl) printf 'Fuehrt git pull nur als Fast-Forward aus.' ;;
+        gp) printf 'Fuehrt git push auf das konfigurierte Ziel aus.' ;;
+        gpf) printf 'Fuehrt git push mit --force-with-lease aus (sicherer Force-Push).' ;;
+        gr) printf 'Setzt Aenderungen im Working Tree auf HEAD zurueck.' ;;
+        grs) printf 'Entfernt Dateien aus der Staging-Area.' ;;
+        gst) printf 'Speichert den aktuellen Arbeitsstand in einem Stash.' ;;
         gstp) printf 'Spielt den letzten Git-Stash wieder ein.' ;;
         ports) printf 'Zeigt offene Ports und zugehoerige Prozesse.' ;;
         myip) printf 'Zeigt lokale IP-Adressen kompakt an.' ;;
         pingg) printf 'Testet Netzwerkverbindung zu google.com.' ;;
-        log|logs|log_min|log_hour|log_clean) printf 'Zeigt/bereinigt Journal-Logs (root-Funktionen).' ;;
-        agi|agr|acs|agu|agg|aga|agl|aua) printf 'APT-Shortcuts fuer Paketverwaltung und Updates (root).' ;;
+        log) printf 'Zeigt die letzten Journal-Logs (Standard 50 Zeilen, root-Funktion).' ;;
+        logs) printf 'Zeigt Journal-Logs fuer einen Dienst mit optionaler Zeilenanzahl (root-Funktion).' ;;
+        log_min) printf 'Zeigt Journal-Logs der letzten X Minuten (Standard 10, root-Funktion).' ;;
+        log_hour) printf 'Zeigt Journal-Logs der letzten X Stunden (Standard 1, root-Funktion).' ;;
+        log_clean) printf 'Bereinigt Journal-Logs nach Aufbewahrungszeit/Groesse (root-Funktion).' ;;
+        agi) printf 'Installiert ein Paket via apt install (root).' ;;
+        agr) printf 'Entfernt ein Paket via apt remove (root).' ;;
+        acs) printf 'Sucht Pakete via apt search.' ;;
+        agu) printf 'Aktualisiert Paketlisten via apt update (root).' ;;
+        agg) printf 'Fuehrt Paket-Upgrade via apt upgrade aus (root).' ;;
+        aga) printf 'Entfernt unnoetige Pakete via apt autoremove (root).' ;;
+        agl) printf 'Zeigt alle upgradefaehigen Pakete.' ;;
+        aua) printf 'Fuehrt apt update, upgrade und autoremove als Gesamt-Update aus (root).' ;;
         my) printf 'Startet die MySQL-CLI.' ;;
         mya) printf 'Startet mysqladmin fuer Admin-Operationen.' ;;
         myping) printf 'Prueft, ob der MySQL-Server antwortet.' ;;
@@ -163,6 +328,33 @@ _alias_description_for_name() {
     *)
       printf "$(_alias_text desc_fallback)" "${cmd}"
       ;;
+  esac
+}
+
+_alias_detail_command_for_name() {
+  local name="$1"
+  local cmd="$2"
+  local from_docs=""
+
+  from_docs="$(_alias_help_get cmd "${name}")"
+  if [ -n "${from_docs}" ]; then
+    printf '%s' "${from_docs}"
+    return 0
+  fi
+
+  case "${name}" in
+    log) printf 'journalctl -n <X> --no-pager  (Standard: X=50)' ;;
+    logs) printf 'journalctl -u <service> -n <X> --no-pager  (Standard: X=50)' ;;
+    log_min) printf 'journalctl --since \"<X> minutes ago\" --no-pager  (Standard: X=10)' ;;
+    log_hour) printf 'journalctl --since \"<X> hours ago\" --no-pager  (Standard: X=1)' ;;
+    log_clean) printf 'journalctl --vacuum-time=<tage>d --vacuum-size=<groesse>  (Standard: 2d, 100M)' ;;
+    aua) printf 'apt update && apt upgrade [-y] && apt autoremove [-y]' ;;
+    _self_update) printf 'git pull --ff-only && alias_repo_reload  (Standardmodus)' ;;
+    _self_reload) printf 'alias_repo_reload  (Alias-Loader in aktueller Shell neu laden)' ;;
+    _self_setup) printf 'bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
+    _self_test_reload) printf 'bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"' ;;
+    _self_edit) printf 'nano ~/.bash_aliases && source ~/.bashrc' ;;
+    *) printf '%s' "${cmd}" ;;
   esac
 }
 
@@ -205,9 +397,9 @@ _alias_resolve_category_input() {
 }
 
 _alias_print_category_list() {
-  local idx=1
   local category=""
   local state=""
+  local number=""
 
   echo "" >&2
   echo "$(_alias_text categories_title)" >&2
@@ -218,8 +410,8 @@ _alias_print_category_list() {
     if [ "${BASH_ALIAS_CATEGORY_ENABLED[${category}]:-0}" -eq 1 ]; then
       state="on"
     fi
-    printf ' %2d) %-12s [%s]\n' "${idx}" "${category}" "${state}" >&2
-    idx=$((idx + 1))
+    number="$(_alias_category_number_for_name "${category}")" || continue
+    printf ' %3d) %-12s [%s]\n' "${number}" "${category}" "${state}" >&2
   done
 }
 
@@ -235,13 +427,83 @@ _alias_names_for_category() {
   done < <(_alias_sorted_names)
 }
 
+_alias_setup_special_number() {
+  if [ "${#BASH_ALIAS_CATEGORY_ORDER[@]}" -le 99 ]; then
+    printf '99'
+  else
+    printf '999'
+  fi
+}
+
+_alias_category_number_for_name() {
+  local wanted="$1"
+  local category=""
+  local number=1
+  local reserved=0
+
+  reserved="$(_alias_setup_special_number)"
+
+  if [ "${wanted}" = "_setup" ]; then
+    printf '%s' "${reserved}"
+    return 0
+  fi
+
+  for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    [ "${category}" = "_setup" ] && continue
+    if [ "${number}" -eq "${reserved}" ]; then
+      number=$((number + 1))
+    fi
+    if [ "${category}" = "${wanted}" ]; then
+      printf '%s' "${number}"
+      return 0
+    fi
+    number=$((number + 1))
+  done
+
+  return 1
+}
+
+_alias_category_name_for_number() {
+  local wanted="$1"
+  local category=""
+  local number=1
+  local reserved=0
+
+  reserved="$(_alias_setup_special_number)"
+  if [ "${wanted}" -eq "${reserved}" ]; then
+    for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+      if [ "${category}" = "_setup" ]; then
+        printf '%s' "${category}"
+        return 0
+      fi
+    done
+    return 1
+  fi
+
+  for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    [ "${category}" = "_setup" ] && continue
+    if [ "${number}" -eq "${reserved}" ]; then
+      number=$((number + 1))
+    fi
+    if [ "${number}" -eq "${wanted}" ]; then
+      printf '%s' "${category}"
+      return 0
+    fi
+    number=$((number + 1))
+  done
+
+  return 1
+}
+
 _alias_show_alias_details() {
   local name="$1"
+  local raw_cmd=""
   local cmd=""
   local desc=""
 
-  cmd="$(_alias_value_for_name "${name}")"
-  desc="$(_alias_description_for_name "${name}" "${cmd}")"
+  raw_cmd="$(_alias_value_for_name "${name}")"
+  desc="$(_alias_description_for_name "${name}" "${raw_cmd}")"
+  cmd="$(_alias_detail_command_for_name "${name}" "${raw_cmd}")"
 
   echo ""
   echo "=== $(_alias_text alias_detail_title): ${name} ==="
@@ -327,18 +589,17 @@ _alias_show_all_categories() {
 _alias_menu_all_categories() {
   local choice=""
   local number_re='^[0-9]+$'
-  local idx=1
   local category=""
+  local number=""
 
   while true; do
     echo ""
     echo "=== $(_alias_text all_categories_title) ==="
     printf ' %2d) %s\n' 0 "$(_alias_text all_categories_back)"
 
-    idx=1
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
-      printf ' %2d) %s\n' "${idx}" "${category}"
-      idx=$((idx + 1))
+      number="$(_alias_category_number_for_name "${category}")" || continue
+      printf ' %3d) %s\n' "${number}" "${category}"
     done
 
     read -r -p "$(_alias_text all_categories_prompt)" choice
@@ -351,28 +612,19 @@ _alias_menu_all_categories() {
       return 0
     fi
 
-    idx=1
-    for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
-      if [ "${idx}" -eq "${choice}" ]; then
-        _alias_menu_category "${category}" || return 1
-        break
-      fi
-      idx=$((idx + 1))
-    done
+    category="$(_alias_category_name_for_number "${choice}")" || {
+      echo "$(_alias_text alias_invalid)"
+      return 1
+    }
+    _alias_menu_category "${category}" || return 1
+    continue
 
-    if [ "${idx}" -le "${#BASH_ALIAS_CATEGORY_ORDER[@]}" ]; then
-      continue
-    fi
-
-    echo "$(_alias_text alias_invalid)"
-    return 1
   done
 }
 
 _alias_pick_category_interactive() {
   local choice=""
   local number_re='^[0-9]+$'
-  local idx=1
   local category=""
 
   while true; do
@@ -389,21 +641,12 @@ _alias_pick_category_interactive() {
         continue
       fi
 
-      idx=1
-      for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
-        if [ "${idx}" -eq "${choice}" ]; then
-          _alias_menu_category "${category}" || return 1
-          break
-        fi
-        idx=$((idx + 1))
-      done
-
-      if [ "${idx}" -le "${#BASH_ALIAS_CATEGORY_ORDER[@]}" ]; then
-        continue
-      fi
-
-      echo "$(_alias_text categories_invalid)"
-      return 1
+      category="$(_alias_category_name_for_number "${choice}")" || {
+        echo "$(_alias_text categories_invalid)"
+        return 1
+      }
+      _alias_menu_category "${category}" || return 1
+      continue
     fi
     category="$(_alias_resolve_category_input "${choice}")" || {
       echo "$(_alias_text categories_invalid)"

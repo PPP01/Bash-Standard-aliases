@@ -8,3 +8,10 @@ Hilfsfunktionen fuer Alias-Listen.
   - Ohne Parameter: interaktive Kategorie-Auswahl (inkl. `all`).
   - Mit Parameter: z. B. `a git`.
 - Completion fuer `a`: Kategorie-Namen werden per Tab angeboten.
+
+## Lokalisierbare Texte
+- Alias-Texte fuer Tabelle/Details werden pro Kategorie aus `docs/alias_files/[0-9][0-9]-*.md` geladen.
+- Je Datei sind Sprachvarianten moeglich:
+  - Unterordner: `docs/alias_files/<lang>/35-git.md`
+  - Suffix: `docs/alias_files/35-git.<lang>.md`
+- Ohne Sprachvariante wird die Basisdatei genutzt (z. B. `docs/alias_files/35-git.md`).
