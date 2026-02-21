@@ -7,6 +7,9 @@ Hilfsfunktionen fuer Alias-Listen.
 - `a`: Zeigt Aliase nach Kategorie.
   - Ohne Parameter: interaktive Kategorie-Auswahl (inkl. `all`).
   - Mit Parameter: z. B. `a git`.
+  - Navigation im interaktiven Menue:
+    - `0`, `left`, `backspace`: eine Ebene zurueck
+    - `escape`, `q`: Menue beenden
 - Completion fuer `a`: Kategorie-Namen werden per Tab angeboten.
 
 ## Lokalisierbare Texte

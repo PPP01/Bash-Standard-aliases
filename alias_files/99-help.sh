@@ -28,6 +28,70 @@ _alias_trim() {
   printf '%s' "${value}"
 }
 
+_alias_menu_is_back_input() {
+  local value="$1"
+  case "${value}" in
+    0|left|LEFT|Left|backspace|BACKSPACE|Backspace|$'\x7f'|$'\b'|$'\e[D') return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_alias_menu_is_quit_input() {
+  local value="$1"
+  case "${value}" in
+    q|Q|quit|QUIT|Quit|esc|ESC|Esc|escape|ESCAPE|Escape|$'\e') return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_alias_menu_read_input() {
+  local prompt="$1"
+  local key=""
+  local seq=""
+  local value=""
+
+  printf '%s' "${prompt}"
+  while IFS= read -r -s -n 1 key; do
+    case "${key}" in
+      '')
+        break
+        ;;
+      $'\e')
+        if IFS= read -r -s -n 1 -t 0.05 seq; then
+          if [ "${seq}" = "[" ] && IFS= read -r -s -n 1 -t 0.05 seq; then
+            if [ "${seq}" = "D" ]; then
+              echo ""
+              REPLY="left"
+              return 0
+            fi
+          fi
+          continue
+        fi
+        echo ""
+        REPLY="escape"
+        return 0
+        ;;
+      $'\x7f'|$'\b')
+        if [ -n "${value}" ]; then
+          value="${value%?}"
+          printf '\b \b'
+        else
+          echo ""
+          REPLY="backspace"
+          return 0
+        fi
+        ;;
+      *)
+        value+="${key}"
+        printf '%s' "${key}"
+        ;;
+    esac
+  done
+
+  echo ""
+  REPLY="${value}"
+}
+
 _alias_runtime_cache_reset() {
   BASH_ALIAS_RUNTIME_VALUE=()
   BASH_ALIAS_RUNTIME_SORTED_NAMES=()
@@ -208,13 +272,13 @@ _alias_text() {
     de*)
       case "${key}" in
         categories_title) printf 'Alias-Kategorien:' ;;
-        categories_prompt) printf 'Kategorie (Name oder Nummer, 0 = alle): ' ;;
+        categories_prompt) printf 'Kategorie (Name/Nummer, 0 = alle, q/esc = Ende): ' ;;
         categories_invalid) printf 'Ungueltige Eingabe. Menue wird beendet.' ;;
         categories_back) printf 'Alle Kategorien' ;;
         all_categories_title) printf 'Alle Kategorien' ;;
-        all_categories_prompt) printf 'Kategorie waehlen (0 = Zurueck): ' ;;
+        all_categories_prompt) printf 'Kategorie waehlen (0/left/backspace = Zurueck, q/esc = Ende): ' ;;
         all_categories_back) printf 'Zurueck zur Hauptauswahl' ;;
-        category_prompt) printf 'Alias-Nummer waehlen (0 = Zurueck): ' ;;
+        category_prompt) printf 'Alias waehlen (Nummer, 0/left/backspace = Zurueck, q/esc = Ende): ' ;;
         category_empty) printf '(keine geladenen Aliase)' ;;
         category_back) printf 'Zurueck zur Kategorienauswahl' ;;
         table_col_no) printf 'no)' ;;
@@ -233,13 +297,13 @@ _alias_text() {
     *)
       case "${key}" in
         categories_title) printf 'Alias categories:' ;;
-        categories_prompt) printf 'Category (name or number, 0 = all): ' ;;
+        categories_prompt) printf 'Category (name/number, 0 = all, q/esc = quit): ' ;;
         categories_invalid) printf 'Invalid input. Exiting menu.' ;;
         categories_back) printf 'All categories' ;;
         all_categories_title) printf 'All categories' ;;
-        all_categories_prompt) printf 'Choose category (0 = back): ' ;;
+        all_categories_prompt) printf 'Choose category (0/left/backspace = back, q/esc = quit): ' ;;
         all_categories_back) printf 'Back to main menu' ;;
-        category_prompt) printf 'Choose alias number (0 = back): ' ;;
+        category_prompt) printf 'Choose alias (number, 0/left/backspace = back, q/esc = quit): ' ;;
         category_empty) printf '(no loaded aliases)' ;;
         category_back) printf 'Back to category menu' ;;
         table_col_no) printf 'no)' ;;
@@ -614,14 +678,17 @@ _alias_menu_category() {
       done
     fi
 
-    read -r -p "$(_alias_text category_prompt)" choice
+    _alias_menu_read_input "$(_alias_text category_prompt)"
+    choice="${REPLY:-}"
+    if _alias_menu_is_quit_input "${choice}"; then
+      return 130
+    fi
+    if _alias_menu_is_back_input "${choice}"; then
+      return 0
+    fi
     if ! [[ "${choice}" =~ ${number_re} ]]; then
       echo "$(_alias_text alias_invalid)"
       return 1
-    fi
-
-    if [ "${choice}" -eq 0 ]; then
-      return 0
     fi
 
     if [ "${choice}" -lt 1 ] || [ "${choice}" -gt "${#names[@]}" ]; then
@@ -680,21 +747,29 @@ _alias_menu_all_categories() {
       printf ' %3d) %s\n' "${number}" "${category}"
     done
 
-    read -r -p "$(_alias_text all_categories_prompt)" choice
+    _alias_menu_read_input "$(_alias_text all_categories_prompt)"
+    choice="${REPLY:-}"
+    if _alias_menu_is_quit_input "${choice}"; then
+      return 130
+    fi
+    if _alias_menu_is_back_input "${choice}"; then
+      return 0
+    fi
     if ! [[ "${choice}" =~ ${number_re} ]]; then
       echo "$(_alias_text alias_invalid)"
       return 1
-    fi
-
-    if [ "${choice}" -eq 0 ]; then
-      return 0
     fi
 
     category="$(_alias_category_name_for_number "${choice}")" || {
       echo "$(_alias_text alias_invalid)"
       return 1
     }
-    _alias_menu_category "${category}" || return 1
+    _alias_menu_category "${category}"
+    case "$?" in
+      0) ;;
+      130) return 130 ;;
+      *) return 1 ;;
+    esac
     continue
 
   done
@@ -704,18 +779,32 @@ _alias_pick_category_interactive() {
   local choice=""
   local number_re='^[0-9]+$'
   local category=""
+  local rc=0
 
   while true; do
     _alias_print_category_list
-    read -r -p "$(_alias_text categories_prompt)" choice
+    _alias_menu_read_input "$(_alias_text categories_prompt)"
+    choice="${REPLY:-}"
+    if _alias_menu_is_quit_input "${choice}"; then
+      return 0
+    fi
+    if _alias_menu_is_back_input "${choice}"; then
+      return 0
+    fi
     [ -z "${choice}" ] && {
       echo "$(_alias_text categories_invalid)"
       return 1
     }
 
     if [[ "${choice}" =~ ${number_re} ]]; then
-      if [ "${choice}" -eq 0 ]; then
-        _alias_menu_all_categories || return 1
+      if _alias_menu_is_back_input "${choice}"; then
+        _alias_menu_all_categories
+        rc=$?
+        case "${rc}" in
+          0) ;;
+          130) return 0 ;;
+          *) return 1 ;;
+        esac
         continue
       fi
 
@@ -723,19 +812,30 @@ _alias_pick_category_interactive() {
         echo "$(_alias_text categories_invalid)"
         return 1
       }
-      _alias_menu_category "${category}" || return 1
+      _alias_menu_category "${category}"
+      case "$?" in
+        0) ;;
+        130) return 0 ;;
+        *) return 1 ;;
+      esac
       continue
     fi
     category="$(_alias_resolve_category_input "${choice}")" || {
       echo "$(_alias_text categories_invalid)"
       return 1
     }
-    _alias_menu_category "${category}" || return 1
+    _alias_menu_category "${category}"
+    case "$?" in
+      0) ;;
+      130) return 0 ;;
+      *) return 1 ;;
+    esac
   done
 }
 
 a() {
   local category=""
+  local rc=0
   _alias_runtime_cache_reset
 
   if [ -n "${1:-}" ]; then
@@ -751,7 +851,11 @@ a() {
     }
   else
     _alias_pick_category_interactive
-    return $?
+    rc=$?
+    case "${rc}" in
+      130) return 0 ;;
+      *) return "${rc}" ;;
+    esac
   fi
 
   if [ "${category}" = "all" ]; then
@@ -760,6 +864,11 @@ a() {
   fi
 
   _alias_menu_category "${category}"
+  rc=$?
+  case "${rc}" in
+    130) return 0 ;;
+    *) return "${rc}" ;;
+  esac
 }
 
 _alias_category_completion() {
