@@ -791,7 +791,7 @@ _alias_pick_category_interactive() {
     if _alias_menu_is_quit_input "${choice}"; then
       return 0
     fi
-    if _alias_menu_is_back_input "${choice}"; then
+    if _alias_menu_is_back_input "${choice}" && [ "${choice}" != "0" ]; then
       return 0
     fi
     [ -z "${choice}" ] && {
@@ -800,7 +800,7 @@ _alias_pick_category_interactive() {
     }
 
     if [[ "${choice}" =~ ${number_re} ]]; then
-      if _alias_menu_is_back_input "${choice}"; then
+      if [ "${choice}" -eq 0 ]; then
         _alias_menu_all_categories
         rc=$?
         case "${rc}" in
