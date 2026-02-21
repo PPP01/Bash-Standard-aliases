@@ -16,10 +16,12 @@ _alias_text() {
     de*)
       case "${key}" in
         categories_title) printf 'Alias-Kategorien:' ;;
-        categories_prompt) printf 'Kategorie (Name oder Nummer, 0 = Ende): ' ;;
+        categories_prompt) printf 'Kategorie (Name oder Nummer, 0 = alle): ' ;;
         categories_invalid) printf 'Ungueltige Eingabe. Menue wird beendet.' ;;
-        categories_exit) printf 'Menue beendet.' ;;
-        categories_back) printf 'Zurueck/Ende' ;;
+        categories_back) printf 'Alle Kategorien' ;;
+        all_categories_title) printf 'Alle Kategorien' ;;
+        all_categories_prompt) printf 'Kategorie waehlen (0 = Zurueck): ' ;;
+        all_categories_back) printf 'Zurueck zur Hauptauswahl' ;;
         category_prompt) printf 'Alias-Nummer waehlen (0 = Zurueck): ' ;;
         category_empty) printf '(keine geladenen Aliase)' ;;
         category_back) printf 'Zurueck zur Kategorienauswahl' ;;
@@ -35,10 +37,12 @@ _alias_text() {
     *)
       case "${key}" in
         categories_title) printf 'Alias categories:' ;;
-        categories_prompt) printf 'Category (name or number, 0 = exit): ' ;;
+        categories_prompt) printf 'Category (name or number, 0 = all): ' ;;
         categories_invalid) printf 'Invalid input. Exiting menu.' ;;
-        categories_exit) printf 'Menu closed.' ;;
-        categories_back) printf 'Back/Exit' ;;
+        categories_back) printf 'All categories' ;;
+        all_categories_title) printf 'All categories' ;;
+        all_categories_prompt) printf 'Choose category (0 = back): ' ;;
+        all_categories_back) printf 'Back to main menu' ;;
         category_prompt) printf 'Choose alias number (0 = back): ' ;;
         category_empty) printf '(no loaded aliases)' ;;
         category_back) printf 'Back to category menu' ;;
@@ -109,7 +113,7 @@ _alias_description_for_name() {
         agi|agr|acs|agu|agg|aga|agl|aua) printf 'APT-Shortcuts fuer Paketverwaltung und Updates (root).' ;;
         _self_update) printf 'Aktualisiert dieses Alias-Repository per git pull und laedt neu.' ;;
         _self_setup) printf 'Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
-        _self_reload) printf 'Laedt die Shell-Konfiguration neu.' ;;
+        _self_reload) printf 'Laedt die Alias-Module in der aktuellen Shell neu (Repo-Reload).' ;;
         _self_edit) printf 'Oeffnet ~/.bash_aliases zum Bearbeiten und laedt neu.' ;;
         _self_test_reload) printf 'Prueft automatisiert, ob Alias-Kategorien nach Reload konsistent bleiben.' ;;
         *) printf "$(_alias_text desc_fallback)" "${cmd}" ;;
@@ -194,7 +198,6 @@ _alias_show_alias_details() {
   local name="$1"
   local cmd=""
   local desc=""
-  local choice=""
 
   cmd="$(_alias_value_for_name "${name}")"
   desc="$(_alias_description_for_name "${name}" "${cmd}")"
@@ -203,12 +206,6 @@ _alias_show_alias_details() {
   echo "=== $(_alias_text alias_detail_title): ${name} ==="
   echo "$(_alias_text alias_detail_desc): ${desc}"
   echo "$(_alias_text alias_detail_cmd): ${cmd}"
-
-  read -r -p "$(_alias_text alias_detail_prompt)" choice
-  if [ -n "${choice}" ] && [ "${choice}" != "0" ]; then
-    echo "$(_alias_text alias_invalid)"
-    return 1
-  fi
   return 0
 }
 
@@ -281,6 +278,51 @@ _alias_show_all_categories() {
   done
 }
 
+_alias_menu_all_categories() {
+  local choice=""
+  local number_re='^[0-9]+$'
+  local idx=1
+  local category=""
+
+  while true; do
+    echo ""
+    echo "=== $(_alias_text all_categories_title) ==="
+    printf ' %2d) %s\n' 0 "$(_alias_text all_categories_back)"
+
+    idx=1
+    for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+      printf ' %2d) %s\n' "${idx}" "${category}"
+      idx=$((idx + 1))
+    done
+
+    read -r -p "$(_alias_text all_categories_prompt)" choice
+    if ! [[ "${choice}" =~ ${number_re} ]]; then
+      echo "$(_alias_text alias_invalid)"
+      return 1
+    fi
+
+    if [ "${choice}" -eq 0 ]; then
+      return 0
+    fi
+
+    idx=1
+    for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+      if [ "${idx}" -eq "${choice}" ]; then
+        _alias_menu_category "${category}" || return 1
+        break
+      fi
+      idx=$((idx + 1))
+    done
+
+    if [ "${idx}" -le "${#BASH_ALIAS_CATEGORY_ORDER[@]}" ]; then
+      continue
+    fi
+
+    echo "$(_alias_text alias_invalid)"
+    return 1
+  done
+}
+
 _alias_pick_category_interactive() {
   local choice=""
   local number_re='^[0-9]+$'
@@ -297,8 +339,8 @@ _alias_pick_category_interactive() {
 
     if [[ "${choice}" =~ ${number_re} ]]; then
       if [ "${choice}" -eq 0 ]; then
-        echo "$(_alias_text categories_exit)"
-        return 0
+        _alias_menu_all_categories || return 1
+        continue
       fi
 
       idx=1

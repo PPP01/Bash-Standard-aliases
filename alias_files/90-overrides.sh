@@ -1,5 +1,5 @@
 # Lokale Overrides
-alias _self_reload='source ~/.bashrc'
+alias _self_reload='alias_repo_reload'
 alias _self_edit='nano ~/.bash_aliases && source ~/.bashrc'
 
 if [ -f /opt/scripts/bash_aliases_specific ]; then

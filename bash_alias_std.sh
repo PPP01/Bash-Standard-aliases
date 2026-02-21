@@ -79,12 +79,21 @@ _alias_register_aliases_for_category() {
   local aliases_before="$2"
   local aliases_after="$3"
   local alias_name=""
+  local mapped_category=""
 
   while IFS= read -r alias_name; do
     [ -z "${alias_name}" ] && continue
 
     if ! grep -Fxq -- "${alias_name}" <<< "${aliases_before}"; then
-      BASH_ALIAS_ALIAS_CATEGORY["${alias_name}"]="${category}"
+      mapped_category="${category}"
+      case "${alias_name}" in
+        _self_*)
+          mapped_category="_setup"
+          _alias_add_category_if_missing "${mapped_category}"
+          BASH_ALIAS_CATEGORY_ENABLED["${mapped_category}"]=1
+          ;;
+      esac
+      BASH_ALIAS_ALIAS_CATEGORY["${alias_name}"]="${mapped_category}"
     fi
   done <<< "${aliases_after}"
 }

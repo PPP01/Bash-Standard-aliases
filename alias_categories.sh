@@ -13,6 +13,7 @@ apt
 systemd
 repo
 setup
+_setup
 mysql
 overrides
 help
@@ -52,6 +53,7 @@ alias_modules_for_category() {
     systemd) printf '70-root-systemd.sh' ;;
     repo) printf '80-repo-update.sh' ;;
     setup) printf '81-setup.sh' ;;
+    _setup) printf '80-repo-update.sh 81-setup.sh 90-overrides.sh 99-help.sh' ;;
     mysql) printf '85-mysql.sh' ;;
     overrides) printf '90-overrides.sh' ;;
     help) printf '99-help.sh' ;;
