@@ -73,4 +73,8 @@ _alias_help_category_completion_lazy() {
 }
 
 complete -F _alias_help_category_completion_lazy a
-alias _self_test_reload='alias_self_test_reload'
+if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -w "${BASH_ALIAS_REPO_DIR}" ]; then
+  alias _self_test_reload='alias_self_test_reload'
+else
+  unalias _self_test_reload 2>/dev/null || true
+fi

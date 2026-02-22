@@ -59,4 +59,8 @@ alias_repo_update() {
   esac
 }
 
-alias _self_update='alias_repo_update'
+if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -w "${BASH_ALIAS_REPO_DIR}" ]; then
+  alias _self_update='alias_repo_update'
+else
+  unalias _self_update 2>/dev/null || true
+fi

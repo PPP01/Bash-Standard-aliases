@@ -1060,4 +1060,8 @@ alias_self_test_reload() {
   bash "${BASH_ALIAS_REPO_DIR}/scripts/test_reload_category_mapping.sh"
 }
 
-alias _self_test_reload='alias_self_test_reload'
+if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -w "${BASH_ALIAS_REPO_DIR}" ]; then
+  alias _self_test_reload='alias_self_test_reload'
+else
+  unalias _self_test_reload 2>/dev/null || true
+fi
