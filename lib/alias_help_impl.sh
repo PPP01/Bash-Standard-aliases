@@ -22,6 +22,7 @@ declare -gA BASH_ALIAS_RUNTIME_CATEGORY_NAMES=()
 declare -g BASH_ALIAS_RUNTIME_CACHE_READY=0
 declare -gA BASH_ALIAS_MENU_SHORT_DESC=()
 declare -g BASH_ALIAS_MENU_CACHE_READY=0
+declare -g BASH_ALIAS_MENU_DISK_CACHE_TRIED=0
 
 : "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL:=\033[0;32m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_TITLE:=\033[0;32m}"
@@ -111,6 +112,155 @@ _alias_runtime_cache_reset() {
 _alias_menu_cache_reset() {
   BASH_ALIAS_MENU_SHORT_DESC=()
   BASH_ALIAS_MENU_CACHE_READY=0
+  BASH_ALIAS_MENU_DISK_CACHE_TRIED=0
+}
+
+_alias_menu_cache_enabled() {
+  case "${BASH_ALIAS_MENU_DISK_CACHE:-1}" in
+    1|true|TRUE|yes|YES|on|ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_alias_menu_cache_dir() {
+  printf '%s/bash-standard-aliases' "${XDG_CACHE_HOME:-${HOME}/.cache}"
+}
+
+_alias_menu_cache_repo_dir() {
+  if [ -n "${BASH_ALIAS_REPO_DIR:-}" ]; then
+    printf '%s' "${BASH_ALIAS_REPO_DIR}"
+    return 0
+  fi
+  cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd
+}
+
+_alias_menu_cache_repo_version() {
+  local repo_dir="$1"
+  local rev=""
+  local cksum_line=""
+
+  if command -v git >/dev/null 2>&1 && [ -d "${repo_dir}/.git" ]; then
+    rev="$(git -C "${repo_dir}" rev-parse --verify --short=12 HEAD 2>/dev/null || true)"
+    if [ -n "${rev}" ]; then
+      if ! git -C "${repo_dir}" diff --quiet --no-ext-diff --ignore-submodules -- 2>/dev/null || ! git -C "${repo_dir}" diff --cached --quiet --no-ext-diff --ignore-submodules -- 2>/dev/null; then
+        rev="${rev}-dirty"
+      fi
+      printf '%s' "${rev}"
+      return 0
+    fi
+  fi
+
+  if [ -f "${repo_dir}/bash_alias_std.sh" ]; then
+    cksum_line="$(cksum < "${repo_dir}/bash_alias_std.sh" 2>/dev/null || true)"
+    cksum_line="${cksum_line%% *}"
+    if [ -n "${cksum_line}" ]; then
+      printf 'cksum-%s' "${cksum_line}"
+      return 0
+    fi
+  fi
+
+  printf 'unknown'
+}
+
+_alias_menu_cache_user_salt() {
+  local file=""
+  local cksum_line=""
+
+  for file in "${HOME}/.bash_aliases_specific" "${HOME}/.bash_aliases_specific.md"; do
+    [ -f "${file}" ] || continue
+    cksum_line="$(cksum < "${file}" 2>/dev/null || true)"
+    cksum_line="${cksum_line%% *}"
+    printf '%s:%s;' "${file}" "${cksum_line}"
+  done
+}
+
+_alias_menu_cache_key() {
+  local repo_dir=""
+  local repo_version=""
+  local locale="${BASH_ALIAS_LOCALE:-de}"
+  local user_salt=""
+  local key_line=""
+  local key=""
+
+  repo_dir="$(_alias_menu_cache_repo_dir)" || return 1
+  repo_version="$(_alias_menu_cache_repo_version "${repo_dir}")"
+  user_salt="$(_alias_menu_cache_user_salt)"
+  key_line="$(printf '%s|%s|%s' "${repo_version}" "${locale}" "${user_salt}" | cksum 2>/dev/null || true)"
+  key="${key_line%% *}"
+  [ -n "${key}" ] || return 1
+  printf '%s' "${key}"
+}
+
+_alias_menu_cache_file() {
+  local cache_dir=""
+  local cache_key=""
+
+  cache_dir="$(_alias_menu_cache_dir)"
+  cache_key="$(_alias_menu_cache_key)" || return 1
+  printf '%s/menu-cache-%s.sh' "${cache_dir}" "${cache_key}"
+}
+
+_alias_menu_cache_emit_global_declare() {
+  local var_name="$1"
+  local decl=""
+
+  decl="$(declare -p "${var_name}" 2>/dev/null || true)"
+  [ -n "${decl}" ] || return 1
+  decl="${decl/declare -A /declare -gA }"
+  decl="${decl/declare -a /declare -ga }"
+  decl="${decl/declare -- /declare -g }"
+  printf '%s\n' "${decl}"
+}
+
+_alias_menu_cache_try_load() {
+  local cache_file=""
+
+  _alias_menu_cache_enabled || return 1
+  [ "${BASH_ALIAS_MENU_DISK_CACHE_TRIED}" -eq 0 ] || return 1
+  BASH_ALIAS_MENU_DISK_CACHE_TRIED=1
+
+  cache_file="$(_alias_menu_cache_file)" || return 1
+  [ -f "${cache_file}" ] || return 1
+
+  # shellcheck disable=SC1090
+  source "${cache_file}" || return 1
+  if [ "${BASH_ALIAS_RUNTIME_CACHE_READY}" -eq 1 ] && [ "${BASH_ALIAS_MENU_CACHE_READY}" -eq 1 ]; then
+    return 0
+  fi
+  return 1
+}
+
+_alias_menu_cache_save() {
+  local cache_dir=""
+  local cache_file=""
+  local tmp_file=""
+
+  _alias_menu_cache_enabled || return 0
+
+  cache_dir="$(_alias_menu_cache_dir)"
+  cache_file="$(_alias_menu_cache_file)" || return 0
+  tmp_file="${cache_file}.tmp.$$"
+
+  mkdir -p "${cache_dir}" 2>/dev/null || return 0
+
+  {
+    printf '# shellcheck shell=bash\n'
+    printf '# generated automatically by alias help cache\n'
+    _alias_menu_cache_emit_global_declare "BASH_ALIAS_RUNTIME_VALUE"
+    _alias_menu_cache_emit_global_declare "BASH_ALIAS_RUNTIME_SORTED_NAMES"
+    _alias_menu_cache_emit_global_declare "BASH_ALIAS_RUNTIME_CATEGORY_NAMES"
+    _alias_menu_cache_emit_global_declare "BASH_ALIAS_MENU_SHORT_DESC"
+    printf 'declare -g BASH_ALIAS_RUNTIME_CACHE_READY=1\n'
+    printf 'declare -g BASH_ALIAS_MENU_CACHE_READY=1\n'
+  } > "${tmp_file}" 2>/dev/null || {
+    rm -f "${tmp_file}" 2>/dev/null || true
+    return 0
+  }
+
+  mv -f "${tmp_file}" "${cache_file}" 2>/dev/null || {
+    rm -f "${tmp_file}" 2>/dev/null || true
+    return 0
+  }
 }
 
 _alias_runtime_cache_build() {
@@ -172,6 +322,10 @@ _alias_menu_cache_build() {
     return 0
   fi
 
+  if _alias_menu_cache_try_load; then
+    return 0
+  fi
+
   _alias_runtime_cache_build || return 1
   _alias_help_load_data || true
 
@@ -183,6 +337,7 @@ _alias_menu_cache_build() {
   done
 
   BASH_ALIAS_MENU_CACHE_READY=1
+  _alias_menu_cache_save
 }
 
 _alias_menu_short_description_for_name() {
