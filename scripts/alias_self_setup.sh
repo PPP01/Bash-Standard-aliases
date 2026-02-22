@@ -180,6 +180,10 @@ _alias_setup_remove_from_file() {
   local target_file="$1"
   local tmp_file=""
   local awk_rc=0
+  local stat_out=""
+  local orig_mode=""
+  local orig_uid=""
+  local orig_gid=""
 
   if [ -z "${target_file}" ] || [ ! -f "${target_file}" ]; then
     echo "Fehler: Datei nicht gefunden: ${target_file}"
@@ -189,6 +193,12 @@ _alias_setup_remove_from_file() {
   if [ ! -w "${target_file}" ]; then
     echo "Fehler: Datei ist nicht schreibbar: ${target_file}"
     return 1
+  fi
+
+  # Preserve ownership and permissions because mktemp creates 0600 files.
+  stat_out="$(stat -c '%a %u %g' "${target_file}" 2>/dev/null || true)"
+  if [ -n "${stat_out}" ]; then
+    read -r orig_mode orig_uid orig_gid <<< "${stat_out}"
   fi
 
   tmp_file="$(mktemp)" || return 1
@@ -219,6 +229,14 @@ _alias_setup_remove_from_file() {
         rm -f "${tmp_file}"
         return 1
       }
+      if [ -n "${orig_mode}" ]; then
+        chmod "${orig_mode}" "${target_file}" || {
+          echo "Warnung: Konnte Dateirechte nicht wiederherstellen: ${target_file}"
+        }
+      fi
+      if [ -n "${orig_uid}" ] && [ -n "${orig_gid}" ]; then
+        chown "${orig_uid}:${orig_gid}" "${target_file}" 2>/dev/null || true
+      fi
       echo "Marker-Block entfernt: ${target_file}"
       ;;
     2)
