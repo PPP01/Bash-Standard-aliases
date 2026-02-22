@@ -292,11 +292,11 @@ _alias_text() {
         categories_invalid) printf 'Ungueltige Eingabe. Menue wird beendet.' ;;
         categories_back) printf 'Alle Kategorien' ;;
         all_categories_title) printf 'Alle Kategorien' ;;
-        all_categories_prompt) printf 'Kategorie wählen (0/left/backspace = Zurueck, q/esc = Ende): ' ;;
-        all_categories_back) printf 'Zurueck zur Hauptauswahl' ;;
-        category_prompt) printf 'Alias wählen (Nummer, 0/left/backspace = Zurueck, q/esc = Ende): ' ;;
+        all_categories_prompt) printf 'Kategorie wählen (0/left/backspace = Zurück, q/esc = Ende): ' ;;
+        all_categories_back) printf 'Zurück zur Hauptauswahl' ;;
+        category_prompt) printf 'Alias wählen (Nummer, 0/left/backspace = Zurück, q/esc = Ende): ' ;;
         category_empty) printf '(keine geladenen Aliase)' ;;
-        category_back) printf 'Zurueck zur Kategorienauswahl' ;;
+        category_back) printf 'Zurück zur Kategorienauswahl' ;;
         table_col_no) printf 'no)' ;;
         table_col_alias) printf 'alias' ;;
         table_col_short) printf 'kurzbeschreibung' ;;
@@ -304,7 +304,7 @@ _alias_text() {
         alias_detail_title) printf 'Alias-Details' ;;
         alias_detail_desc) printf 'Beschreibung' ;;
         alias_detail_cmd) printf 'Befehl' ;;
-        alias_detail_prompt) printf 'Enter = ausfuehren, 0/left/backspace = Zurueck, q/esc = Ende: ' ;;
+        alias_detail_prompt) printf 'Enter = ausfuehren, 0/left/backspace = Zurück, q/esc = Ende: ' ;;
         alias_unknown) printf 'Unbekannter Alias: %s' ;;
         short_internal) printf 'Interner Helfer: %s' ;;
         desc_fallback) printf 'Fuehrt aus: %s' ;;
@@ -444,7 +444,7 @@ _alias_description_for_name() {
         gpl) REPLY='Fuehrt git pull nur als Fast-Forward aus.' ;;
         gp) REPLY='Fuehrt git push auf das konfigurierte Ziel aus.' ;;
         gpf) REPLY='Fuehrt git push mit --force-with-lease aus (sicherer Force-Push).' ;;
-        gr) REPLY='Setzt Aenderungen im Working Tree auf HEAD zurueck.' ;;
+        gr) REPLY='Setzt Aenderungen im Working Tree auf HEAD Zurück.' ;;
         grs) REPLY='Entfernt Dateien aus der Staging-Area.' ;;
         gst) REPLY='Speichert den aktuellen Arbeitsstand in einem Stash.' ;;
         gstp) REPLY='Spielt den letzten Git-Stash wieder ein.' ;;
@@ -560,7 +560,7 @@ _alias_print_category_list() {
 
   echo "" >&2
   echo "$(_alias_text categories_title)" >&2
-  printf ' %2d) %-12s\n' 0 "$(_alias_text categories_back)" >&2
+  printf ' %3d) %-12s\n' 0 "$(_alias_text categories_back)" >&2
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     _alias_category_is_visible "${category}" || continue
@@ -750,7 +750,7 @@ _alias_menu_category() {
     echo ""
     echo "=== ${category} ==="
     if [ "${show_back_entry}" -eq 1 ]; then
-      printf ' %2d) %s\n' 0 "$(_alias_text category_back)"
+      printf ' %3d) %s\n' 0 "$(_alias_text category_back)"
     fi
     printf ' %3s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
 
@@ -836,7 +836,7 @@ _alias_menu_all_categories() {
   while true; do
     echo ""
     echo "=== $(_alias_text all_categories_title) ==="
-    printf ' %2d) %s\n' 0 "$(_alias_text all_categories_back)"
+    printf ' %3d) %s\n' 0 "$(_alias_text all_categories_back)"
 
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
       _alias_category_is_visible "${category}" || continue
