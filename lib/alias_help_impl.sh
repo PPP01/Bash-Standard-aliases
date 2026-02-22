@@ -752,7 +752,7 @@ _alias_menu_category() {
     if [ "${show_back_entry}" -eq 1 ]; then
       printf ' %3d) %s\n' 0 "$(_alias_text category_back)"
     fi
-    printf ' %3s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
+    printf ' %4s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
 
     if [ "${#names[@]}" -eq 0 ]; then
       echo "$(_alias_text category_empty)"
@@ -807,7 +807,7 @@ _alias_show_all_categories() {
     _alias_category_is_visible "${category}" || continue
     echo ""
     echo "=== ${category} ==="
-    printf ' %3s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
+    printf ' %4s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
     found=0
     idx=1
     while IFS= read -r name; do
