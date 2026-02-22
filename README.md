@@ -86,7 +86,23 @@ a _self_setup
 
 Wenn der Parameter ein Alias-Name ist, zeigt `a` direkt die Detailansicht (Beschreibung + Befehl).
 
-### 4.1.3 Farben der Detailansicht
+### 4.1.3 Performance-Cache für `a`
+Der Menü-Cache von `a` wird lazy aufgebaut:
+- Beim ersten Aufruf von `a` wird der Cache berechnet.
+- Danach wird ein userbezogener Disk-Cache genutzt:
+  - `${XDG_CACHE_HOME:-$HOME/.cache}/bash-standard-aliases`
+- Bei neuer Repo-Version wird der Cache automatisch neu aufgebaut.
+  - Versionserkennung über Git-Revision (`HEAD`, bei lokalen Änderungen mit `-dirty`).
+- User-spezifische Dateien fließen ebenfalls in den Cache-Key ein:
+  - `~/.bash_aliases_specific`
+  - `~/.bash_aliases_specific.md`
+
+Deaktivieren (optional):
+```bash
+export BASH_ALIAS_MENU_DISK_CACHE=0
+```
+
+### 4.1.4 Farben der Detailansicht
 Die Labels `Beschreibung` und `Befehl` sind standardmaessig grün.
 Sie koennen über Settings-Layer überschrieben werden:
 
@@ -182,6 +198,22 @@ if [ -f /pfad/zu/bash-standard-aliases/bash_alias_std.sh ]; then
   source /pfad/zu/bash-standard-aliases/bash_alias_std.sh
 fi
 ```
+
+### 7.1 Optionales Loader-Profiling
+Für die Analyse von Startzeit-Problemen kann der Loader pro Modul Laufzeiten ausgeben:
+
+```bash
+BASH_ALIAS_PROFILE=1 source /pfad/zu/bash-standard-aliases/bash_alias_std.sh
+```
+
+Optionale Filterung:
+```bash
+BASH_ALIAS_PROFILE=1 BASH_ALIAS_PROFILE_MIN_MS=20 source /pfad/zu/bash-standard-aliases/bash_alias_std.sh
+```
+
+- `BASH_ALIAS_PROFILE=1`: Profiling aktivieren
+- `BASH_ALIAS_PROFILE_MIN_MS=<n>`: nur Module mit mindestens `<n>` ms anzeigen
+- Ausgabe erfolgt auf `stderr` und enthält zusätzlich eine Gesamtzeit
 
 ## 8. Zielstruktur
 - `bash_alias_std.sh`: Loader (Layer-Logik + Kategorie-Mapping zur Laufzeit)

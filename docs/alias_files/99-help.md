@@ -16,6 +16,17 @@ Hilfsfunktionen für Alias-Listen.
     - `escape`, `q`: Menü beenden
 - Completion für `a`: Kategorie-Namen werden per Tab angeboten.
 
+## Performance
+- `a` baut seinen Menü-Cache beim ersten Aufruf auf (lazy).
+- Danach wird ein userbezogener Disk-Cache verwendet:
+  - `${XDG_CACHE_HOME:-$HOME/.cache}/bash-standard-aliases`
+- Der Cache wird automatisch invalidiert, wenn sich die Repo-Version ändert.
+- Auch user-spezifische Dateien werden berücksichtigt:
+  - `~/.bash_aliases_specific`
+  - `~/.bash_aliases_specific.md`
+- Optional deaktivieren:
+  - `BASH_ALIAS_MENU_DISK_CACHE=0`
+
 ## Lokalisierbare Texte
 - Alias-Texte für Tabelle/Details werden pro Kategorie aus `docs/alias_files/[0-9][0-9]-*.md` geladen.
 - Zusätzlich werden eigene Hilfetexte aus folgenden Dateien geladen, falls vorhanden:
