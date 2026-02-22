@@ -4,6 +4,8 @@
 alias _alias_reload='alias_repo_reload'
 
 declare -g BASH_ALIAS_OVERRIDES_EDIT_IMPL_LOADED=0
+# shellcheck disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/alias_i18n.sh"
 
 _alias_overrides_repo_dir() {
   if [ -n "${BASH_ALIAS_REPO_DIR:-}" ]; then
@@ -25,7 +27,7 @@ _alias_overrides_load_edit_impl() {
   impl_path="${repo_dir}/lib/alias_overrides_edit_impl.sh"
 
   if [ ! -f "${impl_path}" ]; then
-    echo "Fehler: Overrides-Implementierung nicht gefunden: ${impl_path}" >&2
+    printf '%s\n' "$(_alias_i18n_pick "Fehler: Overrides-Implementierung nicht gefunden: ${impl_path}" "Error: Overrides implementation not found: ${impl_path}")" >&2
     return 1
   fi
 
@@ -43,7 +45,7 @@ alias_self_edit() {
   after="$(declare -f alias_self_edit 2>/dev/null || true)"
 
   if [ -z "${after}" ] || [ "${before}" = "${after}" ]; then
-    echo "Fehler: alias_self_edit konnte nicht geladen werden." >&2
+    printf '%s\n' "$(_alias_i18n_pick "Fehler: alias_self_edit konnte nicht geladen werden." "Error: Failed to load alias_self_edit.")" >&2
     return 1
   fi
 

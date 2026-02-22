@@ -18,6 +18,8 @@ _alias_settings_file_user="${HOME}/.config/bash-standard-aliases/settings.conf"
 _alias_categories_file="${_alias_base_dir}/alias_categories.sh"
 # Von Modulen/Funktionen nutzbar, um den Repo-Ordner sicher zu finden.
 BASH_ALIAS_REPO_DIR="${_alias_base_dir}"
+# shellcheck disable=SC1090
+source "${_alias_base_dir}/lib/alias_i18n.sh"
 
 if [ -f "${_alias_categories_file}" ]; then
   # shellcheck disable=SC1090
@@ -314,7 +316,7 @@ if [ "${#_alias_config_layers[@]}" -gt 0 ]; then
       _aliases_before="$(_alias_collect_alias_names)"
       # shellcheck disable=SC1090
       if ! source "${_full_path}"; then
-        echo "Fehler: Modul konnte nicht geladen werden: ${_entry}" >&2
+        printf '%s\n' "$(_alias_i18n_pick "Fehler: Modul konnte nicht geladen werden: ${_entry}" "Error: Failed to load module: ${_entry}")" >&2
         return 1 2>/dev/null || exit 1
       fi
       _aliases_after="$(_alias_collect_alias_names)"
@@ -332,7 +334,7 @@ if [ "${#_alias_config_layers[@]}" -gt 0 ]; then
     unset _full_path _category _aliases_before _aliases_after
   done
 else
-  echo "Hinweis: Konfigurationsdatei fehlt: ${_alias_config_file_default} (Basis), optional ${_alias_config_file_local}, ${_alias_config_file_user}" >&2
+  printf '%s\n' "$(_alias_i18n_pick "Hinweis: Konfigurationsdatei fehlt: ${_alias_config_file_default} (Basis), optional ${_alias_config_file_local}, ${_alias_config_file_user}" "Note: Configuration file missing: ${_alias_config_file_default} (base), optional ${_alias_config_file_local}, ${_alias_config_file_user}")" >&2
 fi
 
 _alias_sort_categories

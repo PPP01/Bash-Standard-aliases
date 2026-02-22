@@ -3,6 +3,11 @@
 
 set -u
 
+_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_repo_dir="$(cd "${_script_dir}/.." && pwd)"
+# shellcheck disable=SC1090
+source "${_repo_dir}/lib/alias_i18n.sh"
+
 _user_settings_dir="${HOME}/.config/bash-standard-aliases"
 _user_settings_file="${_user_settings_dir}/settings.conf"
 _scheme_block_start="# >>> _alias_setup_scheme managed >>>"
@@ -10,29 +15,55 @@ _scheme_block_end="# <<< _alias_setup_scheme managed <<<"
 _override_block_start="# >>> _alias_setup_scheme user-overrides >>>"
 _override_block_end="# <<< _alias_setup_scheme user-overrides <<<"
 
+_text() {
+  local key="$1"
+  case "${key}" in
+    err_mkdir) _alias_i18n_pick "Fehler: Konnte Verzeichnis nicht erstellen: %s" "Error: Could not create directory: %s" ;;
+    err_not_writable) _alias_i18n_pick "Fehler: Datei ist nicht schreibbar: %s" "Error: File is not writable: %s" ;;
+    err_create_file) _alias_i18n_pick "Fehler: Konnte Datei nicht erzeugen: %s" "Error: Could not create file: %s" ;;
+    header_delta) _alias_i18n_pick "# User-Delta-Settings für bash-standard-aliases" "# User delta settings for bash-standard-aliases" ;;
+    header_delta_hint) _alias_i18n_pick "# Nur Abweichungen von settings.conf / settings.local.conf" "# Store only deviations from settings.conf / settings.local.conf" ;;
+    err_unknown_scheme) _alias_i18n_pick "Fehler: Unbekanntes Schema '%s'. Erlaubt: dark, bright" "Error: Unknown scheme '%s'. Allowed: dark, bright" ;;
+    managed_comment) _alias_i18n_pick "# Von _alias_setup_scheme verwaltet." "# Managed by _alias_setup_scheme." ;;
+    override_comment_1) _alias_i18n_pick "# Eigene Farb-Overrides. Diese Werte setzen sich immer gegen das Schema durch." "# Custom color overrides. These values always override the selected scheme." ;;
+    override_comment_2) _alias_i18n_pick "# Zum Aktivieren '#' entfernen und Wert anpassen." "# To activate, remove '#' and adjust the value." ;;
+    menu_title) _alias_i18n_pick "Farbschema auswählen (Speicherort: %s)" "Choose color scheme (target: %s)" ;;
+    menu_current) _alias_i18n_pick "Aktuell: %s" "Current: %s" ;;
+    menu_dark) _alias_i18n_pick "  1) dark   (für dunklen Terminal-Hintergrund)" "  1) dark   (for dark terminal backgrounds)" ;;
+    menu_bright) _alias_i18n_pick "  2) bright (für hellen Terminal-Hintergrund)" "  2) bright (for bright terminal backgrounds)" ;;
+    menu_quit) _alias_i18n_pick "  q) abbrechen" "  q) cancel" ;;
+    menu_prompt) _alias_i18n_pick "Auswahl [1/2/q]: " "Choice [1/2/q]: " ;;
+    canceled) _alias_i18n_pick "Abgebrochen." "Canceled." ;;
+    invalid_choice) _alias_i18n_pick "Ungültige Auswahl." "Invalid choice." ;;
+    saved) _alias_i18n_pick "Farbschema '%s' gespeichert in: %s" "Color scheme '%s' saved to: %s" ;;
+    reload_hint) _alias_i18n_pick "Für die aktuelle Shell: _alias_reload" "For the current shell: _alias_reload" ;;
+    *) printf '%s' "${key}" ;;
+  esac
+}
+
 _escape_regex() {
   printf '%s' "$1" | sed -E 's/[][(){}.^$*+?|\\/]/\\&/g'
 }
 
 _ensure_user_settings_file() {
   mkdir -p "${_user_settings_dir}" || {
-    echo "Fehler: Konnte Verzeichnis nicht erstellen: ${_user_settings_dir}"
+    printf "$(_text err_mkdir)\n" "${_user_settings_dir}"
     exit 1
   }
 
   if [ -f "${_user_settings_file}" ]; then
     if [ ! -w "${_user_settings_file}" ]; then
-      echo "Fehler: Datei ist nicht schreibbar: ${_user_settings_file}"
+      printf "$(_text err_not_writable)\n" "${_user_settings_file}"
       exit 1
     fi
     return 0
   fi
 
   {
-    echo "# User-Delta-Settings für bash-standard-aliases"
-    echo "# Nur Abweichungen von settings.conf / settings.local.conf"
+    echo "$(_text header_delta)"
+    echo "$(_text header_delta_hint)"
   } > "${_user_settings_file}" || {
-    echo "Fehler: Konnte Datei nicht erzeugen: ${_user_settings_file}"
+    printf "$(_text err_create_file)\n" "${_user_settings_file}"
     exit 1
   }
 }
@@ -73,7 +104,7 @@ _write_scheme_block() {
       menu_setup="'\\033[0;90m'"
       ;;
     *)
-      echo "Fehler: Unbekanntes Schema '${scheme}'. Erlaubt: dark, bright"
+      printf "$(_text err_unknown_scheme)\n" "${scheme}"
       exit 1
       ;;
   esac
@@ -83,7 +114,7 @@ _write_scheme_block() {
   {
     echo ""
     echo "${_scheme_block_start}"
-    echo "# Von _alias_setup_scheme verwaltet."
+    echo "$(_text managed_comment)"
     echo "BASH_ALIAS_COLOR_SCHEME='${scheme}'"
     echo "BASH_ALIAS_HELP_COLOR_DETAIL_LABEL=${detail_label}"
     echo "BASH_ALIAS_HELP_COLOR_MENU_TITLE=${menu_title}"
@@ -111,8 +142,8 @@ _ensure_override_block() {
   {
     echo ""
     echo "${_override_block_start}"
-    echo "# Eigene Farb-Overrides. Diese Werte setzen sich immer gegen das Schema durch."
-    echo "# Zum Aktivieren '#' entfernen und Wert anpassen."
+    echo "$(_text override_comment_1)"
+    echo "$(_text override_comment_2)"
     echo "# BASH_ALIAS_HELP_COLOR_DETAIL_LABEL='\\033[1;32m'"
     echo "# BASH_ALIAS_HELP_COLOR_MENU_TITLE='\\033[1;36m'"
     echo "# BASH_ALIAS_HELP_COLOR_MENU_META='\\033[0;36m'"
@@ -129,11 +160,11 @@ _ensure_override_block() {
 _print_menu() {
   local current_scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
   echo ""
-  echo "Farbschema auswählen (Speicherort: ${_user_settings_file})"
-  echo "Aktuell: ${current_scheme}"
-  echo "  1) dark   (für dunklen Terminal-Hintergrund)"
-  echo "  2) bright (für hellen Terminal-Hintergrund)"
-  echo "  q) abbrechen"
+  printf "$(_text menu_title)\n" "${_user_settings_file}"
+  printf "$(_text menu_current)\n" "${current_scheme}"
+  echo "$(_text menu_dark)"
+  echo "$(_text menu_bright)"
+  echo "$(_text menu_quit)"
 }
 
 _select_scheme_interactive() {
@@ -141,12 +172,12 @@ _select_scheme_interactive() {
 
   while true; do
     _print_menu
-    read -r -p "Auswahl [1/2/q]: " answer
+    read -r -p "$(_text menu_prompt)" answer
     case "${answer}" in
       1|dark|DARK) REPLY="dark"; return 0 ;;
       2|bright|BRIGHT|light|LIGHT) REPLY="bright"; return 0 ;;
-      q|Q|quit|QUIT|exit|EXIT) echo "Abgebrochen."; exit 0 ;;
-      *) echo "Ungültige Auswahl." ;;
+      q|Q|quit|QUIT|exit|EXIT) echo "$(_text canceled)"; exit 0 ;;
+      *) echo "$(_text invalid_choice)" ;;
     esac
   done
 }
@@ -164,8 +195,8 @@ main() {
   _write_scheme_block "${scheme}"
   _ensure_override_block
 
-  echo "Farbschema '${scheme}' gespeichert in: ${_user_settings_file}"
-  echo "Für die aktuelle Shell: _alias_reload"
+  printf "$(_text saved)\n" "${scheme}" "${_user_settings_file}"
+  echo "$(_text reload_hint)"
 }
 
 main "$@"

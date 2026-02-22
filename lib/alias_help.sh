@@ -1,6 +1,8 @@
 # shellcheck shell=bash
 
 declare -g BASH_ALIAS_HELP_IMPL_LOADED=0
+# shellcheck disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/alias_i18n.sh"
 
 _alias_help_repo_dir() {
   if [ -n "${BASH_ALIAS_REPO_DIR:-}" ]; then
@@ -22,7 +24,7 @@ _alias_help_load_impl() {
   impl_path="${repo_dir}/lib/alias_help_impl.sh"
 
   if [ ! -f "${impl_path}" ]; then
-    echo "Fehler: Hilfe-Implementierung nicht gefunden: ${impl_path}" >&2
+    printf '%s\n' "$(_alias_i18n_pick "Fehler: Hilfe-Implementierung nicht gefunden: ${impl_path}" "Error: Help implementation not found: ${impl_path}")" >&2
     return 1
   fi
 
@@ -42,7 +44,7 @@ _alias_help_dispatch() {
   after="$(declare -f "${fn_name}" 2>/dev/null || true)"
 
   if [ -z "${after}" ] || [ "${before}" = "${after}" ]; then
-    echo "Fehler: Hilfe-Funktion '${fn_name}' konnte nicht geladen werden." >&2
+    printf '%s\n' "$(_alias_i18n_pick "Fehler: Hilfe-Funktion '${fn_name}' konnte nicht geladen werden." "Error: Failed to load help function '${fn_name}'.")" >&2
     return 1
   fi
 

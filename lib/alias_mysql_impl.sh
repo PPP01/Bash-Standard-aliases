@@ -1,5 +1,8 @@
 # shellcheck shell=bash
 
+# shellcheck disable=SC1091
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/alias_i18n.sh"
+
 mysql_databases() {
   mysql -e "SHOW DATABASES;"
 }
@@ -10,13 +13,13 @@ mysql_dump() {
   local script_path=""
 
   if [ -z "${db}" ]; then
-    echo "Usage: mysql_dump <database> [output.sql]"
+    echo "$(_alias_i18n_pick "Nutzung: mysql_dump <datenbank> [ausgabe.sql]" "Usage: mysql_dump <database> [output.sql]")"
     return 1
   fi
 
   script_path="${BASH_ALIAS_REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}/scripts/mysql_dump.sh"
   if [ ! -f "${script_path}" ]; then
-    echo "Fehler: Script nicht gefunden: ${script_path}"
+    printf '%s\n' "$(_alias_i18n_pick "Fehler: Script nicht gefunden: ${script_path}" "Error: Script not found: ${script_path}")"
     return 1
   fi
 
@@ -29,13 +32,13 @@ mysql_dump_gz() {
   local script_path=""
 
   if [ -z "${db}" ]; then
-    echo "Usage: mysql_dump_gz <database> [output.sql.gz]"
+    echo "$(_alias_i18n_pick "Nutzung: mysql_dump_gz <datenbank> [ausgabe.sql.gz]" "Usage: mysql_dump_gz <database> [output.sql.gz]")"
     return 1
   fi
 
   script_path="${BASH_ALIAS_REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}/scripts/mysql_dump.sh"
   if [ ! -f "${script_path}" ]; then
-    echo "Fehler: Script nicht gefunden: ${script_path}"
+    printf '%s\n' "$(_alias_i18n_pick "Fehler: Script nicht gefunden: ${script_path}" "Error: Script not found: ${script_path}")"
     return 1
   fi
 

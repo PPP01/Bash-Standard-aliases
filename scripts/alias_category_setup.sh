@@ -5,6 +5,8 @@ set -u
 
 _script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _repo_dir="$(cd "${_script_dir}/.." && pwd)"
+# shellcheck disable=SC1090
+source "${_repo_dir}/lib/alias_i18n.sh"
 _default_conf="${_repo_dir}/alias_files.conf"
 _local_conf="${_repo_dir}/alias_files.local.conf"
 _user_conf_dir="${HOME}/.config/bash-standard-aliases"
@@ -16,8 +18,42 @@ _target_kind=""
 
 declare -A _module_visible_cache=()
 
+_text() {
+  local key="$1"
+  case "${key}" in
+    err_default_conf_missing) _alias_i18n_pick "Fehler: alias_files.conf nicht gefunden: %s" "Error: alias_files.conf not found: %s" ;;
+    root_target_title) _alias_i18n_pick "Root-Ausführung: Wo sollen Änderungen gespeichert werden?" "Running as root: where should changes be stored?" ;;
+    root_target_global) _alias_i18n_pick "  1) global (%s)" "  1) global (%s)" ;;
+    root_target_user) _alias_i18n_pick "  2) nur für root (%s)" "  2) root-only (%s)" ;;
+    root_target_cancel) _alias_i18n_pick "  3) abbrechen" "  3) cancel" ;;
+    root_target_prompt) _alias_i18n_pick "Auswahl [1/2/3]: " "Choice [1/2/3]: " ;;
+    canceled) _alias_i18n_pick "Abgebrochen." "Canceled." ;;
+    err_mkdir) _alias_i18n_pick "Fehler: Konnte Verzeichnis nicht erstellen: %s" "Error: Could not create directory: %s" ;;
+    err_not_writable) _alias_i18n_pick "Fehler: Datei ist nicht schreibbar: %s" "Error: File is not writable: %s" ;;
+    err_create_config) _alias_i18n_pick "Fehler: Konnte Konfiguration nicht erzeugen: %s" "Error: Could not create configuration: %s" ;;
+    cfg_header_1) _alias_i18n_pick "# Delta-Konfiguration für bash-standard-aliases" "# Delta configuration for bash-standard-aliases" ;;
+    cfg_header_2) _alias_i18n_pick "# Nur Abweichungen von alias_files.conf" "# Store only deviations from alias_files.conf" ;;
+    cfg_header_user_base) _alias_i18n_pick "# Basis: alias_files.conf + alias_files.local.conf (falls vorhanden)" "# Base: alias_files.conf + alias_files.local.conf (if present)" ;;
+    cfg_header_global_base) _alias_i18n_pick "# Basis: alias_files.conf" "# Base: alias_files.conf" ;;
+    cfg_header_enable) _alias_i18n_pick "# Aktivieren: modulname.sh" "# Enable: module_name.sh" ;;
+    cfg_header_disable) _alias_i18n_pick "# Deaktivieren: # modulname.sh" "# Disable: # module_name.sh" ;;
+    cfg_created) _alias_i18n_pick "Lokale Konfiguration erzeugt: %s" "Local configuration created: %s" ;;
+    category_on) _alias_i18n_pick "Kategorie '%s' eingeschaltet." "Category '%s' enabled." ;;
+    category_off) _alias_i18n_pick "Kategorie '%s' ausgeschaltet." "Category '%s' disabled." ;;
+    categories_in_file) _alias_i18n_pick "Kategorien in %s:" "Categories in %s:" ;;
+    no_categories_defined) _alias_i18n_pick "Keine Kategorien definiert." "No categories defined." ;;
+    no_editable_categories) _alias_i18n_pick " (keine bearbeitbaren Kategorien verfügbar)" " (no editable categories available)" ;;
+    quit_line) _alias_i18n_pick "  q) Ende" "  q) quit" ;;
+    toggle_prompt) _alias_i18n_pick "Kategorie-Nummer zum Umschalten (q zum Beenden): " "Category number to toggle (q to quit): " ;;
+    enter_valid_number) _alias_i18n_pick "Bitte eine gültige Nummer eingeben." "Please enter a valid number." ;;
+    invalid_number) _alias_i18n_pick "Nummer ungültig." "Invalid number." ;;
+    done_hint) _alias_i18n_pick "Fertig. Für die aktuelle Shell ggf. '_alias_reload' oder 'source ~/.bashrc' ausführen." "Done. For the current shell, run '_alias_reload' or 'source ~/.bashrc' if needed." ;;
+    *) printf '%s' "${key}" ;;
+  esac
+}
+
 if [ ! -f "${_default_conf}" ]; then
-  echo "Fehler: alias_files.conf nicht gefunden: ${_default_conf}"
+  printf "$(_text err_default_conf_missing)\n" "${_default_conf}"
   exit 1
 fi
 
@@ -40,11 +76,11 @@ _select_target_conf() {
   fi
 
   echo ""
-  echo "Root-Ausführung: Wo sollen Änderungen gespeichert werden?"
-  echo "  1) global (${_local_conf})"
-  echo "  2) nur für root (${_user_conf})"
-  echo "  3) abbrechen"
-  read -r -p "Auswahl [1/2/3]: " answer
+  echo "$(_text root_target_title)"
+  printf "$(_text root_target_global)\n" "${_local_conf}"
+  printf "$(_text root_target_user)\n" "${_user_conf}"
+  echo "$(_text root_target_cancel)"
+  read -r -p "$(_text root_target_prompt)" answer
 
   case "${answer}" in
     1)
@@ -56,7 +92,7 @@ _select_target_conf() {
       _target_conf="${_user_conf}"
       ;;
     *)
-      echo "Abgebrochen."
+      echo "$(_text canceled)"
       exit 1
       ;;
   esac
@@ -65,35 +101,35 @@ _select_target_conf() {
 _prepare_target_conf() {
   if [ "${_target_kind}" = "user" ]; then
     mkdir -p "${_user_conf_dir}" || {
-      echo "Fehler: Konnte Verzeichnis nicht erstellen: ${_user_conf_dir}"
+      printf "$(_text err_mkdir)\n" "${_user_conf_dir}"
       exit 1
     }
   fi
 
   if [ -f "${_target_conf}" ]; then
     if [ ! -w "${_target_conf}" ]; then
-      echo "Fehler: Datei ist nicht schreibbar: ${_target_conf}"
+      printf "$(_text err_not_writable)\n" "${_target_conf}"
       exit 1
     fi
     return 0
   fi
 
   {
-    echo "# Delta-Konfiguration für bash-standard-aliases"
-    echo "# Nur Abweichungen von alias_files.conf"
+    echo "$(_text cfg_header_1)"
+    echo "$(_text cfg_header_2)"
     if [ "${_target_kind}" = "user" ]; then
-      echo "# Basis: alias_files.conf + alias_files.local.conf (falls vorhanden)"
+      echo "$(_text cfg_header_user_base)"
     else
-      echo "# Basis: alias_files.conf"
+      echo "$(_text cfg_header_global_base)"
     fi
-    echo "# Aktivieren: modulname.sh"
-    echo "# Deaktivieren: # modulname.sh"
+    echo "$(_text cfg_header_enable)"
+    echo "$(_text cfg_header_disable)"
   } > "${_target_conf}" || {
-    echo "Fehler: Konnte Konfiguration nicht erzeugen: ${_target_conf}"
+    printf "$(_text err_create_config)\n" "${_target_conf}"
     exit 1
   }
 
-  echo "Lokale Konfiguration erzeugt: ${_target_conf}"
+  printf "$(_text cfg_created)\n" "${_target_conf}"
 }
 
 _module_state_in_file() {
@@ -298,9 +334,9 @@ _toggle_category() {
   done
 
   if [ "${desired_state}" = "on" ]; then
-    echo "Kategorie '${category}' eingeschaltet."
+    printf "$(_text category_on)\n" "${category}"
   else
-    echo "Kategorie '${category}' ausgeschaltet."
+    printf "$(_text category_off)\n" "${category}"
   fi
 }
 
@@ -311,7 +347,7 @@ _list_categories() {
   local shown=0
 
   echo ""
-  echo "Kategorien in ${_target_conf}:"
+  printf "$(_text categories_in_file)\n" "${_target_conf}"
 
   if declare -F alias_categories_list >/dev/null 2>&1; then
     while IFS= read -r category; do
@@ -323,14 +359,14 @@ _list_categories() {
       idx=$((idx + 1))
     done < <(alias_categories_list)
   else
-    echo "Keine Kategorien definiert."
+    echo "$(_text no_categories_defined)"
   fi
 
   if [ "${shown}" -eq 0 ]; then
-    echo " (keine bearbeitbaren Kategorien verfügbar)"
+    echo "$(_text no_editable_categories)"
   fi
 
-  echo "  q) Ende"
+  echo "$(_text quit_line)"
 }
 
 _resolve_category_by_index() {
@@ -358,18 +394,18 @@ _prepare_target_conf
 
 while true; do
   _list_categories
-  read -r -p "Kategorie-Nummer zum Umschalten (q zum Beenden): " _choice
+  read -r -p "$(_text toggle_prompt)" _choice
 
   case "${_choice}" in
     q|Q|quit|QUIT|exit|EXIT)
       break
       ;;
     ''|*[!0-9]*)
-      echo "Bitte eine gültige Nummer eingeben."
+      echo "$(_text enter_valid_number)"
       ;;
     *)
       _category="$(_resolve_category_by_index "${_choice}")" || {
-        echo "Nummer ungültig."
+        echo "$(_text invalid_number)"
         continue
       }
       _toggle_category "${_category}"
@@ -378,4 +414,4 @@ while true; do
 
 done
 
-echo "Fertig. Für die aktuelle Shell ggf. '_alias_reload' oder 'source ~/.bashrc' ausführen."
+echo "$(_text done_hint)"

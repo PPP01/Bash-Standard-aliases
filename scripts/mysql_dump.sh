@@ -3,6 +3,11 @@
 
 set -euo pipefail
 
+_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_repo_dir="$(cd "${_script_dir}/.." && pwd)"
+# shellcheck disable=SC1090
+source "${_repo_dir}/lib/alias_i18n.sh"
+
 use_gzip=0
 if [ "${1:-}" = "--gzip" ]; then
   use_gzip=1
@@ -13,7 +18,7 @@ db="${1:-}"
 out="${2:-}"
 
 if [ -z "${db}" ]; then
-  echo "Usage: mysql_dump.sh [--gzip] <database> [output]" >&2
+  echo "$(_alias_i18n_pick "Nutzung: mysql_dump.sh [--gzip] <datenbank> [ausgabe]" "Usage: mysql_dump.sh [--gzip] <database> [output]")" >&2
   exit 1
 fi
 
