@@ -16,18 +16,14 @@ Typische Beispiele:
 git clone https://github.com/PPP01/Bash-Standard-aliases bash-standard-aliases
 ```
 
-### 2.1 Erstinitialisierung (`_self_init`)
+### 2.1 Erstinitialisierung (`_alias_init`)
 Nach dem Klonen kannst du die Initialisierung direkt starten:
 
 ```bash
-_self_init
+_alias_init
 ```
 
 Der Befehl richtet die Einbindung in der Shell-Startdatei ein (Marker-Block) und führt danach ins Setup.
-
-Hinweis:
-- In der aktuellen Alias-Namenskonvention heißt der Befehl `_alias_init`.
-- Falls `_self_init` bei dir nicht verfügbar ist, nutze `_alias_init`.
 
 ## 3. Initiale Konfiguration per `_self_setup`
 Nach dem ersten Laden des Repos startet `_self_setup` den Setup-Assistenten.
