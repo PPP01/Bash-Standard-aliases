@@ -782,6 +782,13 @@ _alias_category_color_for_menu() {
         printf '\033[0;90m'
         return 0
       fi
+    elif [ "${scheme}" = "dark" ]; then
+      # Rueckwaertskompatibel: frueherer dark-Default (0;37) wirkt oft wie
+      # die normale Textfarbe. Deshalb auf dezentes Grau normalisieren.
+      if [ "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}" = '\033[0;37m' ]; then
+        printf '\033[0;90m'
+        return 0
+      fi
     fi
     printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}"
     return 0

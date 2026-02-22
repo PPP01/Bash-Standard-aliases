@@ -63,7 +63,7 @@ _write_scheme_block() {
       menu_title="'\\033[1;36m'"
       menu_meta="'\\033[0;36m'"
       menu_header="'\\033[1;96m'"
-      menu_setup="'\\033[0;37m'"
+      menu_setup="'\\033[0;90m'"
       ;;
     bright)
       detail_label="'\\033[0;34m'"
