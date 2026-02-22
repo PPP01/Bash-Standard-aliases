@@ -21,7 +21,7 @@ if [ "${EUID}" -eq 0 ]; then
       return 0
     fi
 
-    echo "Upgrades verfuegbar (${upg_count}):"
+    echo "Upgrades verfügbar (${upg_count}):"
     apt list --upgradable
 
     sudo apt upgrade "${apt_yes[@]}" || return 1

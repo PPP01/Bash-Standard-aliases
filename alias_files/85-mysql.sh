@@ -7,7 +7,7 @@ alias my='mysql'
 alias mya='mysqladmin'
 alias myping='mysqladmin ping'
 
-# Komfort-Aliase fuer Dump-Funktionen.
+# Komfort-Aliase für Dump-Funktionen.
 alias mydump='mysql_dump'
 alias mydumpgz='mysql_dump_gz'
 

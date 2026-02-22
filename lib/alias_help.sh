@@ -57,7 +57,7 @@ a() {
   _alias_help_dispatch "a" "$@"
 }
 
-alias_self_test_reload() {
+alias_test_reload() {
   _alias_help_dispatch "alias_self_test_reload" "$@"
 }
 
@@ -74,7 +74,7 @@ _alias_help_category_completion_lazy() {
 
 complete -F _alias_help_category_completion_lazy a
 if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -w "${BASH_ALIAS_REPO_DIR}" ]; then
-  alias _self_test_reload='alias_self_test_reload'
+  alias _alias_test_reload='alias_test_reload'
 else
-  unalias _self_test_reload 2>/dev/null || true
+  unalias _alias_test_reload 2>/dev/null || true
 fi

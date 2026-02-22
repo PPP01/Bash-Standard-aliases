@@ -6,7 +6,7 @@ Datei- und Speicher-Helfer.
 - `h`: Shell-History anzeigen
 - `dfh`: Dateisystem-Auslastung in human-readable Form
 - `duh`: Grössen je Verzeichnis-Ebene
-- `freeh`: RAM/SWAP Uebersicht
+- `freeh`: RAM/SWAP Übersicht
 
 ## Alias-Hilfe (de)
 | alias | kurz | beschreibung | befehl |

@@ -12,7 +12,7 @@ Optionales MySQL-Modul für CLI- und Backup-Aufgaben.
 
 ## Hinweise
 - Das Modul ist in `alias_files.conf` standardmässig auskommentiert.
-- Zugangsdaten sollten ueber `~/.my.cnf` oder passende Umgebungsparameter erfolgen.
+- Zugangsdaten sollten über `~/.my.cnf` oder passende Umgebungsparameter erfolgen.
 
 ## Alias-Hilfe (de)
 | alias | kurz | beschreibung | befehl |

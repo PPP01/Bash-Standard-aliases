@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # Lokale Overrides
 
-alias _self_reload='alias_repo_reload'
+alias _alias_reload='alias_repo_reload'
 
 declare -g BASH_ALIAS_OVERRIDES_EDIT_IMPL_LOADED=0
 
@@ -50,7 +50,7 @@ alias_self_edit() {
   alias_self_edit "$@"
 }
 
-alias _self_edit='alias_self_edit'
+alias _alias_edit='alias_self_edit'
 
 _alias_mark_own_category_from_file() {
   local file_path="$1"

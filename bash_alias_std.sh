@@ -180,7 +180,7 @@ _alias_register_aliases_for_category() {
       fi
       mapped_category="${category}"
       case "${alias_name}" in
-        _self_*)
+        _alias_*)
           mapped_category="setup"
           _alias_add_category_if_missing "${mapped_category}"
           BASH_ALIAS_CATEGORY_ENABLED["${mapped_category}"]=1

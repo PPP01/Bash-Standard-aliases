@@ -40,9 +40,9 @@ _select_target_conf() {
   fi
 
   echo ""
-  echo "Root-Ausfuehrung: Wo sollen Aenderungen gespeichert werden?"
+  echo "Root-Ausführung: Wo sollen Änderungen gespeichert werden?"
   echo "  1) global (${_local_conf})"
-  echo "  2) nur fuer root (${_user_conf})"
+  echo "  2) nur für root (${_user_conf})"
   echo "  3) abbrechen"
   read -r -p "Auswahl [1/2/3]: " answer
 
@@ -79,7 +79,7 @@ _prepare_target_conf() {
   fi
 
   {
-    echo "# Delta-Konfiguration fuer bash-standard-aliases"
+    echo "# Delta-Konfiguration für bash-standard-aliases"
     echo "# Nur Abweichungen von alias_files.conf"
     if [ "${_target_kind}" = "user" ]; then
       echo "# Basis: alias_files.conf + alias_files.local.conf (falls vorhanden)"
@@ -327,7 +327,7 @@ _list_categories() {
   fi
 
   if [ "${shown}" -eq 0 ]; then
-    echo " (keine bearbeitbaren Kategorien verfuegbar)"
+    echo " (keine bearbeitbaren Kategorien verfügbar)"
   fi
 
   echo "  q) Ende"
@@ -365,11 +365,11 @@ while true; do
       break
       ;;
     ''|*[!0-9]*)
-      echo "Bitte eine gueltige Nummer eingeben."
+      echo "Bitte eine gültige Nummer eingeben."
       ;;
     *)
       _category="$(_resolve_category_by_index "${_choice}")" || {
-        echo "Nummer ungueltig."
+        echo "Nummer ungültig."
         continue
       }
       _toggle_category "${_category}"
@@ -378,4 +378,4 @@ while true; do
 
 done
 
-echo "Fertig. Fuer die aktuelle Shell ggf. '_self_reload' oder 'source ~/.bashrc' ausfuehren."
+echo "Fertig. Für die aktuelle Shell ggf. '_alias_reload' oder 'source ~/.bashrc' ausführen."

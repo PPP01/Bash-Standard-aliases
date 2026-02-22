@@ -21,7 +21,7 @@ if [ "${EUID}" -eq 0 ]; then
   journal_log_minutes() {
     local minutes="${1:-10}"
     if ! [[ "${minutes}" =~ ^[0-9]+$ ]]; then
-      echo "Fehler: Bitte eine positive Zahl fuer Minuten angeben."
+      echo "Fehler: Bitte eine positive Zahl für Minuten angeben."
       return 1
     fi
     sudo journalctl --since "$(date --date="${minutes} minutes ago" '+%Y-%m-%d %H:%M:%S')" --no-pager
@@ -30,7 +30,7 @@ if [ "${EUID}" -eq 0 ]; then
   journal_log_hours() {
     local hours="${1:-1}"
     if ! [[ "${hours}" =~ ^[0-9]+$ ]]; then
-      echo "Fehler: Bitte eine positive Zahl fuer Stunden angeben."
+      echo "Fehler: Bitte eine positive Zahl für Stunden angeben."
       return 1
     fi
     sudo journalctl --since "$(date --date="${hours} hours ago" '+%Y-%m-%d %H:%M:%S')" --no-pager

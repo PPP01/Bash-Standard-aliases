@@ -10,13 +10,13 @@
 # 3) ~/.config/bash-standard-aliases/settings.conf
 
 # Bereich: Color
-# Beispiel-Override (hellgruen)
+# Beispiel-Override (hellgrün)
 # BASH_ALIAS_HELP_COLOR_DETAIL_LABEL='\033[1;32m'
-# Beispiel-Override (gruen fuer Menue-Ueberschriften)
+# Beispiel-Override (grün für Menü-Überschriften)
 # BASH_ALIAS_HELP_COLOR_MENU_TITLE='\033[0;32m'
-# Beispiel-Override (cyan fuer Meta-Zeilen)
+# Beispiel-Override (cyan für Meta-Zeilen)
 # BASH_ALIAS_HELP_COLOR_MENU_META='\033[0;36m'
-# Beispiel-Override (fett cyan fuer Tabellenkopf)
+# Beispiel-Override (fett cyan für Tabellenkopf)
 # BASH_ALIAS_HELP_COLOR_MENU_HEADER='\033[1;36m'
-# Beispiel-Override (grau fuer Kategorie "setup")
+# Beispiel-Override (grau für Kategorie "setup")
 # BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP='\033[0;37m'

@@ -21,7 +21,7 @@ alias_repo_reload() {
 
   if declare -F alias_help_warm_cache >/dev/null 2>&1; then
     if ! alias_help_warm_cache >/dev/null 2>&1; then
-      echo "Hinweis: Menue-Cache konnte beim Reload nicht vorab aufgebaut werden." >&2
+      echo "Hinweis: Menü-Cache konnte beim Reload nicht vorab aufgebaut werden." >&2
     fi
   fi
 }
@@ -53,14 +53,14 @@ alias_repo_update() {
       echo "Update und Reload abgeschlossen."
       ;;
     *)
-      echo "Usage: _self_update [--reload|--restart]"
+      echo "Usage: _alias_update [--reload|--restart]"
       return 2
       ;;
   esac
 }
 
 if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -w "${BASH_ALIAS_REPO_DIR}" ]; then
-  alias _self_update='alias_repo_update'
+  alias _alias_update='alias_repo_update'
 else
-  unalias _self_update 2>/dev/null || true
+  unalias _alias_update 2>/dev/null || true
 fi

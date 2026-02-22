@@ -41,7 +41,7 @@ for _name in "${!_map_first[@]}"; do
   fi
 
   if [ "${BASH_ALIAS_ALIAS_CATEGORY[${_name}]}" != "${_map_first[${_name}]}" ]; then
-    echo "FAIL: Kategorie-Aenderung nach Reload fuer ${_name}: ${_map_first[${_name}]} -> ${BASH_ALIAS_ALIAS_CATEGORY[${_name}]}"
+    echo "FAIL: Kategorie-Änderung nach Reload für ${_name}: ${_map_first[${_name}]} -> ${BASH_ALIAS_ALIAS_CATEGORY[${_name}]}"
     exit 1
   fi
 done

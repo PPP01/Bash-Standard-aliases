@@ -33,7 +33,7 @@ _alias_self_edit_append_help_entry() {
   cmd_text="${alias_cmd//|/\\|}"
 
   if grep -Eq "^[[:space:]]*\\|[[:space:]]*${alias_name}[[:space:]]*\\|" "${help_file}"; then
-    echo "Fehler: Hilfetext fuer '${alias_name}' ist in ${help_file} bereits vorhanden."
+    echo "Fehler: Hilfetext für '${alias_name}' ist in ${help_file} bereits vorhanden."
     echo "Bitte Eintrag dort manuell anpassen."
     return 1
   fi
@@ -58,7 +58,7 @@ _alias_self_edit_resolve_target_file() {
   repo_file="${BASH_ALIAS_REPO_DIR}/.bash_aliases_specific"
 
   echo ""
-  echo "_self_edit: Ziel-Datei wählen"
+  echo "_alias_edit: Ziel-Datei wählen"
   echo "  1) ${home_file} (root-eigen)"
   echo "  2) ${repo_file} (projektweit)"
   printf 'Auswahl [1/2, Enter=1]: '
@@ -68,7 +68,7 @@ _alias_self_edit_resolve_target_file() {
     ""|1) REPLY="${home_file}" ;;
     2) REPLY="${repo_file}" ;;
     *)
-      echo "Ungueltige Auswahl."
+      echo "Ungültige Auswahl."
       return 1
       ;;
   esac
@@ -107,7 +107,7 @@ alias_self_edit() {
   [ -z "${alias_desc}" ] && alias_desc="(ohne Beschreibung)"
 
   while true; do
-    printf 'Befehl fuer %s: ' "${alias_name}"
+    printf 'Befehl für %s: ' "${alias_name}"
     IFS= read -r alias_cmd
     if [ -z "${alias_cmd}" ]; then
       echo "Befehl darf nicht leer sein."
@@ -155,4 +155,4 @@ alias_self_edit() {
   echo "Reload abgeschlossen."
 }
 
-alias _self_edit='alias_self_edit'
+alias _alias_edit='alias_self_edit'

@@ -50,7 +50,7 @@ _alias_setup_add_to_file() {
     _alias_setup_block "${loader_path}"
   } >> "${target_file}"
 
-  echo "Eintrag hinzugefuegt: ${target_file}"
+  echo "Eintrag hinzugefügt: ${target_file}"
 }
 
 _alias_setup_has_marker() {
@@ -135,7 +135,7 @@ _alias_setup_prompt_choice_root_target() {
   echo "Root-Setup Ziel wählen:" >&2
   echo "  1) ${user_target}" >&2
   echo "  2) /etc/bash.bashrc" >&2
-  echo "  3) ueberspringen" >&2
+  echo "  3) überspringen" >&2
   read -r -p "Auswahl [1/2/3]: " answer
 
   case "${answer}" in
@@ -165,12 +165,12 @@ alias_setup() {
     if [ -n "${final_target}" ]; then
       _alias_setup_add_to_file "${final_target}" "${_loader_path}" || return 1
     else
-      echo "Root-Setup uebersprungen."
+      echo "Root-Setup übersprungen."
     fi
   elif _alias_setup_prompt_yes_no "Setup in ${user_target} eintragen?"; then
     _alias_setup_add_to_file "${user_target}" "${_loader_path}" || return 1
   else
-    echo "User-Setup uebersprungen."
+    echo "User-Setup übersprungen."
   fi
 
   echo "Setup abgeschlossen."
