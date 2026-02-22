@@ -15,11 +15,6 @@ _target_conf=""
 _target_kind=""
 
 declare -A _module_visible_cache=()
-declare -A _module_writable_cache=()
-_repo_writable=0
-if [ -w "${_repo_dir}" ]; then
-  _repo_writable=1
-fi
 
 if [ ! -f "${_default_conf}" ]; then
   echo "Fehler: alias_files.conf nicht gefunden: ${_default_conf}"
@@ -233,39 +228,6 @@ _module_visible_for_user() {
   return 1
 }
 
-_module_writable_for_user() {
-  local module="$1"
-  local module_path=""
-  local cached=""
-
-  if [ "${_repo_writable}" -eq 1 ]; then
-    return 0
-  fi
-
-  cached="${_module_writable_cache[${module}]:-}"
-  if [ -n "${cached}" ]; then
-    [ "${cached}" = "1" ]
-    return
-  fi
-
-  module_path="${_repo_dir}/alias_files/${module}"
-  if [ -f "${module_path}" ] && [ -w "${module_path}" ]; then
-    _module_writable_cache["${module}"]=1
-    return 0
-  fi
-
-  _module_writable_cache["${module}"]=0
-  return 1
-}
-
-_module_manageable_for_user() {
-  local module="$1"
-
-  _module_visible_for_user "${module}" || return 1
-  _module_writable_for_user "${module}" || return 1
-  return 0
-}
-
 _category_is_visible() {
   local category="$1"
   local modules=""
@@ -276,7 +238,7 @@ _category_is_visible() {
   fi
 
   for module in ${modules}; do
-    _module_manageable_for_user "${module}" && return 0
+    _module_visible_for_user "${module}" && return 0
   done
 
   return 1
@@ -295,7 +257,7 @@ _category_state() {
   fi
 
   for module in ${modules}; do
-    _module_manageable_for_user "${module}" || continue
+    _module_visible_for_user "${module}" || continue
     total=$((total + 1))
     state="$(_effective_state_for_module "${module}")"
     if [ "${state}" = "on" ]; then
@@ -331,7 +293,7 @@ _toggle_category() {
   fi
 
   for module in ${modules}; do
-    _module_manageable_for_user "${module}" || continue
+    _module_visible_for_user "${module}" || continue
     _set_module_desired_state "${module}" "${desired_state}"
   done
 
