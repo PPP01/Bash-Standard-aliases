@@ -20,6 +20,8 @@ declare -gA BASH_ALIAS_RUNTIME_VALUE=()
 declare -ga BASH_ALIAS_RUNTIME_SORTED_NAMES=()
 declare -gA BASH_ALIAS_RUNTIME_CATEGORY_NAMES=()
 declare -g BASH_ALIAS_RUNTIME_CACHE_READY=0
+declare -gA BASH_ALIAS_MENU_SHORT_DESC=()
+declare -g BASH_ALIAS_MENU_CACHE_READY=0
 
 : "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL:=\033[0;32m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_TITLE:=\033[0;32m}"
@@ -105,6 +107,11 @@ _alias_runtime_cache_reset() {
   BASH_ALIAS_RUNTIME_CACHE_READY=0
 }
 
+_alias_menu_cache_reset() {
+  BASH_ALIAS_MENU_SHORT_DESC=()
+  BASH_ALIAS_MENU_CACHE_READY=0
+}
+
 _alias_runtime_cache_build() {
   local line=""
   local rest=""
@@ -154,6 +161,39 @@ _alias_runtime_cache_build() {
   done
 
   BASH_ALIAS_RUNTIME_CACHE_READY=1
+}
+
+_alias_menu_cache_build() {
+  local name=""
+  local raw_cmd=""
+
+  if [ "${BASH_ALIAS_MENU_CACHE_READY}" -eq 1 ]; then
+    return 0
+  fi
+
+  _alias_runtime_cache_build || return 1
+  _alias_help_load_data || true
+
+  BASH_ALIAS_MENU_SHORT_DESC=()
+  for name in "${BASH_ALIAS_RUNTIME_SORTED_NAMES[@]}"; do
+    raw_cmd="${BASH_ALIAS_RUNTIME_VALUE[${name}]:-}"
+    _alias_short_description_for_name "${name}" "${raw_cmd}"
+    BASH_ALIAS_MENU_SHORT_DESC["${name}"]="${REPLY:-}"
+  done
+
+  BASH_ALIAS_MENU_CACHE_READY=1
+}
+
+_alias_menu_short_description_for_name() {
+  local name="$1"
+  local raw_cmd="$2"
+
+  if [ "${BASH_ALIAS_MENU_CACHE_READY}" -eq 1 ] && [ -n "${BASH_ALIAS_MENU_SHORT_DESC[${name}]+_}" ]; then
+    REPLY="${BASH_ALIAS_MENU_SHORT_DESC[${name}]}"
+    return 0
+  fi
+
+  _alias_short_description_for_name "${name}" "${raw_cmd}"
 }
 
 _alias_help_doc_path() {
@@ -783,7 +823,7 @@ _alias_menu_category() {
       for name in "${names[@]}"; do
         _alias_value_for_name "${name}" || raw_cmd=""
         raw_cmd="${REPLY:-}"
-        _alias_short_description_for_name "${name}" "${raw_cmd}"
+        _alias_menu_short_description_for_name "${name}" "${raw_cmd}"
         short_desc="${REPLY:-}"
         printf ' %3d) | %-18s | %s\n' "${idx}" "${name}" "${short_desc}"
         idx=$((idx + 1))
@@ -836,7 +876,7 @@ _alias_show_all_categories() {
       [ -z "${name}" ] && continue
       _alias_value_for_name "${name}" || raw_cmd=""
       raw_cmd="${REPLY:-}"
-      _alias_short_description_for_name "${name}" "${raw_cmd}"
+      _alias_menu_short_description_for_name "${name}" "${raw_cmd}"
       short_desc="${REPLY:-}"
       printf ' %3d) | %-18s | %s\n' "${idx}" "${name}" "${short_desc}"
       idx=$((idx + 1))
@@ -955,7 +995,7 @@ _alias_pick_category_interactive() {
 a() {
   local category=""
   local rc=0
-  _alias_runtime_cache_reset
+  _alias_menu_cache_build || return 1
 
   if [ -n "${1:-}" ]; then
     if builtin alias -- "$1" >/dev/null 2>&1; then
@@ -988,6 +1028,12 @@ a() {
     130) return 0 ;;
     *) return "${rc}" ;;
   esac
+}
+
+alias_menu_cache_warmup() {
+  _alias_runtime_cache_reset
+  _alias_menu_cache_reset
+  _alias_menu_cache_build
 }
 
 _alias_category_completion() {

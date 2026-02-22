@@ -18,6 +18,12 @@ alias_repo_reload() {
   unset BASH_ALIAS_STD_LOADED
   # shellcheck disable=SC1090
   source "${loader_path}" || return 1
+
+  if declare -F alias_help_warm_cache >/dev/null 2>&1; then
+    if ! alias_help_warm_cache >/dev/null 2>&1; then
+      echo "Hinweis: Menue-Cache konnte beim Reload nicht vorab aufgebaut werden." >&2
+    fi
+  fi
 }
 
 alias_repo_update() {

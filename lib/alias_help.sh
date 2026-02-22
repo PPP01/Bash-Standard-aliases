@@ -61,6 +61,10 @@ alias_self_test_reload() {
   _alias_help_dispatch "alias_self_test_reload" "$@"
 }
 
+alias_help_warm_cache() {
+  _alias_help_dispatch "alias_menu_cache_warmup" "$@"
+}
+
 _alias_help_category_completion_lazy() {
   _alias_help_load_impl || return 0
   if declare -F _alias_category_completion >/dev/null 2>&1; then
