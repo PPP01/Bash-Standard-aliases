@@ -773,9 +773,17 @@ _alias_category_display_name() {
 
 _alias_category_color_for_menu() {
   local category="$1"
-  # Kategorie-Namen bewusst in Terminal-Standardfarbe halten.
-  # So bleibt die Darstellung auf hellen und dunklen Hintergründen gut lesbar.
-  printf '%s' "${BASH_ALIAS_HELP_COLOR_RESET}"
+  local scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
+  # Kategorie-Ueberschriften: immer fett, mit Gruenton je nach Schema.
+  # bright: dunkleres Gruen, dark: klassisches Gruen.
+  case "${scheme}" in
+    bright|light)
+      printf '\033[1;38;5;22m'
+      ;;
+    *)
+      printf '\033[1;32m'
+      ;;
+  esac
 }
 
 _alias_print_category_list() {
