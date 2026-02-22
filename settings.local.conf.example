@@ -18,3 +18,5 @@
 # BASH_ALIAS_HELP_COLOR_MENU_META='\033[0;36m'
 # Beispiel-Override (fett cyan fuer Tabellenkopf)
 # BASH_ALIAS_HELP_COLOR_MENU_HEADER='\033[1;36m'
+# Beispiel-Override (grau fuer Kategorie "setup")
+# BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP='\033[0;37m'

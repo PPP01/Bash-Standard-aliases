@@ -27,6 +27,7 @@ declare -g BASH_ALIAS_MENU_CACHE_READY=0
 : "${BASH_ALIAS_HELP_COLOR_MENU_TITLE:=\033[0;32m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_META:=\033[0;36m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_HEADER:=\033[1;36m}"
+: "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP:=\033[0;37m}"
 : "${BASH_ALIAS_HELP_COLOR_RESET:=\033[0m}"
 
 _alias_trim() {
@@ -560,6 +561,7 @@ _alias_resolve_category_input() {
   local raw="$1"
   local lowered=""
   local category=""
+  local display=""
   local found=""
   local count=0
 
@@ -572,7 +574,8 @@ _alias_resolve_category_input() {
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     _alias_category_is_visible "${category}" || continue
-    if [ "${category}" = "${lowered}" ]; then
+    display="$(_alias_category_display_name "${category}")"
+    if [ "${category}" = "${lowered}" ] || [ "${display}" = "${lowered}" ]; then
       printf '%s' "${category}"
       return 0
     fi
@@ -580,8 +583,9 @@ _alias_resolve_category_input() {
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     _alias_category_is_visible "${category}" || continue
-    case "${category}" in
-      "${lowered}"*)
+    display="$(_alias_category_display_name "${category}")"
+    case "${category}:${display}" in
+      "${lowered}"*:*|*:"${lowered}"*)
         found="${category}"
         count=$((count + 1))
         ;;
@@ -596,10 +600,32 @@ _alias_resolve_category_input() {
   return 1
 }
 
+_alias_category_display_name() {
+  local category="$1"
+
+  case "${category}" in
+    _setup) printf 'setup' ;;
+    _own) printf 'own' ;;
+    *) printf '%s' "${category}" ;;
+  esac
+}
+
+_alias_category_color_for_menu() {
+  local category="$1"
+
+  if [ "$(_alias_category_display_name "${category}")" = "setup" ]; then
+    printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}"
+  else
+    printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}"
+  fi
+}
+
 _alias_print_category_list() {
   local category=""
   local state=""
   local number=""
+  local display=""
+  local color=""
 
   echo "" >&2
   printf '%b%s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_text categories_title)" "${BASH_ALIAS_HELP_COLOR_RESET}" >&2
@@ -612,7 +638,9 @@ _alias_print_category_list() {
       state="on"
     fi
     number="$(_alias_category_number_for_name "${category}")" || continue
-    printf ' %3d) %-12s [%s]\n' "${number}" "${category}" "${state}" >&2
+    display="$(_alias_category_display_name "${category}")"
+    color="$(_alias_category_color_for_menu "${category}")"
+    printf ' %3d) %b%-12s%b [%s]\n' "${number}" "${color}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" >&2
   done
 }
 
@@ -774,13 +802,15 @@ _alias_menu_alias_details() {
 
 _alias_menu_category_title_line() {
   local category="$1"
+  local display=""
   local header_line=""
   local title_line=""
   local pad_len=0
   local pad=""
 
+  display="$(_alias_category_display_name "${category}")"
   printf -v header_line ' %4s | %-18s | %s' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
-  title_line="=== ${category} ==="
+  title_line="=== ${display} ==="
   pad_len=$((${#header_line} - ${#title_line}))
   if [ "${pad_len}" -gt 0 ]; then
     printf -v pad '%*s' "${pad_len}" ''
@@ -810,7 +840,7 @@ _alias_menu_category() {
     done < <(_alias_names_for_category "${category}")
 
     echo ""
-    printf '%b%s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b%s%b\n' "$(_alias_category_color_for_menu "${category}")" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
     if [ "${show_back_entry}" -eq 1 ]; then
       printf '%b %3d) %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_META}" 0 "$(_alias_text category_back)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     fi
@@ -868,7 +898,7 @@ _alias_show_all_categories() {
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     _alias_category_is_visible "${category}" || continue
     echo ""
-    printf '%b%s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b%s%b\n' "$(_alias_category_color_for_menu "${category}")" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
     printf '%b %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     found=0
     idx=1
@@ -903,7 +933,7 @@ _alias_menu_all_categories() {
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
       _alias_category_is_visible "${category}" || continue
       number="$(_alias_category_number_for_name "${category}")" || continue
-      printf ' %3d) %s\n' "${number}" "${category}"
+      printf ' %3d) %b%s%b\n' "${number}" "$(_alias_category_color_for_menu "${category}")" "$(_alias_category_display_name "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
     done
 
     _alias_menu_read_input "$(_alias_text all_categories_prompt)"
@@ -1040,10 +1070,20 @@ _alias_category_completion() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   local words="all"
   local category=""
+  local display=""
+  local -A seen=()
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     _alias_category_is_visible "${category}" || continue
-    words+=" ${category}"
+    display="$(_alias_category_display_name "${category}")"
+    if [ -z "${seen[${display}]:-}" ]; then
+      words+=" ${display}"
+      seen["${display}"]=1
+    fi
+    if [ -z "${seen[${category}]:-}" ]; then
+      words+=" ${category}"
+      seen["${category}"]=1
+    fi
   done
 
   COMPREPLY=( $(compgen -W "${words}" -- "${cur}") )
