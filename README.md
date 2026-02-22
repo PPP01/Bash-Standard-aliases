@@ -9,7 +9,7 @@ Typische Beispiele:
 - Prozesse und Netzwerk: `psmem`, `pscpu`, `ports`, `myip`
 - Git-Workflow: `gs`, `ga`, `gcm`, `gpl`
 - Systemdienste/Logs (root): `start nginx`, `status ssh`, `logs nginx`
-- Selbstverwaltung: `_self_setup`, `_self_category_setup`, `_self_update`, `_self_edit`
+- Selbstverwaltung: `_alias_init`, `_alias_category_setup`, `_alias_update`, `_alias_edit`
 
 ## 2. Installation
 ```bash
@@ -25,12 +25,12 @@ _alias_init
 
 Der Befehl richtet die Einbindung in der Shell-Startdatei ein (Marker-Block) und führt danach ins Setup.
 
-## 3. Initiale Konfiguration per `_self_setup`
-Nach dem ersten Laden des Repos startet `_self_setup` den Setup-Assistenten.
+## 3. Initiale Konfiguration per `_alias_init`
+Nach dem ersten Laden des Repos startet `_alias_init` den Setup-Assistenten.
 Er setzt einen Marker-Block in die passende Bash-Startdatei und startet danach die Kategorie-Auswahl.
 
 ```bash
-_self_setup
+_alias_init
 ```
 
 ### 3.1 Integration
@@ -44,7 +44,7 @@ Nach der Integration (oder bei vorhandenem Marker) startet direkt das Kategorien
 Du kannst es jederzeit separat starten:
 
 ```bash
-_self_category_setup
+_alias_category_setup
 ```
 
 Speicherort der Änderungen:
@@ -57,13 +57,7 @@ Hinweis: Es werden Delta-Änderungen gespeichert (nur Abweichungen), nicht die k
 Setup-Marker wieder entfernen:
 
 ```bash
-_self_setup_remove
-```
-
-Alternativ:
-
-```bash
-_self_setup --remove
+_alias_setup_remove
 ```
 
 ## 4. Bedienung
@@ -90,7 +84,7 @@ a all
 ### 4.1.2 Menü `a [alias]`
 ```bash
 a gs
-a _self_setup
+a _alias_init
 ```
 
 Wenn der Parameter ein Alias-Name ist, zeigt `a` direkt die Detailansicht (Beschreibung + Befehl).
@@ -138,7 +132,7 @@ Root-only Module (z. B. `journald`, `apt`, `systemd`) sind nur sichtbar/nutzbar,
 
 ### 4.3.1 Per Menü
 ```bash
-_self_edit
+_alias_edit
 ```
 
 Der Assistent fragt Alias-Name, Beschreibung und Befehl ab und laedt danach automatisch neu.
@@ -152,9 +146,9 @@ Zugehoerige Hilfe-Datei liegt jeweils daneben:
 - `~/.bash_aliases_specific.md`
 - `${BASH_ALIAS_REPO_DIR}/.bash_aliases_specific.md`
 
-## 5. Update per `_self_update`
+## 5. Update per `_alias_update`
 ```bash
-_self_update
+_alias_update
 ```
 
 Führt `git pull --ff-only` im Repo aus und macht danach einen Reload.
@@ -162,7 +156,7 @@ Führt `git pull --ff-only` im Repo aus und macht danach einen Reload.
 Optional:
 
 ```bash
-_self_update --restart
+_alias_update --restart
 ```
 
 Startet nach dem Update eine frische Login-Shell.
@@ -200,7 +194,7 @@ BASH_ALIAS_HELP_COLOR_DETAIL_LABEL='\033[1;32m'
 ```
 
 ## 7. Manuelle Einbindung
-Wenn du `_self_setup` nicht nutzen willst, kannst du den Loader direkt sourcen:
+Wenn du `_alias_init` nicht nutzen willst, kannst du den Loader direkt sourcen:
 
 ```bash
 if [ -f /pfad/zu/bash-standard-aliases/bash_alias_std.sh ]; then
@@ -231,7 +225,7 @@ BASH_ALIAS_PROFILE=1 BASH_ALIAS_PROFILE_MIN_MS=20 source /pfad/zu/bash-standard-
 - `alias_files.local.conf`: globale Delta-Konfiguration
 - `settings.conf`: Basis-Settings (z. B. Farben)
 - `settings.local.conf`: globale Delta-Settings
-- `scripts/alias_self_setup.sh`: Setup/Marker-Logik
+- `scripts/`: Setup/Marker- und Kategorie-Setup-Logik
 - `scripts/alias_category_setup.sh`: Kategorie-Umschaltung
 - `alias_categories.sh`: Modul <-> Kategorie Zuordnung
 - `docs/alias_files/*.md`: Modul-Doku
@@ -248,7 +242,7 @@ BASH_ALIAS_PROFILE=1 BASH_ALIAS_PROFILE_MIN_MS=20 source /pfad/zu/bash-standard-
 9. Modul aktivieren, entweder global in `alias_files.local.conf` oder user-spezifisch in `~/.config/bash-standard-aliases/config.conf`.
 10. Reload ausführen:
 ```bash
-_self_reload
+_alias_reload
 ```
 11. Ergebnis prüfen:
 ```bash
@@ -256,5 +250,5 @@ a monitoring
 ```
 12. Optional Konsistenztest:
 ```bash
-_self_test_reload
+_alias_test_reload
 ```
