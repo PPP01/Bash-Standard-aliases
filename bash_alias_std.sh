@@ -161,7 +161,7 @@ _alias_init_categories() {
 }
 
 _alias_collect_alias_names() {
-  alias | sed -E "s/^alias[[:space:]]+--[[:space:]]+([^=]+)=.*/\1/; t; s/^alias[[:space:]]+([^=]+)=.*/\1/" | LC_ALL=C sort -u
+  compgen -A alias
 }
 
 _alias_register_aliases_for_category() {
@@ -170,24 +170,32 @@ _alias_register_aliases_for_category() {
   local aliases_after="$3"
   local alias_name=""
   local mapped_category=""
+  local -A aliases_before_map=()
+
+  while IFS= read -r alias_name; do
+    [ -z "${alias_name}" ] && continue
+    aliases_before_map["${alias_name}"]=1
+  done <<< "${aliases_before}"
 
   while IFS= read -r alias_name; do
     [ -z "${alias_name}" ] && continue
 
-    if ! grep -Fxq -- "${alias_name}" <<< "${aliases_before}"; then
-      if [ -n "${BASH_ALIAS_ALIAS_CATEGORY[${alias_name}]:-}" ]; then
-        continue
-      fi
-      mapped_category="${category}"
-      case "${alias_name}" in
-        _alias_*)
-          mapped_category="setup"
-          _alias_add_category_if_missing "${mapped_category}"
-          BASH_ALIAS_CATEGORY_ENABLED["${mapped_category}"]=1
-          ;;
-      esac
-      BASH_ALIAS_ALIAS_CATEGORY["${alias_name}"]="${mapped_category}"
+    if [ -n "${aliases_before_map[${alias_name}]:-}" ]; then
+      continue
     fi
+    if [ -n "${BASH_ALIAS_ALIAS_CATEGORY[${alias_name}]:-}" ]; then
+      continue
+    fi
+
+    mapped_category="${category}"
+    case "${alias_name}" in
+      _alias_*)
+        mapped_category="setup"
+        _alias_add_category_if_missing "${mapped_category}"
+        BASH_ALIAS_CATEGORY_ENABLED["${mapped_category}"]=1
+        ;;
+    esac
+    BASH_ALIAS_ALIAS_CATEGORY["${alias_name}"]="${mapped_category}"
   done <<< "${aliases_after}"
 }
 
