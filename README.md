@@ -25,21 +25,20 @@ _alias_init
 
 Der Befehl richtet die Einbindung in der Shell-Startdatei ein (Marker-Block) und führt danach ins Setup.
 
-## 3. Initiale Konfiguration per `_alias_init`
-Nach dem ersten Laden des Repos startet `_alias_init` den Setup-Assistenten.
-Er setzt einen Marker-Block in die passende Bash-Startdatei und startet danach die Kategorie-Auswahl.
-
-```bash
-_alias_init
-```
-
-### 3.1 Integration
+### 2.1.1 Integration
 Was passiert:
 - Marker-basierter `source`-Block wird eingetragen (idempotent).
 - User: Ziel ist erkannte Alias-Datei aus `~/.bashrc` oder `~/.bashrc`.
 - Root: Auswahl zwischen User-Ziel und `/etc/bash.bashrc`.
 
-### 3.2 Kategorien ein/ausschalten
+## 3. Kategorie-Konfiguration per `_alias_setup`
+Für die laufende Kategorie-Konfiguration nutzt du `_alias_setup` (gleich wie `_alias_category_setup`):
+
+```bash
+_alias_setup
+```
+
+### 3.1 Kategorien ein/ausschalten
 Nach der Integration (oder bei vorhandenem Marker) startet direkt das Kategorien-Menü.
 Du kannst es jederzeit separat starten:
 
@@ -53,7 +52,7 @@ Speicherort der Änderungen:
 
 Hinweis: Es werden Delta-Änderungen gespeichert (nur Abweichungen), nicht die komplette Basisdatei.
 
-### 3.3 Remove
+### 3.2 Remove
 Setup-Marker wieder entfernen:
 
 ```bash
