@@ -39,15 +39,16 @@ _alias_init_remove
 ```
 
 ## 3. Kategorie-Konfiguration per `_alias_setup`
-Für die laufende Kategorie-Konfiguration nutzt du `_alias_setup` (gleich wie `_alias_category_setup`):
+`_alias_setup` startet ein geführtes Setup mit zwei Schritten:
+1. Farbschema einstellen
+2. Kategorien konfigurieren
 
 ```bash
 _alias_setup
 ```
 
 ### 3.1 Kategorien ein/ausschalten
-Nach der Integration (oder bei vorhandenem Marker) startet direkt das Kategorien-Menü.
-Du kannst es jederzeit separat starten:
+Für nur die Kategorie-Auswahl (ohne Farbschema) nutze:
 
 ```bash
 _alias_category_setup

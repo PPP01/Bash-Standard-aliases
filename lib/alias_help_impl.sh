@@ -570,7 +570,7 @@ _alias_short_description_for_name() {
     aua) REPLY='APT Update/Upgrade/Autoremove in einem Lauf.' ;;
     _alias_update) REPLY='Repository aktualisieren und Aliase neu laden.' ;;
     _alias_init) REPLY='Setup-Block in Bash-Startdatei eintragen.' ;;
-    _alias_setup) REPLY='Interaktives Kategorie-Setup starten.' ;;
+    _alias_setup) REPLY='Geführtes Setup: erst Farbschema, dann Kategorien.' ;;
     _alias_setup_scheme) REPLY='Farbschema (dark/bright) in User-Settings speichern.' ;;
     _alias_init_remove) REPLY='Setup-Marker aus Bash-Startdatei entfernen.' ;;
     _alias_category_setup) REPLY='Interaktives Kategorie-Setup starten.' ;;
@@ -670,7 +670,7 @@ _alias_description_for_name() {
         myping) REPLY='Prüft, ob der MySQL-Server antwortet.' ;;
         _alias_update) REPLY='Aktualisiert dieses Alias-Repository per git pull und lädt neu.' ;;
         _alias_init) REPLY='Trägt den markierten Setup-Block in die passende Bash-Startdatei ein.' ;;
-        _alias_setup) REPLY='Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
+        _alias_setup) REPLY='Startet das geführte Setup (Farbschema, danach Kategorien).' ;;
         _alias_setup_scheme) REPLY='Wählt ein Farbschema und speichert es nur in ~/.config/bash-standard-aliases/settings.conf.' ;;
         _alias_init_remove) REPLY='Entfernt den markierten Setup-Block aus der erkannten Bash-Startdatei.' ;;
         _alias_category_setup) REPLY='Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
@@ -708,7 +708,7 @@ _alias_detail_command_for_name() {
     _alias_update) REPLY='git pull --ff-only && alias_repo_reload  (Standardmodus)' ;;
     _alias_reload) REPLY='alias_repo_reload  (Alias-Loader in aktueller Shell neu laden)' ;;
     _alias_init) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --init' ;;
-    _alias_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
+    _alias_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_guided_setup.sh\"' ;;
     _alias_setup_scheme) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_color_scheme_setup.sh\" [dark|bright]' ;;
     _alias_init_remove) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --remove' ;;
     _alias_category_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;

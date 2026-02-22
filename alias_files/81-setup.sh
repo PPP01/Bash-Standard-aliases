@@ -19,11 +19,15 @@ else
   unalias _alias_setup_remove 2>/dev/null || true
 fi
 
+if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -f "${BASH_ALIAS_REPO_DIR}/scripts/alias_guided_setup.sh" ]; then
+  alias _alias_setup='bash "${BASH_ALIAS_REPO_DIR}/scripts/alias_guided_setup.sh"'
+else
+  alias _alias_setup='echo "Fehler: scripts/alias_guided_setup.sh nicht gefunden."'
+fi
+
 if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -f "${BASH_ALIAS_REPO_DIR}/scripts/alias_category_setup.sh" ]; then
-  alias _alias_setup='bash "${BASH_ALIAS_REPO_DIR}/scripts/alias_category_setup.sh"'
   alias _alias_category_setup='bash "${BASH_ALIAS_REPO_DIR}/scripts/alias_category_setup.sh"'
 else
-  alias _alias_setup='echo "Fehler: scripts/alias_category_setup.sh nicht gefunden."'
   alias _alias_category_setup='echo "Fehler: scripts/alias_category_setup.sh nicht gefunden."'
 fi
 
