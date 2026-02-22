@@ -22,6 +22,8 @@ declare -gA BASH_ALIAS_RUNTIME_CATEGORY_NAMES=()
 declare -g BASH_ALIAS_RUNTIME_CACHE_READY=0
 
 : "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL:=\033[0;32m}"
+: "${BASH_ALIAS_HELP_COLOR_MENU_META:=\033[2m}"
+: "${BASH_ALIAS_HELP_COLOR_MENU_HEADER:=\033[1;36m}"
 : "${BASH_ALIAS_HELP_COLOR_RESET:=\033[0m}"
 
 _alias_trim() {
@@ -750,9 +752,9 @@ _alias_menu_category() {
     echo ""
     echo "=== ${category} ==="
     if [ "${show_back_entry}" -eq 1 ]; then
-      printf ' %3d) %s\n' 0 "$(_alias_text category_back)"
+      printf '%b %3d) %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_META}" 0 "$(_alias_text category_back)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     fi
-    printf ' %4s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
+    printf '%b %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
 
     if [ "${#names[@]}" -eq 0 ]; then
       echo "$(_alias_text category_empty)"
@@ -807,7 +809,7 @@ _alias_show_all_categories() {
     _alias_category_is_visible "${category}" || continue
     echo ""
     echo "=== ${category} ==="
-    printf ' %4s | %-18s | %s\n' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
+    printf '%b %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     found=0
     idx=1
     while IFS= read -r name; do
@@ -836,7 +838,7 @@ _alias_menu_all_categories() {
   while true; do
     echo ""
     echo "=== $(_alias_text all_categories_title) ==="
-    printf ' %3d) %s\n' 0 "$(_alias_text all_categories_back)"
+    printf '%b %3d) %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_META}" 0 "$(_alias_text all_categories_back)" "${BASH_ALIAS_HELP_COLOR_RESET}"
 
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
       _alias_category_is_visible "${category}" || continue

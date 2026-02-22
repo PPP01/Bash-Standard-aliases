@@ -12,3 +12,7 @@
 # Bereich: Color
 # Beispiel-Override (hellgruen)
 # BASH_ALIAS_HELP_COLOR_DETAIL_LABEL='\033[1;32m'
+# Beispiel-Override (dim fuer Meta-Zeilen)
+# BASH_ALIAS_HELP_COLOR_MENU_META='\033[2m'
+# Beispiel-Override (fett cyan fuer Tabellenkopf)
+# BASH_ALIAS_HELP_COLOR_MENU_HEADER='\033[1;36m'
