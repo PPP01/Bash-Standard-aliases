@@ -826,7 +826,7 @@ _alias_print_category_list() {
     number="$(_alias_category_number_for_name "${category}")" || continue
     display="$(_alias_category_display_name "${category}")"
     color="$(_alias_category_color_for_menu "${category}")"
-    printf ' %3d) %b%-12s%b [%s]\n' "${number}" "${color}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" >&2
+    printf ' %b%3d) %-12s%b [%s]\n' "${color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" >&2
   done
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
@@ -839,7 +839,7 @@ _alias_print_category_list() {
     number="$(_alias_category_number_for_name "${category}")" || continue
     display="$(_alias_category_display_name "${category}")"
     color="$(_alias_category_color_for_menu "${category}")"
-    printf ' %3d) %b%-12s%b [%s]\n' "${number}" "${color}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" >&2
+    printf ' %b%3d) %-12s%b [%s]\n' "${color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" >&2
   done
 }
 
