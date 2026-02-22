@@ -629,6 +629,20 @@ _alias_print_category_list() {
   printf ' %3d) %-12s\n' 0 "$(_alias_text categories_back)" >&2
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    _alias_is_setup_category "${category}" && continue
+    _alias_category_is_visible "${category}" || continue
+    state="off"
+    if [ "${BASH_ALIAS_CATEGORY_ENABLED[${category}]:-0}" -eq 1 ]; then
+      state="on"
+    fi
+    number="$(_alias_category_number_for_name "${category}")" || continue
+    display="$(_alias_category_display_name "${category}")"
+    color="$(_alias_category_color_for_menu "${category}")"
+    printf ' %3d) %b%-12s%b [%s]\n' "${number}" "${color}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" >&2
+  done
+
+  for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    _alias_is_setup_category "${category}" || continue
     _alias_category_is_visible "${category}" || continue
     state="off"
     if [ "${BASH_ALIAS_CATEGORY_ENABLED[${category}]:-0}" -eq 1 ]; then
@@ -659,11 +673,38 @@ _alias_category_is_visible() {
 }
 
 _alias_reserved_number_for_category() {
-  case "$1" in
+  local category="$1"
+
+  case "${category}" in
     _own) printf '98' ;;
-    _setup) printf '99' ;;
+    setup|_setup) _alias_setup_reserved_number ;;
     *) return 1 ;;
   esac
+}
+
+_alias_is_setup_category() {
+  case "$1" in
+    setup|_setup) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_alias_setup_reserved_number() {
+  local category=""
+  local visible_count=0
+
+  for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+    [ "${category}" = "_own" ] && continue
+    _alias_is_setup_category "${category}" && continue
+    _alias_category_is_visible "${category}" || continue
+    visible_count=$((visible_count + 1))
+  done
+
+  if [ "${visible_count}" -ge 99 ]; then
+    printf '999'
+  else
+    printf '99'
+  fi
 }
 
 _alias_category_number_for_name() {
@@ -680,9 +721,11 @@ _alias_category_number_for_name() {
     return 0
   fi
 
+  reserved_setup="$(_alias_setup_reserved_number)"
+
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     [ "${category}" = "_own" ] && continue
-    [ "${category}" = "_setup" ] && continue
+    _alias_is_setup_category "${category}" && continue
     _alias_category_is_visible "${category}" || continue
     if [ "${number}" -eq "${reserved_own}" ] || [ "${number}" -eq "${reserved_setup}" ]; then
       number=$((number + 1))
@@ -704,6 +747,8 @@ _alias_category_name_for_number() {
   local reserved_own=98
   local reserved_setup=99
 
+  reserved_setup="$(_alias_setup_reserved_number)"
+
   if [ "${wanted}" -eq "${reserved_own}" ]; then
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
       if [ "${category}" = "_own" ]; then
@@ -717,7 +762,7 @@ _alias_category_name_for_number() {
 
   if [ "${wanted}" -eq "${reserved_setup}" ]; then
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
-      if [ "${category}" = "_setup" ]; then
+      if _alias_is_setup_category "${category}"; then
         _alias_category_is_visible "${category}" || return 1
         printf '%s' "${category}"
         return 0
@@ -728,7 +773,7 @@ _alias_category_name_for_number() {
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     [ "${category}" = "_own" ] && continue
-    [ "${category}" = "_setup" ] && continue
+    _alias_is_setup_category "${category}" && continue
     _alias_category_is_visible "${category}" || continue
     if [ "${number}" -eq "${reserved_own}" ] || [ "${number}" -eq "${reserved_setup}" ]; then
       number=$((number + 1))
@@ -928,6 +973,14 @@ _alias_menu_all_categories() {
     printf '%b %3d) %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_META}" 0 "$(_alias_text all_categories_back)" "${BASH_ALIAS_HELP_COLOR_RESET}"
 
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+      _alias_is_setup_category "${category}" && continue
+      _alias_category_is_visible "${category}" || continue
+      number="$(_alias_category_number_for_name "${category}")" || continue
+      printf ' %3d) %b%s%b\n' "${number}" "$(_alias_category_color_for_menu "${category}")" "$(_alias_category_display_name "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    done
+
+    for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+      _alias_is_setup_category "${category}" || continue
       _alias_category_is_visible "${category}" || continue
       number="$(_alias_category_number_for_name "${category}")" || continue
       printf ' %3d) %b%s%b\n' "${number}" "$(_alias_category_color_for_menu "${category}")" "$(_alias_category_display_name "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
