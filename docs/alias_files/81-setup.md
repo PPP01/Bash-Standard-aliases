@@ -4,7 +4,7 @@ Setup-Startpunkt mit markerbasierter Installation und Kategorie-Umschaltung.
 
 ## Enthalten
 - `_alias_init`: Marker-Prüfung und Setup-Initialisierung.
-- `_alias_setup_remove`: Entfernt den Setup-Markerblock wieder aus der Zieldatei.
+- `_alias_init_remove`: Entfernt den Setup-Markerblock wieder aus der Zieldatei.
 - `_alias_category_setup`: Alias, der das externe Script `scripts/alias_category_setup.sh` startet.
 - `_alias_setup`: Kurzalias auf `_alias_category_setup`.
 
@@ -15,7 +15,7 @@ Setup-Startpunkt mit markerbasierter Installation und Kategorie-Umschaltung.
 - Wenn Marker gefunden: startet direkt Kategorie-Umschaltung.
 - Wenn kein Marker gefunden: startet Setup-Assistent und danach Kategorie-Umschaltung.
 - Setup schreibt einen markierten Source-Block nur einmal (idempotent).
-- `_alias_setup_remove`:
+- `_alias_init_remove`:
 - Entfernt den markierten Setup-Block aus der erkannten Zieldatei.
 - `_alias_category_setup` / `_alias_setup`:
 - Nutzt ein Delta-Konfigurationsmodell:
@@ -35,6 +35,6 @@ Setup-Startpunkt mit markerbasierter Installation und Kategorie-Umschaltung.
 | alias | kurz | beschreibung | befehl |
 |---|---|---|---|
 | _alias_init | Marker-Setup starten | Prüft Marker und startet Kategorie-Umschaltung oder Setup. | _alias_init |
-| _alias_setup_remove | Setup-Marker entfernen | Entfernt den markierten Setup-Block aus der erkannten Startdatei. | _alias_setup_remove |
+| _alias_init_remove | Setup-Marker entfernen | Entfernt den markierten Setup-Block aus der erkannten Startdatei. | _alias_init_remove |
 | _alias_category_setup | Kategorie-Setup starten | Startet den interaktiven Kategorie-Setup-Assistenten. | bash "$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh" |
 | _alias_setup | Kategorie-Setup starten (kurz) | Kurzalias auf den interaktiven Kategorie-Setup-Assistenten. | bash "$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh" |

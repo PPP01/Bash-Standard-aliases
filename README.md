@@ -31,6 +31,13 @@ Was passiert:
 - User: Ziel ist erkannte Alias-Datei aus `~/.bashrc` oder `~/.bashrc`.
 - Root: Auswahl zwischen User-Ziel und `/etc/bash.bashrc`.
 
+### 2.1.2 Integration entfernen (`_alias_init_remove`)
+Setup-Marker wieder entfernen:
+
+```bash
+_alias_init_remove
+```
+
 ## 3. Kategorie-Konfiguration per `_alias_setup`
 Für die laufende Kategorie-Konfiguration nutzt du `_alias_setup` (gleich wie `_alias_category_setup`):
 
@@ -51,13 +58,6 @@ Speicherort der Änderungen:
 - Root: Auswahl zwischen `global` (`${BASH_ALIAS_REPO_DIR}/alias_files.local.conf`) und `root-eigen` (`~/.config/bash-standard-aliases/config.conf`)
 
 Hinweis: Es werden Delta-Änderungen gespeichert (nur Abweichungen), nicht die komplette Basisdatei.
-
-### 3.2 Remove
-Setup-Marker wieder entfernen:
-
-```bash
-_alias_setup_remove
-```
 
 ## 4. Bedienung
 

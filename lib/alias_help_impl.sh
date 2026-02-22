@@ -572,7 +572,7 @@ _alias_short_description_for_name() {
     _alias_init) REPLY='Setup-Block in Bash-Startdatei eintragen.' ;;
     _alias_setup) REPLY='Interaktives Kategorie-Setup starten.' ;;
     _alias_setup_scheme) REPLY='Farbschema (dark/bright) in User-Settings speichern.' ;;
-    _alias_setup_remove) REPLY='Setup-Marker aus Bash-Startdatei entfernen.' ;;
+    _alias_init_remove) REPLY='Setup-Marker aus Bash-Startdatei entfernen.' ;;
     _alias_category_setup) REPLY='Interaktives Kategorie-Setup starten.' ;;
     _alias_reload) REPLY='Alias-Module in aktueller Shell neu laden.' ;;
     _alias_edit) REPLY='Geführter Assistent für eigenes Alias und Reload.' ;;
@@ -672,7 +672,7 @@ _alias_description_for_name() {
         _alias_init) REPLY='Trägt den markierten Setup-Block in die passende Bash-Startdatei ein.' ;;
         _alias_setup) REPLY='Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
         _alias_setup_scheme) REPLY='Wählt ein Farbschema und speichert es nur in ~/.config/bash-standard-aliases/settings.conf.' ;;
-        _alias_setup_remove) REPLY='Entfernt den markierten Setup-Block aus der erkannten Bash-Startdatei.' ;;
+        _alias_init_remove) REPLY='Entfernt den markierten Setup-Block aus der erkannten Bash-Startdatei.' ;;
         _alias_category_setup) REPLY='Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
         _alias_reload) REPLY='Lädt die Alias-Module in der aktuellen Shell neu (Repo-Reload).' ;;
         _alias_edit) REPLY='Startet einen Assistenten und legt ein Alias mit Beschreibung an; danach Reload.' ;;
@@ -710,7 +710,7 @@ _alias_detail_command_for_name() {
     _alias_init) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --init' ;;
     _alias_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
     _alias_setup_scheme) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_color_scheme_setup.sh\" [dark|bright]' ;;
-    _alias_setup_remove) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --remove' ;;
+    _alias_init_remove) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --remove' ;;
     _alias_category_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
     _alias_test_reload) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"' ;;
     _alias_edit) REPLY='alias_self_edit  (Alias-Assistent mit Ziel-Datei-Auswahl und Reload)' ;;
