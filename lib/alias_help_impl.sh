@@ -692,7 +692,7 @@ _alias_show_alias_details() {
   cmd="${REPLY:-}"
 
   echo ""
-  echo "=== $(_alias_text alias_detail_title): ${name} ==="
+  printf '%b=== %s: %s ===%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_text alias_detail_title)" "${name}" "${BASH_ALIAS_HELP_COLOR_RESET}"
   printf '%b%s%b: %s\n' "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL}" "$(_alias_text alias_detail_desc)" "${BASH_ALIAS_HELP_COLOR_RESET}" "${desc}"
   printf '%b%s%b: %s\n' "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL}" "$(_alias_text alias_detail_cmd)" "${BASH_ALIAS_HELP_COLOR_RESET}" "${cmd}"
   return 0
@@ -732,6 +732,25 @@ _alias_menu_alias_details() {
   return 1
 }
 
+_alias_menu_category_title_line() {
+  local category="$1"
+  local header_line=""
+  local title_line=""
+  local pad_len=0
+  local pad=""
+
+  printf -v header_line ' %4s | %-18s | %s' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
+  title_line="=== ${category} ==="
+  pad_len=$((${#header_line} - ${#title_line}))
+  if [ "${pad_len}" -gt 0 ]; then
+    printf -v pad '%*s' "${pad_len}" ''
+    pad="${pad// /=}"
+    title_line+="${pad}"
+  fi
+
+  printf '%s' "${title_line}"
+}
+
 _alias_menu_category() {
   local category="$1"
   local show_back_entry="${2:-1}"
@@ -751,7 +770,7 @@ _alias_menu_category() {
     done < <(_alias_names_for_category "${category}")
 
     echo ""
-    printf '%b=== %s ===%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "${category}" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b%s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
     if [ "${show_back_entry}" -eq 1 ]; then
       printf '%b %3d) %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_META}" 0 "$(_alias_text category_back)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     fi
@@ -809,7 +828,7 @@ _alias_show_all_categories() {
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     _alias_category_is_visible "${category}" || continue
     echo ""
-    printf '%b=== %s ===%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "${category}" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b%s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
     printf '%b %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     found=0
     idx=1
