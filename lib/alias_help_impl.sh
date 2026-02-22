@@ -612,12 +612,9 @@ _alias_category_display_name() {
 
 _alias_category_color_for_menu() {
   local category="$1"
-
-  if [ "$(_alias_category_display_name "${category}")" = "setup" ]; then
-    printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}"
-  else
-    printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}"
-  fi
+  # Kategorie-Namen bewusst in Terminal-Standardfarbe halten.
+  # So bleibt die Darstellung auf hellen und dunklen Hintergruenden gut lesbar.
+  printf '%s' "${BASH_ALIAS_HELP_COLOR_RESET}"
 }
 
 _alias_print_category_list() {
