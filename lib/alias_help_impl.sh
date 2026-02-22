@@ -563,7 +563,7 @@ _alias_print_category_list() {
 
   echo "" >&2
   printf '%b%s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_text categories_title)" "${BASH_ALIAS_HELP_COLOR_RESET}" >&2
-  printf '%b %3d) %-12s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_META}" 0 "$(_alias_text categories_back)" "${BASH_ALIAS_HELP_COLOR_RESET}" >&2
+  printf ' %3d) %-12s\n' 0 "$(_alias_text categories_back)" >&2
 
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     _alias_category_is_visible "${category}" || continue
