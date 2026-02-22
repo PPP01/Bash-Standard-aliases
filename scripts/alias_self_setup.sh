@@ -282,23 +282,12 @@ _alias_setup_run_category_setup() {
 }
 
 alias_self_setup() {
-  local marker_target=""
+  echo "Starte Kategorie-Auswahl."
+  _alias_setup_run_category_setup
+}
 
-  if _alias_setup_find_marker_target; then
-    marker_target="${REPLY}"
-    echo "Marker gefunden in ${marker_target}. Starte Kategorie-Auswahl."
-    _alias_setup_run_category_setup
-    return $?
-  fi
-
-  echo "Kein Marker gefunden. Starte Setup-Assistent."
-  alias_setup || return 1
-
-  if _alias_setup_find_marker_target; then
-    marker_target="${REPLY}"
-    echo "Marker aktiv in ${marker_target}. Starte Kategorie-Auswahl."
-    _alias_setup_run_category_setup
-  fi
+alias_init() {
+  alias_setup
 }
 
 _main() {
@@ -306,17 +295,17 @@ _main() {
     --remove|remove|rm)
       alias_setup_remove
       ;;
-    --setup|setup|install)
-      alias_setup
+    --setup|setup|install|--init|init)
+      alias_init
       ;;
     --category|category)
-      _alias_setup_run_category_setup
+      alias_self_setup
       ;;
     ""|--run|run)
       alias_self_setup
       ;;
     *)
-      echo "Verwendung: $0 [run|setup|category|remove]"
+      echo "Verwendung: $0 [run|category|init|setup|install|remove]"
       return 1
       ;;
   esac

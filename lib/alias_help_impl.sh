@@ -414,7 +414,8 @@ _alias_short_description_for_name() {
     log_clean) REPLY='Journal aufbewahren/bereinigen (Tage/Größe).' ;;
     aua) REPLY='APT Update/Upgrade/Autoremove in einem Lauf.' ;;
     _alias_update) REPLY='Repository aktualisieren und Aliase neu laden.' ;;
-    _alias_setup) REPLY='Marker-Prüfung, dann Kategorie-Setup oder Installation.' ;;
+    _alias_init) REPLY='Setup-Block in Bash-Startdatei eintragen.' ;;
+    _alias_setup) REPLY='Interaktives Kategorie-Setup starten.' ;;
     _alias_setup_remove) REPLY='Setup-Marker aus Bash-Startdatei entfernen.' ;;
     _alias_category_setup) REPLY='Interaktives Kategorie-Setup starten.' ;;
     _alias_reload) REPLY='Alias-Module in aktueller Shell neu laden.' ;;
@@ -512,7 +513,8 @@ _alias_description_for_name() {
         mya) REPLY='Startet mysqladmin für Admin-Operationen.' ;;
         myping) REPLY='Prüft, ob der MySQL-Server antwortet.' ;;
         _alias_update) REPLY='Aktualisiert dieses Alias-Repository per git pull und lädt neu.' ;;
-        _alias_setup) REPLY='Prüft Marker zuerst (/etc/bash.bashrc bei root, sonst Alias-Datei/.bashrc) und startet dann Kategorie-Setup oder Installation.' ;;
+        _alias_init) REPLY='Trägt den markierten Setup-Block in die passende Bash-Startdatei ein.' ;;
+        _alias_setup) REPLY='Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
         _alias_setup_remove) REPLY='Entfernt den markierten Setup-Block aus der erkannten Bash-Startdatei.' ;;
         _alias_category_setup) REPLY='Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
         _alias_reload) REPLY='Lädt die Alias-Module in der aktuellen Shell neu (Repo-Reload).' ;;
@@ -548,7 +550,8 @@ _alias_detail_command_for_name() {
     aua) REPLY='apt update && apt upgrade [-y] && apt autoremove [-y]' ;;
     _alias_update) REPLY='git pull --ff-only && alias_repo_reload  (Standardmodus)' ;;
     _alias_reload) REPLY='alias_repo_reload  (Alias-Loader in aktueller Shell neu laden)' ;;
-    _alias_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\"' ;;
+    _alias_init) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --init' ;;
+    _alias_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
     _alias_setup_remove) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --remove' ;;
     _alias_category_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
     _alias_test_reload) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"' ;;
