@@ -16,7 +16,14 @@ Typische Beispiele:
 git clone https://github.com/PPP01/Bash-Standard-aliases bash-standard-aliases
 ```
 
-### 2.1 Erstinitialisierung (`_alias_init`)
+### 2.1 Direkt laden (source)
+Wenn du direkt laden willst:
+
+```bash
+source bash-standard-aliases/bash_alias_std.sh
+```
+
+### 2.2 Erstinitialisierung (`_alias_init`)
 Nach dem Klonen kannst du die Initialisierung direkt starten:
 
 ```bash
@@ -25,13 +32,13 @@ _alias_init
 
 Der Befehl richtet die Einbindung in der Shell-Startdatei ein (Marker-Block) und führt danach ins Setup.
 
-### 2.1.1 Integration
+### 2.2.1 Integration
 Was passiert:
 - Marker-basierter `source`-Block wird eingetragen (idempotent).
 - User: Ziel ist erkannte Alias-Datei aus `~/.bashrc` oder `~/.bashrc`.
 - Root: Auswahl zwischen User-Ziel und `/etc/bash.bashrc`.
 
-### 2.1.2 Integration entfernen (`_alias_init_remove`)
+### 2.2.2 Integration entfernen (`_alias_init_remove`)
 Setup-Marker wieder entfernen:
 
 ```bash
