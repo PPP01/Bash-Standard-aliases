@@ -10,6 +10,10 @@ Hilfsfunktionen für Alias-Listen.
   - Navigation im interaktiven Menue:
     - `0`, `left`, `backspace`: eine Ebene zurück
     - `escape`, `q`: Menue beenden
+  - In der Alias-Detailansicht:
+    - `Enter`: ausgewaehlten Alias direkt ausfuehren
+    - `0`, `left`, `backspace`: zur Alias-Liste zurueck
+    - `escape`, `q`: Menue beenden
 - Completion für `a`: Kategorie-Namen werden per Tab angeboten.
 
 ## Lokalisierbare Texte
@@ -21,3 +25,12 @@ Hilfsfunktionen für Alias-Listen.
   - Unterordner: `docs/alias_files/<lang>/35-git.md`
   - Suffix: `docs/alias_files/35-git.<lang>.md`
 - Ohne Sprachvariante wird die Basisdatei genutzt (z. B. `docs/alias_files/35-git.md`).
+
+## Farben (ueberschreibbar)
+- Definiert in `settings.conf` (Bereich `Color`).
+- Delta-Overrides:
+  - `settings.local.conf` (global pro Host/Repo)
+  - `~/.config/bash-standard-aliases/settings.conf` (pro User)
+- Relevante Variablen:
+  - `BASH_ALIAS_HELP_COLOR_DETAIL_LABEL` (Default: gruen, `\033[0;32m`)
+  - `BASH_ALIAS_HELP_COLOR_RESET` (Default: `\033[0m`)

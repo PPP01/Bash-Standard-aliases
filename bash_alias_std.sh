@@ -12,6 +12,9 @@ _alias_base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _alias_config_file_default="${_alias_base_dir}/alias_files.conf"
 _alias_config_file_local="${_alias_base_dir}/alias_files.local.conf"
 _alias_config_file_user="${HOME}/.config/bash-standard-aliases/config.conf"
+_alias_settings_file_default="${_alias_base_dir}/settings.conf"
+_alias_settings_file_local="${_alias_base_dir}/settings.local.conf"
+_alias_settings_file_user="${HOME}/.config/bash-standard-aliases/settings.conf"
 _alias_categories_file="${_alias_base_dir}/alias_categories.sh"
 # Von Modulen/Funktionen nutzbar, um den Repo-Ordner sicher zu finden.
 BASH_ALIAS_REPO_DIR="${_alias_base_dir}"
@@ -37,6 +40,17 @@ declare -ga BASH_ALIAS_CATEGORY_ORDER=()
 
 declare -A _alias_module_enabled=()
 declare -a _alias_module_order=()
+
+declare -a _alias_settings_layers=()
+if [ -f "${_alias_settings_file_default}" ]; then
+  _alias_settings_layers+=("${_alias_settings_file_default}")
+fi
+if [ -f "${_alias_settings_file_local}" ]; then
+  _alias_settings_layers+=("${_alias_settings_file_local}")
+fi
+if [ -f "${_alias_settings_file_user}" ]; then
+  _alias_settings_layers+=("${_alias_settings_file_user}")
+fi
 
 declare -a _alias_config_layers=()
 if [ -f "${_alias_config_file_default}" ]; then
@@ -201,6 +215,20 @@ _alias_apply_config_layer() {
   done < "${file_path}"
 }
 
+_alias_apply_settings_layer() {
+  local file_path="$1"
+
+  [ -f "${file_path}" ] || return 0
+  # shellcheck disable=SC1090
+  source "${file_path}"
+}
+
+if [ "${#_alias_settings_layers[@]}" -gt 0 ]; then
+  for _layer in "${_alias_settings_layers[@]}"; do
+    _alias_apply_settings_layer "${_layer}"
+  done
+fi
+
 _alias_init_categories
 
 if [ "${#_alias_config_layers[@]}" -gt 0 ]; then
@@ -241,6 +269,6 @@ fi
 _alias_sort_categories
 
 unset _entry _layer _full_path _category _aliases_before _aliases_after line entry
-unset _alias_config_layers _alias_module_order _alias_module_enabled
-unset _alias_config_file_default _alias_config_file_local _alias_config_file_user _alias_base_dir _alias_categories_file
-unset -f _alias_add_category_if_missing _alias_add_module_if_missing _alias_sort_key_for_category _alias_sort_categories _alias_init_categories _alias_collect_alias_names _alias_register_aliases_for_category _alias_apply_config_layer
+unset _alias_settings_layers _alias_config_layers _alias_module_order _alias_module_enabled
+unset _alias_config_file_default _alias_config_file_local _alias_config_file_user _alias_settings_file_default _alias_settings_file_local _alias_settings_file_user _alias_base_dir _alias_categories_file
+unset -f _alias_add_category_if_missing _alias_add_module_if_missing _alias_sort_key_for_category _alias_sort_categories _alias_init_categories _alias_collect_alias_names _alias_register_aliases_for_category _alias_apply_config_layer _alias_apply_settings_layer

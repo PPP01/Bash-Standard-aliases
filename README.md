@@ -66,6 +66,7 @@ a
 
 Oeffnet ein interaktives Menue mit sichtbaren Kategorien und Alias-Details.
 Kategorien ohne verfuegbare Aliase fuer den aktuellen User werden ausgeblendet.
+In der Detailansicht startet `Enter` den ausgewaehlten Alias direkt.
 
 ### 4.1.1 Menue `a [kategorie]`
 ```bash
@@ -84,6 +85,18 @@ a _self_setup
 ```
 
 Wenn der Parameter ein Alias-Name ist, zeigt `a` direkt die Detailansicht (Beschreibung + Befehl).
+
+### 4.1.3 Farben der Detailansicht
+Die Labels `Beschreibung` und `Befehl` sind standardmaessig gruen.
+Sie koennen ueber Settings-Layer ueberschrieben werden:
+
+```bash
+# globales Delta (root/host)
+settings.local.conf
+
+# user Delta
+~/.config/bash-standard-aliases/settings.conf
+```
 
 ### 4.2 Alias Bedienung
 Aliase sind normale Shell-Aliase/Funktionen und werden direkt ausgefuehrt, z. B.:
@@ -130,7 +143,8 @@ _self_update --restart
 Startet nach dem Update eine frische Login-Shell.
 
 ## 6. Manuelle Konfiguration
-Konfigurations-Layer (in dieser Reihenfolge):
+### 6.1 Modul-Konfiguration
+Konfigurations-Layer fuer Module (in dieser Reihenfolge):
 1. `alias_files.conf` (Basis, versioniert)
 2. `alias_files.local.conf` (globale Delta-Aenderungen)
 3. `~/.config/bash-standard-aliases/config.conf` (user Delta-Aenderungen)
@@ -148,6 +162,18 @@ Beispiel (nur Delta):
 # 35-git.sh
 ```
 
+### 6.2 Settings-Konfiguration
+Konfigurations-Layer fuer Settings (in dieser Reihenfolge):
+1. `settings.conf` (Basis, versioniert)
+2. `settings.local.conf` (globale Delta-Settings)
+3. `~/.config/bash-standard-aliases/settings.conf` (user Delta-Settings)
+
+Beispiel (nur Delta):
+```bash
+# ~/.config/bash-standard-aliases/settings.conf
+BASH_ALIAS_HELP_COLOR_DETAIL_LABEL='\033[1;32m'
+```
+
 ## 7. Manuelle Einbindung
 Wenn du `_self_setup` nicht nutzen willst, kannst du den Loader direkt sourcen:
 
@@ -162,6 +188,8 @@ fi
 - `alias_files/`: Alias-Module
 - `alias_files.conf`: Basis-Konfiguration
 - `alias_files.local.conf`: globale Delta-Konfiguration
+- `settings.conf`: Basis-Settings (z. B. Farben)
+- `settings.local.conf`: globale Delta-Settings
 - `scripts/alias_self_setup.sh`: Setup/Marker-Logik
 - `scripts/alias_category_setup.sh`: Kategorie-Umschaltung
 - `alias_categories.sh`: Modul <-> Kategorie Zuordnung

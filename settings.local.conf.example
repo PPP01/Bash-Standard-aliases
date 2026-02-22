@@ -1,0 +1,14 @@
+# Lokale Delta-Settings pro Installation/Server.
+# Diese Datei nach settings.local.conf kopieren und nur Abweichungen eintragen.
+#
+# Beispiel:
+# cp settings.local.conf.example settings.local.conf
+#
+# Layer-Reihenfolge:
+# 1) settings.conf
+# 2) settings.local.conf
+# 3) ~/.config/bash-standard-aliases/settings.conf
+
+# Bereich: Color
+# Beispiel-Override (hellgruen)
+# BASH_ALIAS_HELP_COLOR_DETAIL_LABEL='\033[1;32m'

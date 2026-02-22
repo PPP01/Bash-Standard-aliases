@@ -22,6 +22,10 @@ Setup-Startpunkt mit markerbasierter Installation und Kategorie-Umschaltung.
 - Basis ist immer `alias_files.conf`.
 - Globale Abweichungen: `${BASH_ALIAS_REPO_DIR}/alias_files.local.conf`.
 - User-Abweichungen: `~/.config/bash-standard-aliases/config.conf`.
+- Settings (z. B. Farben) werden separat per Layer geladen:
+- Basis: `settings.conf`
+- Globales Delta: `${BASH_ALIAS_REPO_DIR}/settings.local.conf`
+- User-Delta: `~/.config/bash-standard-aliases/settings.conf`
 - Als root Auswahl zwischen globalen oder eigenen Aenderungen.
 - Als User immer eigene Aenderungen im Home-Pfad.
 - Zeigt nummerierte Kategorien mit Status `[on/off/partial]`.

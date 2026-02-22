@@ -21,6 +21,9 @@ declare -ga BASH_ALIAS_RUNTIME_SORTED_NAMES=()
 declare -gA BASH_ALIAS_RUNTIME_CATEGORY_NAMES=()
 declare -g BASH_ALIAS_RUNTIME_CACHE_READY=0
 
+: "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL:=\033[0;32m}"
+: "${BASH_ALIAS_HELP_COLOR_RESET:=\033[0m}"
+
 _alias_trim() {
   local value="$1"
   value="${value#"${value%%[![:space:]]*}"}"
@@ -301,6 +304,7 @@ _alias_text() {
         alias_detail_title) printf 'Alias-Details' ;;
         alias_detail_desc) printf 'Beschreibung' ;;
         alias_detail_cmd) printf 'Befehl' ;;
+        alias_detail_prompt) printf 'Enter = ausfuehren, 0/left/backspace = Zurueck, q/esc = Ende: ' ;;
         alias_unknown) printf 'Unbekannter Alias: %s' ;;
         short_internal) printf 'Interner Helfer: %s' ;;
         desc_fallback) printf 'Fuehrt aus: %s' ;;
@@ -326,6 +330,7 @@ _alias_text() {
         alias_detail_title) printf 'Alias details' ;;
         alias_detail_desc) printf 'Description' ;;
         alias_detail_cmd) printf 'Command' ;;
+        alias_detail_prompt) printf 'Enter = run, 0/left/backspace = back, q/esc = quit: ' ;;
         alias_unknown) printf 'Unknown alias: %s' ;;
         short_internal) printf 'Internal helper: %s' ;;
         desc_fallback) printf 'Runs: %s' ;;
@@ -685,9 +690,43 @@ _alias_show_alias_details() {
 
   echo ""
   echo "=== $(_alias_text alias_detail_title): ${name} ==="
-  echo "$(_alias_text alias_detail_desc): ${desc}"
-  echo "$(_alias_text alias_detail_cmd): ${cmd}"
+  printf '%b%s%b: %s\n' "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL}" "$(_alias_text alias_detail_desc)" "${BASH_ALIAS_HELP_COLOR_RESET}" "${desc}"
+  printf '%b%s%b: %s\n' "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL}" "$(_alias_text alias_detail_cmd)" "${BASH_ALIAS_HELP_COLOR_RESET}" "${cmd}"
   return 0
+}
+
+_alias_execute_by_name() {
+  local name="$1"
+
+  if ! builtin alias -- "${name}" >/dev/null 2>&1; then
+    printf "$(_alias_text alias_unknown)\n" "${name}"
+    return 1
+  fi
+
+  eval "${name}"
+}
+
+_alias_menu_alias_details() {
+  local name="$1"
+  local choice=""
+
+  _alias_show_alias_details "${name}" || return 1
+  _alias_menu_read_input "$(_alias_text alias_detail_prompt)"
+  choice="${REPLY:-}"
+
+  if _alias_menu_is_quit_input "${choice}"; then
+    return 130
+  fi
+  if _alias_menu_is_back_input "${choice}"; then
+    return 0
+  fi
+  if [ -z "${choice}" ]; then
+    _alias_execute_by_name "${name}"
+    return $?
+  fi
+
+  echo "$(_alias_text alias_invalid)"
+  return 1
 }
 
 _alias_menu_category() {
@@ -747,7 +786,12 @@ _alias_menu_category() {
       return 1
     fi
 
-    _alias_show_alias_details "${names[$((choice - 1))]}" || return 1
+    _alias_menu_alias_details "${names[$((choice - 1))]}"
+    case "$?" in
+      0) ;;
+      130) return 130 ;;
+      *) return 1 ;;
+    esac
   done
 }
 
@@ -949,4 +993,3 @@ alias_self_test_reload() {
 }
 
 alias _self_test_reload='alias_self_test_reload'
-
