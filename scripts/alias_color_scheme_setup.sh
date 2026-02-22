@@ -70,7 +70,7 @@ _write_scheme_block() {
       menu_title="'\\033[1;34m'"
       menu_meta="'\\033[0;30m'"
       menu_header="'\\033[1;30m'"
-      menu_setup="'\\033[0;30m'"
+      menu_setup="'\\033[0;90m'"
       ;;
     *)
       echo "Fehler: Unbekanntes Schema '${scheme}'. Erlaubt: dark, bright"

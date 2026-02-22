@@ -773,7 +773,16 @@ _alias_category_display_name() {
 
 _alias_category_color_for_menu() {
   local category="$1"
+  local scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
   if _alias_is_setup_category "${category}"; then
+    # Rueckwaertskompatibel: fruehere bright-Defaults nutzten schwarz (0;30),
+    # was auf hellen Hintergruenden wie Standardtext wirkte.
+    if [ "${scheme}" = "bright" ] || [ "${scheme}" = "light" ]; then
+      if [ "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}" = '\033[0;30m' ]; then
+        printf '\033[0;90m'
+        return 0
+      fi
+    fi
     printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}"
     return 0
   fi
