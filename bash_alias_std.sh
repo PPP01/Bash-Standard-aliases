@@ -231,10 +231,59 @@ _alias_apply_settings_layer() {
   source "${file_path}"
 }
 
+_alias_profile_is_enabled() {
+  case "${BASH_ALIAS_PROFILE:-0}" in
+    1|true|TRUE|yes|YES|on|ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_alias_profile_now_us() {
+  local sec=""
+  local micros=""
+
+  if [ -n "${EPOCHREALTIME:-}" ]; then
+    sec="${EPOCHREALTIME%.*}"
+    micros="${EPOCHREALTIME#*.}"
+    micros="${micros}000000"
+    micros="${micros:0:6}"
+    printf '%s' "$((10#${sec} * 1000000 + 10#${micros}))"
+    return 0
+  fi
+
+  printf -v sec '%(%s)T' -1
+  printf '%s' "$((10#${sec} * 1000000))"
+}
+
+_alias_profile_print_module() {
+  local module="$1"
+  local duration_us="$2"
+  local duration_ms=0
+
+  duration_ms=$((duration_us / 1000))
+  printf 'alias-profile: %4d ms | %s\n' "${duration_ms}" "${module}" >&2
+}
+
 if [ "${#_alias_settings_layers[@]}" -gt 0 ]; then
   for _layer in "${_alias_settings_layers[@]}"; do
     _alias_apply_settings_layer "${_layer}"
   done
+fi
+
+_alias_profile_enabled=0
+_alias_profile_total_start_us=0
+_alias_profile_total_elapsed_us=0
+_alias_profile_module_start_us=0
+_alias_profile_module_us=0
+_alias_profile_modules_count=0
+_alias_profile_min_ms="${BASH_ALIAS_PROFILE_MIN_MS:-0}"
+if [[ ! "${_alias_profile_min_ms}" =~ ^[0-9]+$ ]]; then
+  _alias_profile_min_ms=0
+fi
+
+if _alias_profile_is_enabled; then
+  _alias_profile_enabled=1
+  _alias_profile_total_start_us="$(_alias_profile_now_us)"
 fi
 
 _alias_init_categories
@@ -258,6 +307,10 @@ if [ "${#_alias_config_layers[@]}" -gt 0 ]; then
     BASH_ALIAS_CATEGORY_ENABLED["${_category}"]=1
 
     if [ -f "${_full_path}" ]; then
+      if [ "${_alias_profile_enabled}" -eq 1 ]; then
+        _alias_profile_module_start_us="$(_alias_profile_now_us)"
+      fi
+
       _aliases_before="$(_alias_collect_alias_names)"
       # shellcheck disable=SC1090
       if ! source "${_full_path}"; then
@@ -266,6 +319,14 @@ if [ "${#_alias_config_layers[@]}" -gt 0 ]; then
       fi
       _aliases_after="$(_alias_collect_alias_names)"
       _alias_register_aliases_for_category "${_category}" "${_aliases_before}" "${_aliases_after}"
+
+      if [ "${_alias_profile_enabled}" -eq 1 ]; then
+        _alias_profile_module_us=$(( $(_alias_profile_now_us) - _alias_profile_module_start_us ))
+        _alias_profile_modules_count=$((_alias_profile_modules_count + 1))
+        if [ $((_alias_profile_module_us / 1000)) -ge "${_alias_profile_min_ms}" ]; then
+          _alias_profile_print_module "${_entry}" "${_alias_profile_module_us}"
+        fi
+      fi
     fi
 
     unset _full_path _category _aliases_before _aliases_after
@@ -276,7 +337,13 @@ fi
 
 _alias_sort_categories
 
+if [ "${_alias_profile_enabled}" -eq 1 ]; then
+  _alias_profile_total_elapsed_us=$(( $(_alias_profile_now_us) - _alias_profile_total_start_us ))
+  printf 'alias-profile: total %4d ms | modules=%d\n' "$((_alias_profile_total_elapsed_us / 1000))" "${_alias_profile_modules_count}" >&2
+fi
+
 unset _entry _layer _full_path _category _aliases_before _aliases_after line entry
+unset _alias_profile_enabled _alias_profile_total_start_us _alias_profile_total_elapsed_us _alias_profile_module_start_us _alias_profile_module_us _alias_profile_modules_count _alias_profile_min_ms
 unset _alias_settings_layers _alias_config_layers _alias_module_order _alias_module_enabled
 unset _alias_config_file_default _alias_config_file_local _alias_config_file_user _alias_settings_file_default _alias_settings_file_local _alias_settings_file_user _alias_base_dir _alias_categories_file
-unset -f _alias_add_category_if_missing _alias_add_module_if_missing _alias_sort_key_for_category _alias_sort_categories _alias_init_categories _alias_collect_alias_names _alias_register_aliases_for_category _alias_apply_config_layer _alias_apply_settings_layer
+unset -f _alias_add_category_if_missing _alias_add_module_if_missing _alias_sort_key_for_category _alias_sort_categories _alias_init_categories _alias_collect_alias_names _alias_register_aliases_for_category _alias_apply_config_layer _alias_apply_settings_layer _alias_profile_is_enabled _alias_profile_now_us _alias_profile_print_module
