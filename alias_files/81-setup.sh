@@ -24,4 +24,10 @@ else
   alias _alias_category_setup='echo "Fehler: scripts/alias_category_setup.sh nicht gefunden."'
 fi
 
+if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -f "${BASH_ALIAS_REPO_DIR}/scripts/alias_color_scheme_setup.sh" ]; then
+  alias _alias_setup_scheme='bash "${BASH_ALIAS_REPO_DIR}/scripts/alias_color_scheme_setup.sh"'
+else
+  alias _alias_setup_scheme='echo "Fehler: scripts/alias_color_scheme_setup.sh nicht gefunden."'
+fi
+
 unset _alias_repo_writable
