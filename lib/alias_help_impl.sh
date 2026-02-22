@@ -1213,7 +1213,6 @@ _alias_pick_category_interactive() {
   local choice=""
   local number_re='^[0-9]+$'
   local category=""
-  local rc=0
 
   while true; do
     _alias_print_category_list
@@ -1232,13 +1231,7 @@ _alias_pick_category_interactive() {
 
     if [[ "${choice}" =~ ${number_re} ]]; then
       if [ "${choice}" -eq 0 ]; then
-        _alias_menu_all_categories
-        rc=$?
-        case "${rc}" in
-          0) ;;
-          130) return 0 ;;
-          *) return 1 ;;
-        esac
+        _alias_show_all_categories
         continue
       fi
 
