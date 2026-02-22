@@ -773,6 +773,10 @@ _alias_category_display_name() {
 
 _alias_category_color_for_menu() {
   local category="$1"
+  if _alias_is_setup_category "${category}"; then
+    printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}"
+    return 0
+  fi
   # Kategorien in Auswahllisten in Terminal-Standardfarbe halten.
   printf '%s' "${BASH_ALIAS_HELP_COLOR_RESET}"
 }
