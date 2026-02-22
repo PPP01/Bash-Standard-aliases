@@ -28,7 +28,7 @@ declare -g BASH_ALIAS_MENU_DISK_CACHE_TRIED=0
 : "${BASH_ALIAS_HELP_COLOR_MENU_TITLE:=\033[0;32m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_META:=\033[0;36m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_HEADER:=\033[1;36m}"
-: "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP:=\033[0;37m}"
+: "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP:=\033[38;5;247m}"
 : "${BASH_ALIAS_HELP_COLOR_RESET:=\033[0m}"
 
 _alias_trim() {
@@ -780,6 +780,12 @@ _alias_category_color_for_menu() {
     if [ "${scheme}" = "bright" ] || [ "${scheme}" = "light" ]; then
       if [ "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}" = '\033[0;30m' ]; then
         printf '\033[0;90m'
+        return 0
+      fi
+    elif [ "${scheme}" = "dark" ]; then
+      # Rueckwaertskompatibel: alte dark-Werte koennen wie Standardtext wirken.
+      if [ "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}" = '\033[0;37m' ] || [ "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}" = '\033[0;90m' ]; then
+        printf '\033[38;5;247m'
         return 0
       fi
     fi

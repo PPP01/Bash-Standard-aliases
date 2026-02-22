@@ -63,7 +63,7 @@ _write_scheme_block() {
       menu_title="'\\033[1;36m'"
       menu_meta="'\\033[0;36m'"
       menu_header="'\\033[1;96m'"
-      menu_setup="'\\033[0;37m'"
+      menu_setup="'\\033[38;5;247m'"
       ;;
     bright)
       detail_label="'\\033[0;34m'"
@@ -117,7 +117,7 @@ _ensure_override_block() {
     echo "# BASH_ALIAS_HELP_COLOR_MENU_TITLE='\\033[1;36m'"
     echo "# BASH_ALIAS_HELP_COLOR_MENU_META='\\033[0;36m'"
     echo "# BASH_ALIAS_HELP_COLOR_MENU_HEADER='\\033[1;96m'"
-    echo "# BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP='\\033[0;37m'"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP='\\033[38;5;247m'"
     echo "# BASH_ALIAS_HELP_COLOR_RESET='\\033[0m'"
     if [ -n "${preserved_active}" ]; then
       echo "${preserved_active}"
