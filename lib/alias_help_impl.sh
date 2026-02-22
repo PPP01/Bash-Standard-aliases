@@ -773,6 +773,12 @@ _alias_category_display_name() {
 
 _alias_category_color_for_menu() {
   local category="$1"
+  # Kategorien in Auswahllisten in Terminal-Standardfarbe halten.
+  printf '%s' "${BASH_ALIAS_HELP_COLOR_RESET}"
+}
+
+_alias_category_header_color_for_menu() {
+  local category="$1"
   local scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
   # Kategorie-Ueberschriften: immer fett, mit Gruenton je nach Schema.
   # bright: dunkleres Gruen, dark: klassisches Gruen.
@@ -1051,7 +1057,7 @@ _alias_menu_category() {
     done < <(_alias_names_for_category "${category}")
 
     echo ""
-    printf '%b%s%b\n' "$(_alias_category_color_for_menu "${category}")" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b%s%b\n' "$(_alias_category_header_color_for_menu "${category}")" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
     if [ "${show_back_entry}" -eq 1 ]; then
       printf '%b %3d) %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_META}" 0 "$(_alias_text category_back)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     fi
@@ -1109,7 +1115,7 @@ _alias_show_all_categories() {
   for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
     _alias_category_is_visible "${category}" || continue
     echo ""
-    printf '%b%s%b\n' "$(_alias_category_color_for_menu "${category}")" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b%s%b\n' "$(_alias_category_header_color_for_menu "${category}")" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
     printf '%b %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     found=0
     idx=1
