@@ -90,11 +90,7 @@ color_scheme.invalid_choice	Ungültige Auswahl.
 color_scheme.saved	Farbschema '%s' gespeichert in: %s
 color_scheme.reload_hint	Für die aktuelle Shell: _alias_reload
 guided_setup.title	=== Geführtes Setup ===
-guided_setup.step_1	1) Farbschema
-guided_setup.step_2	2) Kategorien
 guided_setup.err_script_missing	Fehler: Script nicht gefunden: %s
-guided_setup.run_step_1	Schritt 1/2: Farbschema einstellen
-guided_setup.run_step_2	Schritt 2/2: Kategorien konfigurieren
 guided_setup.done	Geführtes Setup abgeschlossen.
 overrides_edit.own_help_title	Eigene Alias-Hilfe
 overrides_edit.own_help_header	## Alias-Hilfe (de)
@@ -158,7 +154,6 @@ help.short.alias.log_clean	Journal aufbewahren/bereinigen (Tage/Größe).
 help.short.alias.aua	APT Update/Upgrade/Autoremove in einem Lauf.
 help.short.alias._alias_update	Repository aktualisieren und Aliase neu laden.
 help.short.alias._alias_init	Setup-Block in Bash-Startdatei eintragen.
-help.short.alias._alias_setup	Geführtes Setup: erst Farbschema, dann Kategorien.
 help.short.alias._alias_setup_scheme	Farbschema (dark/bright) in User-Settings speichern.
 help.short.alias._alias_init_remove	Setup-Marker aus Bash-Startdatei entfernen.
 help.short.alias._alias_category_setup	Interaktives Kategorie-Setup starten.
@@ -243,7 +238,6 @@ help.desc.alias.mya	Startet mysqladmin für Admin-Operationen.
 help.desc.alias.myping	Prüft, ob der MySQL-Server antwortet.
 help.desc.alias._alias_update	Aktualisiert dieses Alias-Repository per git pull und lädt neu.
 help.desc.alias._alias_init	Trägt den markierten Setup-Block in die passende Bash-Startdatei ein.
-help.desc.alias._alias_setup	Startet das geführte Setup (Farbschema, danach Kategorien).
 help.desc.alias._alias_setup_scheme	Wählt ein Farbschema und speichert es nur in ~/.config/bash-standard-aliases/settings.conf.
 help.desc.alias._alias_init_remove	Entfernt den markierten Setup-Block aus der erkannten Bash-Startdatei.
 help.desc.alias._alias_category_setup	Startet den interaktiven Kategorie-Setup-Assistenten.
@@ -265,3 +259,31 @@ help.cmd.alias._alias_init_remove	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self
 help.cmd.alias._alias_category_setup	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"
 help.cmd.alias._alias_test_reload	bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"
 help.cmd.alias._alias_edit	alias_self_edit  (Alias-Assistent mit Ziel-Datei-Auswahl und Reload)
+language_setup.err_mkdir	Fehler: Konnte Verzeichnis nicht erstellen: %s
+language_setup.err_not_writable	Fehler: Datei ist nicht schreibbar: %s
+language_setup.err_create_file	Fehler: Konnte Datei nicht erzeugen: %s
+language_setup.header_delta	# User-Delta-Settings für bash-standard-aliases
+language_setup.header_delta_hint	# Nur Abweichungen von settings.conf / settings.local.conf
+language_setup.err_unknown_language	Fehler: Unbekannte Sprache '%s'. Erlaubt: de, en
+language_setup.managed_comment	# Von _alias_setup_language verwaltet.
+language_setup.menu_title	Sprache auswählen (Speicherort: %s)
+language_setup.menu_current	Aktuell: %s
+language_setup.menu_de	  1) de (Deutsch)
+language_setup.menu_en	  2) en (English)
+language_setup.menu_quit	  q) abbrechen
+language_setup.menu_prompt	Auswahl [1/2/q]: 
+language_setup.canceled	Abgebrochen.
+language_setup.invalid_choice	Ungültige Auswahl.
+language_setup.saved	Sprache '%s' gespeichert in: %s
+language_setup.reload_hint	Für die aktuelle Shell: _alias_reload
+help.short.alias._alias_setup_language	Sprache (de/en) in User-Settings speichern.
+help.desc.alias._alias_setup_language	Wählt die Sprache und speichert sie nur in ~/.config/bash-standard-aliases/settings.conf.
+help.cmd.alias._alias_setup_language	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_language_setup.sh\" [de|en]
+guided_setup.step_1	1) Sprache
+guided_setup.step_2	2) Farbschema
+guided_setup.step_3	3) Kategorien
+guided_setup.run_step_1	Schritt 1/3: Sprache einstellen
+guided_setup.run_step_2	Schritt 2/3: Farbschema einstellen
+guided_setup.run_step_3	Schritt 3/3: Kategorien konfigurieren
+help.short.alias._alias_setup	Geführtes Setup: Sprache, Farbschema und Kategorien.
+help.desc.alias._alias_setup	Startet das geführte Setup (Sprache, Farbschema, danach Kategorien).

@@ -90,11 +90,7 @@ color_scheme.invalid_choice	Invalid choice.
 color_scheme.saved	Color scheme '%s' saved to: %s
 color_scheme.reload_hint	For the current shell: _alias_reload
 guided_setup.title	=== Guided setup ===
-guided_setup.step_1	1) Color scheme
-guided_setup.step_2	2) Categories
 guided_setup.err_script_missing	Error: Script not found: %s
-guided_setup.run_step_1	Step 1/2: configure color scheme
-guided_setup.run_step_2	Step 2/2: configure categories
 guided_setup.done	Guided setup completed.
 overrides_edit.own_help_title	Custom alias help
 overrides_edit.own_help_header	## Alias Help (en)
@@ -158,7 +154,6 @@ help.short.alias.log_clean	Journal retention/cleanup (days/size).
 help.short.alias.aua	APT update/upgrade/autoremove in one run.
 help.short.alias._alias_update	Update repository and reload aliases.
 help.short.alias._alias_init	Write setup block to shell startup file.
-help.short.alias._alias_setup	Guided setup: color scheme first, then categories.
 help.short.alias._alias_setup_scheme	Save color scheme (dark/bright) in user settings.
 help.short.alias._alias_init_remove	Remove setup marker from shell startup file.
 help.short.alias._alias_category_setup	Start interactive category setup.
@@ -243,7 +238,6 @@ help.desc.alias.mya	Starts mysqladmin for admin operations.
 help.desc.alias.myping	Checks whether the MySQL server responds.
 help.desc.alias._alias_update	Updates this alias repository via git pull and reloads.
 help.desc.alias._alias_init	Writes the marked setup block to the detected Bash startup file.
-help.desc.alias._alias_setup	Starts guided setup (color scheme, then categories).
 help.desc.alias._alias_setup_scheme	Selects a color scheme and saves it only to ~/.config/bash-standard-aliases/settings.conf.
 help.desc.alias._alias_init_remove	Removes the marked setup block from the detected Bash startup file.
 help.desc.alias._alias_category_setup	Starts the interactive category setup wizard.
@@ -265,3 +259,31 @@ help.cmd.alias._alias_init_remove	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self
 help.cmd.alias._alias_category_setup	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"
 help.cmd.alias._alias_test_reload	bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"
 help.cmd.alias._alias_edit	alias_self_edit  (alias wizard with target-file selection and reload)
+language_setup.err_mkdir	Error: Could not create directory: %s
+language_setup.err_not_writable	Error: File is not writable: %s
+language_setup.err_create_file	Error: Could not create file: %s
+language_setup.header_delta	# User delta settings for bash-standard-aliases
+language_setup.header_delta_hint	# Store only deviations from settings.conf / settings.local.conf
+language_setup.err_unknown_language	Error: Unknown language '%s'. Allowed: de, en
+language_setup.managed_comment	# Managed by _alias_setup_language.
+language_setup.menu_title	Choose language (target: %s)
+language_setup.menu_current	Current: %s
+language_setup.menu_de	  1) de (German)
+language_setup.menu_en	  2) en (English)
+language_setup.menu_quit	  q) cancel
+language_setup.menu_prompt	Choice [1/2/q]: 
+language_setup.canceled	Canceled.
+language_setup.invalid_choice	Invalid choice.
+language_setup.saved	Language '%s' saved to: %s
+language_setup.reload_hint	For the current shell: _alias_reload
+help.short.alias._alias_setup_language	Save language (de/en) in user settings.
+help.desc.alias._alias_setup_language	Selects language and saves it only to ~/.config/bash-standard-aliases/settings.conf.
+help.cmd.alias._alias_setup_language	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_language_setup.sh\" [de|en]
+guided_setup.step_1	1) Language
+guided_setup.step_2	2) Color scheme
+guided_setup.step_3	3) Categories
+guided_setup.run_step_1	Step 1/3: configure language
+guided_setup.run_step_2	Step 2/3: configure color scheme
+guided_setup.run_step_3	Step 3/3: configure categories
+help.short.alias._alias_setup	Guided setup: language, color scheme and categories.
+help.desc.alias._alias_setup	Starts guided setup (language, color scheme, then categories).

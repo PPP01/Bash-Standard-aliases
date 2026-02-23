@@ -11,7 +11,7 @@ Typical examples:
 - Processes and network: `psmem`, `pscpu`, `ports`, `myip`
 - Git workflow: `gs`, `ga`, `gcm`, `gpl`
 - System services/logs (root): `start nginx`, `status ssh`, `logs nginx`
-- Self-management: `_alias_init`, `_alias_category_setup`, `_alias_update`, `_alias_edit`
+- Self-management: `_alias_init`, `_alias_setup_language`, `_alias_category_setup`, `_alias_update`, `_alias_edit`
 
 ## 2. Install
 ```bash
@@ -41,9 +41,10 @@ _alias_init_remove
 ```
 
 ## 3. Guided setup (`_alias_setup`)
-`_alias_setup` starts a guided two-step flow:
-1. Set color scheme
-2. Configure categories
+`_alias_setup` starts a guided three-step flow:
+1. Set language
+2. Set color scheme
+3. Configure categories
 
 ```bash
 _alias_setup
@@ -167,6 +168,11 @@ Set language with `BASH_ALIAS_LOCALE`:
 export BASH_ALIAS_LOCALE=en
 # or
 export BASH_ALIAS_LOCALE=de
+```
+
+Interactive user settings helper:
+```bash
+_alias_setup_language
 ```
 
 Scope:

@@ -9,7 +9,7 @@ Typische Beispiele:
 - Prozesse und Netzwerk: `psmem`, `pscpu`, `ports`, `myip`
 - Git-Workflow: `gs`, `ga`, `gcm`, `gpl`
 - Systemdienste/Logs (root): `start nginx`, `status ssh`, `logs nginx`
-- Selbstverwaltung: `_alias_init`, `_alias_category_setup`, `_alias_update`, `_alias_edit`
+- Selbstverwaltung: `_alias_init`, `_alias_setup_language`, `_alias_category_setup`, `_alias_update`, `_alias_edit`
 
 ## 2. Installation
 ```bash
@@ -46,9 +46,10 @@ _alias_init_remove
 ```
 
 ## 3. Kategorie-Konfiguration per `_alias_setup`
-`_alias_setup` startet ein geführtes Setup mit zwei Schritten:
-1. Farbschema einstellen
-2. Kategorien konfigurieren
+`_alias_setup` startet ein geführtes Setup mit drei Schritten:
+1. Sprache einstellen
+2. Farbschema einstellen
+3. Kategorien konfigurieren
 
 ```bash
 _alias_setup

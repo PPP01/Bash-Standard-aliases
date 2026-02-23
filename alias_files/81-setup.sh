@@ -37,4 +37,10 @@ else
   alias _alias_setup_scheme='echo "Fehler: scripts/alias_color_scheme_setup.sh nicht gefunden."'
 fi
 
+if [ -n "${BASH_ALIAS_REPO_DIR:-}" ] && [ -f "${BASH_ALIAS_REPO_DIR}/scripts/alias_language_setup.sh" ]; then
+  alias _alias_setup_language='bash "${BASH_ALIAS_REPO_DIR}/scripts/alias_language_setup.sh"'
+else
+  alias _alias_setup_language='echo "Fehler: scripts/alias_language_setup.sh nicht gefunden."'
+fi
+
 unset _alias_repo_writable
