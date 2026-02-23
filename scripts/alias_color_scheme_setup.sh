@@ -87,8 +87,8 @@ _write_scheme_block() {
       menu_header="'\\033[1;30m'"
       menu_setup="'\\033[0;90m'"
       menu_category_header="'\\033[1;38;5;22m'"
-      menu_highlight_line="'\\033[1;30;47m'"
-      menu_highlight_marker="'\\033[1;37m'"
+      menu_highlight_line="'\\033[1;97;100m'"
+      menu_highlight_marker="'\\033[1;34m'"
       ;;
     *)
       printf "$(_text err_unknown_scheme)\n" "${scheme}"
@@ -117,7 +117,50 @@ _write_scheme_block() {
 }
 
 _ensure_override_block() {
+  local scheme="${1:-dark}"
   local preserved_active=""
+  local sample_detail_label=""
+  local sample_menu_title=""
+  local sample_menu_meta=""
+  local sample_menu_header=""
+  local sample_menu_category_header=""
+  local sample_menu_category_setup=""
+  local sample_menu_highlight_line=""
+  local sample_menu_highlight_marker=""
+  local sample_color_reset="'\\033[0m'"
+
+  case "${scheme}" in
+    dark)
+      sample_detail_label="'\\033[1;32m'"
+      sample_menu_title="'\\033[1;36m'"
+      sample_menu_meta="'\\033[0;36m'"
+      sample_menu_header="'\\033[1;96m'"
+      sample_menu_category_header="'\\033[1;32m'"
+      sample_menu_category_setup="'\\033[38;5;247m'"
+      sample_menu_highlight_line="'\\033[1;97;44m'"
+      sample_menu_highlight_marker="'\\033[1;96m'"
+      ;;
+    bright)
+      sample_detail_label="'\\033[0;34m'"
+      sample_menu_title="'\\033[1;34m'"
+      sample_menu_meta="'\\033[0;30m'"
+      sample_menu_header="'\\033[1;30m'"
+      sample_menu_category_header="'\\033[1;38;5;22m'"
+      sample_menu_category_setup="'\\033[0;90m'"
+      sample_menu_highlight_line="'\\033[1;97;100m'"
+      sample_menu_highlight_marker="'\\033[1;34m'"
+      ;;
+    *)
+      sample_detail_label="'\\033[1;32m'"
+      sample_menu_title="'\\033[1;36m'"
+      sample_menu_meta="'\\033[0;36m'"
+      sample_menu_header="'\\033[1;96m'"
+      sample_menu_category_header="'\\033[1;32m'"
+      sample_menu_category_setup="'\\033[38;5;247m'"
+      sample_menu_highlight_line="'\\033[1;97;44m'"
+      sample_menu_highlight_marker="'\\033[1;96m'"
+      ;;
+  esac
 
   preserved_active="$(awk -v start="${_override_block_start}" -v end="${_override_block_end}" '
     $0 == start { in_block=1; next }
@@ -134,15 +177,15 @@ _ensure_override_block() {
     echo "${_override_block_start}"
     echo "$(_text override_comment_1)"
     echo "$(_text override_comment_2)"
-    echo "# BASH_ALIAS_HELP_COLOR_DETAIL_LABEL='\\033[1;32m'"
-    echo "# BASH_ALIAS_HELP_COLOR_MENU_TITLE='\\033[1;36m'"
-    echo "# BASH_ALIAS_HELP_COLOR_MENU_META='\\033[0;36m'"
-    echo "# BASH_ALIAS_HELP_COLOR_MENU_HEADER='\\033[1;96m'"
-    echo "# BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_HEADER='\\033[1;32m'"
-    echo "# BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP='\\033[38;5;247m'"
-    echo "# BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_LINE='\\033[1;97;44m'"
-    echo "# BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_MARKER='\\033[1;96m'"
-    echo "# BASH_ALIAS_HELP_COLOR_RESET='\\033[0m'"
+    echo "# BASH_ALIAS_HELP_COLOR_DETAIL_LABEL=${sample_detail_label}"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_TITLE=${sample_menu_title}"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_META=${sample_menu_meta}"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_HEADER=${sample_menu_header}"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_HEADER=${sample_menu_category_header}"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP=${sample_menu_category_setup}"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_LINE=${sample_menu_highlight_line}"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_MARKER=${sample_menu_highlight_marker}"
+    echo "# BASH_ALIAS_HELP_COLOR_RESET=${sample_color_reset}"
     if [ -n "${preserved_active}" ]; then
       echo "${preserved_active}"
     fi
@@ -186,7 +229,7 @@ main() {
   fi
 
   _write_scheme_block "${scheme}"
-  _ensure_override_block
+  _ensure_override_block "${scheme}"
 
   printf "$(_text saved)\n" "${scheme}" "${_user_settings_file}"
   echo "$(_text reload_hint)"
