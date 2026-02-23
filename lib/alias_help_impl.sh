@@ -196,7 +196,24 @@ _alias_menu_read_input() {
   local read_rc=0
 
   printf '%s' "${prompt}"
-  while IFS= read -r -s -n 1 key; do
+  while true; do
+    if _alias_menu_was_interrupted; then
+      echo ""
+      return 130
+    fi
+    if ! IFS= read -r -s -n 1 -t 0.1 key; then
+      read_rc=$?
+      if [ "${read_rc}" -eq 130 ]; then
+        echo ""
+        return 130
+      fi
+      case "${read_rc}" in
+        142) continue ;;
+        1) break ;;
+        *) continue ;;
+      esac
+    fi
+    read_rc=0
     case "${key}" in
       $'\x03')
         echo ""
@@ -260,7 +277,6 @@ _alias_menu_read_input() {
         ;;
     esac
   done
-  read_rc=$?
 
   if [ "${BASH_ALIAS_MENU_INTERRUPTED}" -eq 1 ] || [ "${read_rc}" -eq 130 ]; then
     BASH_ALIAS_MENU_INTERRUPTED=0
