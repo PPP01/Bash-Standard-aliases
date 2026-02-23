@@ -115,7 +115,7 @@ _alias_menu_tty_raw_enter() {
   mode="$(stty -g 2>/dev/null || true)"
   [ -n "${mode}" ] || return 0
   BASH_ALIAS_MENU_TTY_MODE_SAVED="${mode}"
-  if stty -echo -icanon min 1 time 0 2>/dev/null; then
+  if stty -echo -icanon -isig min 1 time 0 2>/dev/null; then
     BASH_ALIAS_MENU_TTY_MODE_ACTIVE=1
   fi
 }
@@ -198,6 +198,10 @@ _alias_menu_read_input() {
   printf '%s' "${prompt}"
   while IFS= read -r -s -n 1 key; do
     case "${key}" in
+      $'\x03')
+        echo ""
+        return 130
+        ;;
       '')
         break
         ;;
