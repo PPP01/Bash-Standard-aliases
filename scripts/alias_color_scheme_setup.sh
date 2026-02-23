@@ -63,7 +63,10 @@ _write_scheme_block() {
   local menu_title=""
   local menu_meta=""
   local menu_header=""
+  local menu_category_header=""
   local menu_setup=""
+  local menu_highlight_line=""
+  local menu_highlight_marker=""
   local color_reset="'\\033[0m'"
 
   case "${scheme}" in
@@ -72,7 +75,10 @@ _write_scheme_block() {
       menu_title="'\\033[1;36m'"
       menu_meta="'\\033[0;36m'"
       menu_header="'\\033[1;96m'"
+      menu_category_header="'\\033[1;32m'"
       menu_setup="'\\033[38;5;247m'"
+      menu_highlight_line="'\\033[1;97;44m'"
+      menu_highlight_marker="'\\033[1;96m'"
       ;;
     bright)
       detail_label="'\\033[0;34m'"
@@ -80,6 +86,9 @@ _write_scheme_block() {
       menu_meta="'\\033[0;30m'"
       menu_header="'\\033[1;30m'"
       menu_setup="'\\033[0;90m'"
+      menu_category_header="'\\033[1;38;5;22m'"
+      menu_highlight_line="'\\033[1;97;100m'"
+      menu_highlight_marker="'\\033[1;34m'"
       ;;
     *)
       printf "$(_text err_unknown_scheme)\n" "${scheme}"
@@ -98,7 +107,10 @@ _write_scheme_block() {
     echo "BASH_ALIAS_HELP_COLOR_MENU_TITLE=${menu_title}"
     echo "BASH_ALIAS_HELP_COLOR_MENU_META=${menu_meta}"
     echo "BASH_ALIAS_HELP_COLOR_MENU_HEADER=${menu_header}"
+    echo "BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_HEADER=${menu_category_header}"
     echo "BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP=${menu_setup}"
+    echo "BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_LINE=${menu_highlight_line}"
+    echo "BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_MARKER=${menu_highlight_marker}"
     echo "BASH_ALIAS_HELP_COLOR_RESET=${color_reset}"
     echo "${_scheme_block_end}"
   } >> "${_user_settings_file}"
@@ -110,7 +122,7 @@ _ensure_override_block() {
   preserved_active="$(awk -v start="${_override_block_start}" -v end="${_override_block_end}" '
     $0 == start { in_block=1; next }
     $0 == end { in_block=0; next }
-    in_block && $0 ~ /^[[:space:]]*BASH_ALIAS_HELP_COLOR_(DETAIL_LABEL|MENU_TITLE|MENU_META|MENU_HEADER|MENU_CATEGORY_SETUP|RESET)[[:space:]]*=/ {
+    in_block && $0 ~ /^[[:space:]]*BASH_ALIAS_HELP_COLOR_(DETAIL_LABEL|MENU_TITLE|MENU_META|MENU_HEADER|MENU_CATEGORY_HEADER|MENU_CATEGORY_SETUP|MENU_HIGHLIGHT_LINE|MENU_HIGHLIGHT_MARKER|RESET)[[:space:]]*=/ {
       print $0
     }
   ' "${_user_settings_file}")"
@@ -126,7 +138,10 @@ _ensure_override_block() {
     echo "# BASH_ALIAS_HELP_COLOR_MENU_TITLE='\\033[1;36m'"
     echo "# BASH_ALIAS_HELP_COLOR_MENU_META='\\033[0;36m'"
     echo "# BASH_ALIAS_HELP_COLOR_MENU_HEADER='\\033[1;96m'"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_HEADER='\\033[1;32m'"
     echo "# BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP='\\033[38;5;247m'"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_LINE='\\033[1;97;44m'"
+    echo "# BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_MARKER='\\033[1;96m'"
     echo "# BASH_ALIAS_HELP_COLOR_RESET='\\033[0m'"
     if [ -n "${preserved_active}" ]; then
       echo "${preserved_active}"

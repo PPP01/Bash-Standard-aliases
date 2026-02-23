@@ -40,6 +40,9 @@ declare -g BASH_ALIAS_MENU_SAVED_TRAP_TERM=""
 : "${BASH_ALIAS_HELP_COLOR_MENU_META:=\033[0;36m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_HEADER:=\033[1;36m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP:=\033[38;5;247m}"
+: "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_HEADER:=\033[1;32m}"
+: "${BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_LINE:=\033[1;97;44m}"
+: "${BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_MARKER:=\033[1;96m}"
 : "${BASH_ALIAS_HELP_COLOR_RESET:=\033[0m}"
 
 _alias_trim() {
@@ -854,22 +857,7 @@ _alias_category_display_name() {
 
 _alias_category_color_for_menu() {
   local category="$1"
-  local scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
   if _alias_is_setup_category "${category}"; then
-    # Rueckwaertskompatibel: fruehere bright-Defaults nutzten schwarz (0;30),
-    # was auf hellen Hintergruenden wie Standardtext wirkte.
-    if [ "${scheme}" = "bright" ] || [ "${scheme}" = "light" ]; then
-      if [ "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}" = '\033[0;30m' ]; then
-        printf '\033[0;90m'
-        return 0
-      fi
-    elif [ "${scheme}" = "dark" ]; then
-      # Rueckwaertskompatibel: alte dark-Werte koennen wie Standardtext wirken.
-      if [ "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}" = '\033[0;37m' ] || [ "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}" = '\033[0;90m' ]; then
-        printf '\033[38;5;247m'
-        return 0
-      fi
-    fi
     printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}"
     return 0
   fi
@@ -878,44 +866,15 @@ _alias_category_color_for_menu() {
 }
 
 _alias_category_header_color_for_menu() {
-  local category="$1"
-  local scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
-  # Kategorie-Ueberschriften: immer fett, mit Gruenton je nach Schema.
-  # bright: dunkleres Gruen, dark: klassisches Gruen.
-  case "${scheme}" in
-    bright|light)
-      printf '\033[1;38;5;22m'
-      ;;
-    *)
-      printf '\033[1;32m'
-      ;;
-  esac
+  printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_HEADER}"
 }
 
 _alias_menu_highlight_line_color() {
-  local scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
-  case "${scheme}" in
-    bright|light)
-      # Bright terminals: dark text on cyan background for visible hover contrast.
-      printf '\033[1;30;106m'
-      ;;
-    *)
-      # Dark terminals: bright text on blue background.
-      printf '\033[1;97;44m'
-      ;;
-  esac
+  printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_LINE}"
 }
 
 _alias_menu_highlight_marker_color() {
-  local scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
-  case "${scheme}" in
-    bright|light)
-      printf '\033[1;34m'
-      ;;
-    *)
-      printf '\033[1;96m'
-      ;;
-  esac
+  printf '%s' "${BASH_ALIAS_HELP_COLOR_MENU_HIGHLIGHT_MARKER}"
 }
 
 _alias_names_for_category() {
