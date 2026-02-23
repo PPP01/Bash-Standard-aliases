@@ -30,6 +30,10 @@ declare -g BASH_ALIAS_MENU_DISK_CACHE_TRIED=0
 declare -g BASH_ALIAS_MENU_LAST_RENDER_LINES=0
 declare -g BASH_ALIAS_MENU_RENDER_ACTIVE=0
 declare -g BASH_ALIAS_MENU_CURSOR_HIDDEN=0
+declare -g BASH_ALIAS_MENU_TTY_MODE_ACTIVE=0
+declare -g BASH_ALIAS_MENU_TTY_MODE_SAVED=""
+declare -g BASH_ALIAS_MENU_SAVED_TRAP_INT=""
+declare -g BASH_ALIAS_MENU_SAVED_TRAP_TERM=""
 
 : "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL:=\033[0;32m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_TITLE:=\033[0;32m}"
@@ -61,10 +65,71 @@ _alias_menu_is_quit_input() {
   esac
 }
 
+_alias_menu_tty_raw_enabled() {
+  case "${BASH_ALIAS_MENU_TTY_RAW:-1}" in
+    1|true|TRUE|yes|YES|on|ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_alias_menu_session_begin() {
+  _alias_menu_tty_raw_enter
+  BASH_ALIAS_MENU_SAVED_TRAP_INT="$(trap -p INT || true)"
+  BASH_ALIAS_MENU_SAVED_TRAP_TERM="$(trap -p TERM || true)"
+  trap '_alias_menu_session_end' INT TERM
+}
+
+_alias_menu_session_end() {
+  _alias_menu_tty_raw_leave
+  _alias_menu_redraw_reset
+  if [ -n "${BASH_ALIAS_MENU_SAVED_TRAP_INT}" ]; then
+    eval "${BASH_ALIAS_MENU_SAVED_TRAP_INT}"
+  else
+    trap - INT
+  fi
+  if [ -n "${BASH_ALIAS_MENU_SAVED_TRAP_TERM}" ]; then
+    eval "${BASH_ALIAS_MENU_SAVED_TRAP_TERM}"
+  else
+    trap - TERM
+  fi
+  BASH_ALIAS_MENU_SAVED_TRAP_INT=""
+  BASH_ALIAS_MENU_SAVED_TRAP_TERM=""
+}
+
+_alias_menu_tty_raw_enter() {
+  local mode=""
+  _alias_menu_tty_raw_enabled || return 0
+  [ -t 0 ] || return 0
+  command -v stty >/dev/null 2>&1 || return 0
+  [ "${BASH_ALIAS_MENU_TTY_MODE_ACTIVE}" -eq 0 ] || return 0
+
+  mode="$(stty -g 2>/dev/null || true)"
+  [ -n "${mode}" ] || return 0
+  BASH_ALIAS_MENU_TTY_MODE_SAVED="${mode}"
+  if stty -echo -icanon min 1 time 0 2>/dev/null; then
+    BASH_ALIAS_MENU_TTY_MODE_ACTIVE=1
+  fi
+}
+
+_alias_menu_tty_raw_leave() {
+  _alias_menu_tty_raw_enabled || return 0
+  [ "${BASH_ALIAS_MENU_TTY_MODE_ACTIVE}" -eq 1 ] || return 0
+  command -v stty >/dev/null 2>&1 || return 0
+
+  if [ -n "${BASH_ALIAS_MENU_TTY_MODE_SAVED}" ]; then
+    stty "${BASH_ALIAS_MENU_TTY_MODE_SAVED}" 2>/dev/null || true
+  else
+    stty sane 2>/dev/null || true
+  fi
+  BASH_ALIAS_MENU_TTY_MODE_ACTIVE=0
+  BASH_ALIAS_MENU_TTY_MODE_SAVED=""
+}
+
 _alias_menu_read_input() {
   local prompt="$1"
   local key=""
   local seq=""
+  local csi=""
   local value=""
 
   printf '%s' "${prompt}"
@@ -75,8 +140,15 @@ _alias_menu_read_input() {
         ;;
       $'\e')
         if IFS= read -r -s -n 1 -t 0.05 seq; then
-          if [ "${seq}" = "[" ] && IFS= read -r -s -n 1 -t 0.05 seq; then
-            case "${seq}" in
+          if [ "${seq}" = "[" ]; then
+            csi=""
+            while IFS= read -r -s -n 1 -t 0.02 seq; do
+              csi+="${seq}"
+              case "${seq}" in
+                [[:alpha:]~]) break ;;
+              esac
+            done
+            case "${csi}" in
               A)
                 echo ""
                 REPLY="up"
@@ -1480,45 +1552,52 @@ _alias_pick_category_interactive() {
 a() {
   local category=""
   local rc=0
-  _alias_menu_redraw_reset
-  _alias_menu_cache_build || return 1
+  _alias_menu_session_begin
+  _alias_menu_cache_build || {
+    rc=1
+    _alias_menu_session_end
+    return "${rc}"
+  }
 
   if [ -n "${1:-}" ]; then
     if builtin alias -- "$1" >/dev/null 2>&1; then
       _alias_show_alias_details "$1"
-      _alias_menu_redraw_reset
-      return $?
+      rc=$?
+      _alias_menu_session_end
+      return "${rc}"
     fi
 
     category="$(_alias_resolve_category_input "$1")" || {
       printf '%s\n' "$(_alias_i18n_text "help.unknown_alias_or_category" "$1")"
       echo "$(_alias_i18n_text "help.use_a_for_selection")"
-      _alias_menu_redraw_reset
-      return 1
+      rc=1
+      _alias_menu_session_end
+      return "${rc}"
     }
   else
     _alias_pick_category_interactive
     rc=$?
-    _alias_menu_redraw_reset
     case "${rc}" in
-      130) return 0 ;;
-      *) return "${rc}" ;;
+      130) rc=0 ;;
     esac
+    _alias_menu_session_end
+    return "${rc}"
   fi
 
   if [ "${category}" = "all" ]; then
     _alias_show_all_categories
-    _alias_menu_redraw_reset
-    return 0
+    rc=0
+    _alias_menu_session_end
+    return "${rc}"
   fi
 
   _alias_menu_category "${category}" 0
   rc=$?
-  _alias_menu_redraw_reset
   case "${rc}" in
-    130) return 0 ;;
-    *) return "${rc}" ;;
+    130) rc=0 ;;
   esac
+  _alias_menu_session_end
+  return "${rc}"
 }
 
 alias_menu_cache_warmup() {
