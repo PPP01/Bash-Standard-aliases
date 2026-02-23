@@ -896,8 +896,8 @@ _alias_menu_highlight_line_color() {
   local scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
   case "${scheme}" in
     bright|light)
-      # Bright terminals: dark text on light background.
-      printf '\033[1;30;47m'
+      # Bright terminals: dark text on cyan background for visible hover contrast.
+      printf '\033[1;30;106m'
       ;;
     *)
       # Dark terminals: bright text on blue background.
@@ -1312,6 +1312,7 @@ _alias_menu_all_categories() {
   local selected_number=0
   local marker=""
   local line_color=""
+  local display_color=""
   local rendered_entries=0
   local render_lines=0
   local -a menu_categories=()
@@ -1336,13 +1337,15 @@ _alias_menu_all_categories() {
       selected_number="${#menu_categories[@]}"
       marker=" "
       line_color=""
+      display_color="$(_alias_category_color_for_menu "${category}")"
       if [ "${selected}" -eq "${selected_number}" ]; then
         marker=">"
         line_color="$(_alias_menu_highlight_line_color)"
+        display_color=""
       fi
       printf ' %b%s%b %b %3d) %b%s%b%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
-        "${line_color}" "${number}" "$(_alias_category_color_for_menu "${category}")" "$(_alias_category_display_name "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}" "${BASH_ALIAS_HELP_COLOR_RESET}"
+        "${line_color}" "${number}" "${display_color}" "$(_alias_category_display_name "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}" "${BASH_ALIAS_HELP_COLOR_RESET}"
       rendered_entries=$((rendered_entries + 1))
     done
 
@@ -1354,13 +1357,15 @@ _alias_menu_all_categories() {
       selected_number="${#menu_categories[@]}"
       marker=" "
       line_color=""
+      display_color="$(_alias_category_color_for_menu "${category}")"
       if [ "${selected}" -eq "${selected_number}" ]; then
         marker=">"
         line_color="$(_alias_menu_highlight_line_color)"
+        display_color=""
       fi
       printf ' %b%s%b %b %3d) %b%s%b%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
-        "${line_color}" "${number}" "$(_alias_category_color_for_menu "${category}")" "$(_alias_category_display_name "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}" "${BASH_ALIAS_HELP_COLOR_RESET}"
+        "${line_color}" "${number}" "${display_color}" "$(_alias_category_display_name "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}" "${BASH_ALIAS_HELP_COLOR_RESET}"
       rendered_entries=$((rendered_entries + 1))
     done
     if [ "${#menu_categories[@]}" -le 0 ]; then
@@ -1447,6 +1452,7 @@ _alias_pick_category_interactive() {
   local display=""
   local state=""
   local color=""
+  local display_color=""
   local rendered_entries=0
   local render_lines=0
   local -a menu_categories=()
@@ -1477,13 +1483,15 @@ _alias_pick_category_interactive() {
       selected_number="${#menu_categories[@]}"
       marker=" "
       line_color=""
+      display_color="${color}"
       if [ "${selected}" -eq "${selected_number}" ]; then
         marker=">"
         line_color="$(_alias_menu_highlight_line_color)"
+        display_color=""
       fi
       printf ' %b%s%b %b%b%3d) %-12s%b [%s]%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
-        "${line_color}" "${color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" "${BASH_ALIAS_HELP_COLOR_RESET}"
+        "${line_color}" "${display_color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" "${BASH_ALIAS_HELP_COLOR_RESET}"
       rendered_entries=$((rendered_entries + 1))
     done
 
@@ -1501,13 +1509,15 @@ _alias_pick_category_interactive() {
       selected_number="${#menu_categories[@]}"
       marker=" "
       line_color=""
+      display_color="${color}"
       if [ "${selected}" -eq "${selected_number}" ]; then
         marker=">"
         line_color="$(_alias_menu_highlight_line_color)"
+        display_color=""
       fi
       printf ' %b%s%b %b%b%3d) %-12s%b [%s]%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
-        "${line_color}" "${color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" "${BASH_ALIAS_HELP_COLOR_RESET}"
+        "${line_color}" "${display_color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" "${BASH_ALIAS_HELP_COLOR_RESET}"
       rendered_entries=$((rendered_entries + 1))
     done
     if [ "${#menu_categories[@]}" -le 0 ]; then
