@@ -1000,7 +1000,7 @@ _alias_menu_category_title_line() {
   local pad=""
 
   display="$(_alias_category_display_name "${category}")"
-  printf -v header_line '   %4s | %-18s | %s' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
+  printf -v header_line ' %1s %4s | %-18s | %s' "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
   title_line="=== ${display} ==="
   pad_len=$((${#header_line} - ${#title_line}))
   if [ "${pad_len}" -gt 0 ]; then
@@ -1027,6 +1027,7 @@ _alias_menu_category() {
   local marker=""
   local line_color=""
   local total=0
+  local max_select=0
   local render_lines=0
   local -a names=()
 
@@ -1041,26 +1042,20 @@ _alias_menu_category() {
     echo ""
     printf '%b%s%b\n' "$(_alias_category_header_color_for_menu "${category}")" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
     total="${#names[@]}"
-    if [ "${show_back_entry}" -eq 1 ]; then
-      total=$((total + 1))
-    fi
-    if [ "${total}" -le 0 ]; then
+    max_select="${total}"
+    if [ "${max_select}" -le 0 ]; then
       selected=0
-    elif [ "${selected}" -lt 1 ] || [ "${selected}" -gt "${total}" ]; then
+    elif [ "${selected}" -lt 1 ] || [ "${selected}" -gt "${max_select}" ]; then
       selected=1
     fi
     if [ "${show_back_entry}" -eq 1 ]; then
       marker=" "
       line_color=""
-      if [ "${selected}" -eq 1 ]; then
-        marker=">"
-        line_color="$(_alias_menu_highlight_line_color)"
-      fi
       printf ' %b%s%b %b %3d) %s%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
         "${line_color}" 0 "$(_alias_text category_back)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     fi
-    printf '%b   %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b %1s %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
 
     if [ "${#names[@]}" -eq 0 ]; then
       echo "$(_alias_text category_empty)"
@@ -1072,9 +1067,6 @@ _alias_menu_category() {
         _alias_menu_short_description_for_name "${name}" "${raw_cmd}"
         short_desc="${REPLY:-}"
         selected_number="${idx}"
-        if [ "${show_back_entry}" -eq 1 ]; then
-          selected_number=$((idx + 1))
-        fi
         marker=" "
         line_color=""
         if [ "${selected}" -eq "${selected_number}" ]; then
@@ -1109,9 +1101,9 @@ _alias_menu_category() {
     fi
     case "${choice}" in
       up)
-        if [ "${total}" -gt 0 ]; then
+        if [ "${max_select}" -gt 0 ]; then
           if [ "${selected}" -le 1 ]; then
-            selected="${total}"
+            selected="${max_select}"
           else
             selected=$((selected - 1))
           fi
@@ -1119,8 +1111,8 @@ _alias_menu_category() {
         continue
         ;;
       down)
-        if [ "${total}" -gt 0 ]; then
-          if [ "${selected}" -ge "${total}" ]; then
+        if [ "${max_select}" -gt 0 ]; then
+          if [ "${selected}" -ge "${max_select}" ]; then
             selected=1
           else
             selected=$((selected + 1))
@@ -1129,18 +1121,11 @@ _alias_menu_category() {
         continue
         ;;
       right|'')
-        if [ "${total}" -le 0 ]; then
+        if [ "${max_select}" -le 0 ]; then
           echo "$(_alias_text alias_invalid)"
           return 1
         fi
-        if [ "${show_back_entry}" -eq 1 ] && [ "${selected}" -eq 1 ]; then
-          return 0
-        fi
-        if [ "${show_back_entry}" -eq 1 ]; then
-          selected_name="${names[$((selected - 2))]}"
-        else
-          selected_name="${names[$((selected - 1))]}"
-        fi
+        selected_name="${names[$((selected - 1))]}"
         _alias_menu_alias_details "${selected_name}"
         case "$?" in
           0) ;;
@@ -1161,11 +1146,7 @@ _alias_menu_category() {
     fi
 
     _alias_menu_alias_details "${names[$((choice - 1))]}"
-    if [ "${show_back_entry}" -eq 1 ]; then
-      selected=$((choice + 1))
-    else
-      selected="${choice}"
-    fi
+    selected="${choice}"
     case "$?" in
       0) ;;
       130) return 130 ;;
@@ -1186,7 +1167,7 @@ _alias_show_all_categories() {
     _alias_category_is_visible "${category}" || continue
     echo ""
     printf '%b%s%b\n' "$(_alias_category_header_color_for_menu "${category}")" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
-    printf '%b   %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b %1s %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     found=0
     idx=1
     while IFS= read -r name; do
@@ -1195,7 +1176,7 @@ _alias_show_all_categories() {
       raw_cmd="${REPLY:-}"
       _alias_menu_short_description_for_name "${name}" "${raw_cmd}"
       short_desc="${REPLY:-}"
-      printf ' %3d) | %-18s | %s\n' "${idx}" "${name}" "${short_desc}"
+      printf ' %1s %3d) | %-18s | %s\n' "" "${idx}" "${name}" "${short_desc}"
       idx=$((idx + 1))
       found=1
     done < <(_alias_names_for_category "${category}")
@@ -1227,10 +1208,6 @@ _alias_menu_all_categories() {
     printf '%b=== %s ===%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_text all_categories_title)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     marker=" "
     line_color=""
-    if [ "${selected}" -eq 1 ]; then
-      marker=">"
-      line_color="$(_alias_menu_highlight_line_color)"
-    fi
     printf ' %b%s%b %b %3d) %s%b\n' \
       "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
       "${line_color}" 0 "$(_alias_text all_categories_back)" "${BASH_ALIAS_HELP_COLOR_RESET}"
@@ -1241,7 +1218,6 @@ _alias_menu_all_categories() {
       menu_categories+=("${category}")
       number="$(_alias_category_number_for_name "${category}")" || continue
       selected_number="${#menu_categories[@]}"
-      selected_number=$((selected_number + 1))
       marker=" "
       line_color=""
       if [ "${selected}" -eq "${selected_number}" ]; then
@@ -1260,7 +1236,6 @@ _alias_menu_all_categories() {
       menu_categories+=("${category}")
       number="$(_alias_category_number_for_name "${category}")" || continue
       selected_number="${#menu_categories[@]}"
-      selected_number=$((selected_number + 1))
       marker=" "
       line_color=""
       if [ "${selected}" -eq "${selected_number}" ]; then
@@ -1272,7 +1247,9 @@ _alias_menu_all_categories() {
         "${line_color}" "${number}" "$(_alias_category_color_for_menu "${category}")" "$(_alias_category_display_name "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}" "${BASH_ALIAS_HELP_COLOR_RESET}"
       rendered_entries=$((rendered_entries + 1))
     done
-    if [ "${selected}" -lt 1 ] || [ "${selected}" -gt "$((1 + ${#menu_categories[@]}))" ]; then
+    if [ "${#menu_categories[@]}" -le 0 ]; then
+      selected=0
+    elif [ "${selected}" -lt 1 ] || [ "${selected}" -gt "${#menu_categories[@]}" ]; then
       selected=1
     fi
     render_lines=$((1 + 1 + 1 + rendered_entries))
@@ -1290,7 +1267,7 @@ _alias_menu_all_categories() {
       up)
         if [ "${#menu_categories[@]}" -gt 0 ]; then
           if [ "${selected}" -le 1 ]; then
-            selected=$((1 + ${#menu_categories[@]}))
+            selected="${#menu_categories[@]}"
           else
             selected=$((selected - 1))
           fi
@@ -1299,7 +1276,7 @@ _alias_menu_all_categories() {
         ;;
       down)
         if [ "${#menu_categories[@]}" -gt 0 ]; then
-          if [ "${selected}" -ge "$((1 + ${#menu_categories[@]}))" ]; then
+          if [ "${selected}" -ge "${#menu_categories[@]}" ]; then
             selected=1
           else
             selected=$((selected + 1))
@@ -1308,10 +1285,11 @@ _alias_menu_all_categories() {
         continue
         ;;
       right|'')
-        if [ "${selected}" -eq 1 ]; then
-          return 0
+        if [ "${#menu_categories[@]}" -le 0 ] || [ "${selected}" -lt 1 ]; then
+          echo "$(_alias_text alias_invalid)"
+          return 1
         fi
-        category="${menu_categories[$((selected - 2))]}"
+        category="${menu_categories[$((selected - 1))]}"
         _alias_menu_category "${category}"
         case "$?" in
           0) ;;
@@ -1365,10 +1343,6 @@ _alias_pick_category_interactive() {
     printf '%b%s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_text categories_title)" "${BASH_ALIAS_HELP_COLOR_RESET}" >&2
     marker=" "
     line_color=""
-    if [ "${selected}" -eq 1 ]; then
-      marker=">"
-      line_color="$(_alias_menu_highlight_line_color)"
-    fi
     printf ' %b%s%b %b%3d) %-12s%b\n' \
       "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
       "${line_color}" 0 "$(_alias_text categories_back)" "${BASH_ALIAS_HELP_COLOR_RESET}" >&2
@@ -1385,7 +1359,6 @@ _alias_pick_category_interactive() {
       display="$(_alias_category_display_name "${category}")"
       color="$(_alias_category_color_for_menu "${category}")"
       selected_number="${#menu_categories[@]}"
-      selected_number=$((selected_number + 1))
       marker=" "
       line_color=""
       if [ "${selected}" -eq "${selected_number}" ]; then
@@ -1410,7 +1383,6 @@ _alias_pick_category_interactive() {
       display="$(_alias_category_display_name "${category}")"
       color="$(_alias_category_color_for_menu "${category}")"
       selected_number="${#menu_categories[@]}"
-      selected_number=$((selected_number + 1))
       marker=" "
       line_color=""
       if [ "${selected}" -eq "${selected_number}" ]; then
@@ -1422,7 +1394,9 @@ _alias_pick_category_interactive() {
         "${line_color}" "${color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" "${BASH_ALIAS_HELP_COLOR_RESET}" >&2
       rendered_entries=$((rendered_entries + 1))
     done
-    if [ "${selected}" -lt 1 ] || [ "${selected}" -gt "$((1 + ${#menu_categories[@]}))" ]; then
+    if [ "${#menu_categories[@]}" -le 0 ]; then
+      selected=0
+    elif [ "${selected}" -lt 1 ] || [ "${selected}" -gt "${#menu_categories[@]}" ]; then
       selected=1
     fi
     render_lines=$((1 + 1 + 1 + rendered_entries))
@@ -1440,7 +1414,7 @@ _alias_pick_category_interactive() {
       up)
         if [ "${#menu_categories[@]}" -gt 0 ]; then
           if [ "${selected}" -le 1 ]; then
-            selected=$((1 + ${#menu_categories[@]}))
+            selected="${#menu_categories[@]}"
           else
             selected=$((selected - 1))
           fi
@@ -1449,7 +1423,7 @@ _alias_pick_category_interactive() {
         ;;
       down)
         if [ "${#menu_categories[@]}" -gt 0 ]; then
-          if [ "${selected}" -ge "$((1 + ${#menu_categories[@]}))" ]; then
+          if [ "${selected}" -ge "${#menu_categories[@]}" ]; then
             selected=1
           else
             selected=$((selected + 1))
@@ -1458,11 +1432,11 @@ _alias_pick_category_interactive() {
         continue
         ;;
       right|'')
-        if [ "${selected}" -eq 1 ]; then
-          _alias_show_all_categories
-          continue
+        if [ "${#menu_categories[@]}" -le 0 ] || [ "${selected}" -lt 1 ]; then
+          echo "$(_alias_text categories_invalid)"
+          return 1
         fi
-        category="${menu_categories[$((selected - 2))]}"
+        category="${menu_categories[$((selected - 1))]}"
         _alias_menu_category "${category}"
         case "$?" in
           0) ;;
