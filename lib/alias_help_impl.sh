@@ -1116,7 +1116,7 @@ _alias_menu_category_title_line() {
   local pad=""
 
   display="$(_alias_category_display_name "${category}")"
-  printf -v header_line ' %1s %5s | %-18s | %s' "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
+  printf -v header_line ' %1s  %4s | %-18s | %s' "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
   title_line="=== ${display} ==="
   pad_len=$((${#header_line} - ${#title_line}))
   if [ "${pad_len}" -gt 0 ]; then
@@ -1171,7 +1171,7 @@ _alias_menu_category() {
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
         "${line_color}" 0 "$(_alias_text category_back)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     fi
-    printf '%b %1s %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b %1s  %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
 
     if [ "${#names[@]}" -eq 0 ]; then
       echo "$(_alias_text category_empty)"
@@ -1283,7 +1283,7 @@ _alias_show_all_categories() {
     _alias_category_is_visible "${category}" || continue
     echo ""
     printf '%b%s%b\n' "$(_alias_category_header_color_for_menu "${category}")" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
-    printf '%b %1s %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b %1s  %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     found=0
     idx=1
     while IFS= read -r name; do
@@ -1292,7 +1292,7 @@ _alias_show_all_categories() {
       raw_cmd="${REPLY:-}"
       _alias_menu_short_description_for_name "${name}" "${raw_cmd}"
       short_desc="${REPLY:-}"
-      printf ' %1s %3d) | %-18s | %s\n' "" "${idx}" "${name}" "${short_desc}"
+      printf ' %1s  %3d) | %-18s | %s\n' "" "${idx}" "${name}" "${short_desc}"
       idx=$((idx + 1))
       found=1
     done < <(_alias_names_for_category "${category}")
