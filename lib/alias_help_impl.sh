@@ -125,6 +125,57 @@ _alias_menu_tty_raw_leave() {
   BASH_ALIAS_MENU_TTY_MODE_SAVED=""
 }
 
+_alias_menu_coalesce_arrow_input() {
+  local last_direction="$1"
+  local key=""
+  local seq=""
+  local csi=""
+  local max_drain=256
+  local drained=0
+  local next_direction=""
+
+  while [ "${drained}" -lt "${max_drain}" ]; do
+    if ! IFS= read -r -s -n 1 -t 0.002 key; then
+      break
+    fi
+    drained=$((drained + 1))
+
+    if [ "${key}" != $'\e' ]; then
+      continue
+    fi
+    if ! IFS= read -r -s -n 1 -t 0.002 seq; then
+      continue
+    fi
+    drained=$((drained + 1))
+    if [ "${seq}" != "[" ]; then
+      continue
+    fi
+
+    csi=""
+    while IFS= read -r -s -n 1 -t 0.002 seq; do
+      drained=$((drained + 1))
+      csi+="${seq}"
+      case "${seq}" in
+        [[:alpha:]~]) break ;;
+      esac
+      [ "${drained}" -lt "${max_drain}" ] || break
+    done
+
+    next_direction=""
+    case "${csi}" in
+      A) next_direction="up" ;;
+      B) next_direction="down" ;;
+      C) next_direction="right" ;;
+      D) next_direction="left" ;;
+    esac
+    if [ -n "${next_direction}" ]; then
+      last_direction="${next_direction}"
+    fi
+  done
+
+  REPLY="${last_direction}"
+}
+
 _alias_menu_read_input() {
   local prompt="$1"
   local key=""
@@ -151,22 +202,22 @@ _alias_menu_read_input() {
             case "${csi}" in
               A)
                 echo ""
-                REPLY="up"
+                _alias_menu_coalesce_arrow_input "up"
                 return 0
                 ;;
               B)
                 echo ""
-                REPLY="down"
+                _alias_menu_coalesce_arrow_input "down"
                 return 0
                 ;;
               C)
                 echo ""
-                REPLY="right"
+                _alias_menu_coalesce_arrow_input "right"
                 return 0
                 ;;
               D)
                 echo ""
-                REPLY="left"
+                _alias_menu_coalesce_arrow_input "left"
                 return 0
                 ;;
             esac
