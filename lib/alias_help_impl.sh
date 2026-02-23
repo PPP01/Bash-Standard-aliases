@@ -28,6 +28,8 @@ declare -gA BASH_ALIAS_MENU_SHORT_DESC=()
 declare -g BASH_ALIAS_MENU_CACHE_READY=0
 declare -g BASH_ALIAS_MENU_DISK_CACHE_TRIED=0
 declare -g BASH_ALIAS_MENU_LAST_RENDER_LINES=0
+declare -g BASH_ALIAS_MENU_RENDER_ACTIVE=0
+declare -g BASH_ALIAS_MENU_CURSOR_HIDDEN=0
 
 : "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL:=\033[0;32m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_TITLE:=\033[0;32m}"
@@ -151,6 +153,13 @@ _alias_menu_inplace_redraw_enabled() {
   esac
 }
 
+_alias_menu_hide_cursor_enabled() {
+  case "${BASH_ALIAS_MENU_HIDE_CURSOR:-1}" in
+    1|true|TRUE|yes|YES|on|ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 _alias_menu_clear_enabled() {
   case "${BASH_ALIAS_MENU_CLEAR_SCREEN:-0}" in
     1|true|TRUE|yes|YES|on|ON) return 0 ;;
@@ -159,6 +168,7 @@ _alias_menu_clear_enabled() {
 }
 
 _alias_menu_redraw_reset() {
+  _alias_menu_render_end
   BASH_ALIAS_MENU_LAST_RENDER_LINES=0
 }
 
@@ -170,10 +180,41 @@ _alias_menu_redraw_set_lines() {
 _alias_menu_inplace_refresh_begin() {
   _alias_menu_inplace_redraw_enabled || return 1
   [ -t 1 ] || return 1
-  if [ "${BASH_ALIAS_MENU_LAST_RENDER_LINES}" -gt 0 ]; then
-    printf '\033[%sA\033[J' "${BASH_ALIAS_MENU_LAST_RENDER_LINES}"
+  if [ "${BASH_ALIAS_MENU_RENDER_ACTIVE}" -eq 0 ]; then
+    if command -v tput >/dev/null 2>&1; then
+      tput sc 2>/dev/null || printf '\0337'
+      if _alias_menu_hide_cursor_enabled; then
+        tput civis 2>/dev/null || printf '\033[?25l'
+        BASH_ALIAS_MENU_CURSOR_HIDDEN=1
+      fi
+    else
+      printf '\0337'
+      if _alias_menu_hide_cursor_enabled; then
+        printf '\033[?25l'
+        BASH_ALIAS_MENU_CURSOR_HIDDEN=1
+      fi
+    fi
+    BASH_ALIAS_MENU_RENDER_ACTIVE=1
   fi
+  if command -v tput >/dev/null 2>&1; then
+    tput rc 2>/dev/null || printf '\0338'
+  else
+    printf '\0338'
+  fi
+  printf '\033[J'
   return 0
+}
+
+_alias_menu_render_end() {
+  if [ "${BASH_ALIAS_MENU_CURSOR_HIDDEN}" -eq 1 ]; then
+    if command -v tput >/dev/null 2>&1; then
+      tput cnorm 2>/dev/null || printf '\033[?25h'
+    else
+      printf '\033[?25h'
+    fi
+    BASH_ALIAS_MENU_CURSOR_HIDDEN=0
+  fi
+  BASH_ALIAS_MENU_RENDER_ACTIVE=0
 }
 
 _alias_menu_clear_screen() {
