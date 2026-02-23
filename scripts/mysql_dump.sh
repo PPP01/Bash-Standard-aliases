@@ -18,7 +18,7 @@ db="${1:-}"
 out="${2:-}"
 
 if [ -z "${db}" ]; then
-  echo "$(_alias_i18n_pick "Nutzung: mysql_dump.sh [--gzip] <datenbank> [ausgabe]" "Usage: mysql_dump.sh [--gzip] <database> [output]")" >&2
+  echo "$(_alias_i18n_text "mysql_dump.usage_script")" >&2
   exit 1
 fi
 

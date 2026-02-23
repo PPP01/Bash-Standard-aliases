@@ -16,29 +16,7 @@ _override_block_start="# >>> _alias_setup_scheme user-overrides >>>"
 _override_block_end="# <<< _alias_setup_scheme user-overrides <<<"
 
 _text() {
-  local key="$1"
-  case "${key}" in
-    err_mkdir) _alias_i18n_pick "Fehler: Konnte Verzeichnis nicht erstellen: %s" "Error: Could not create directory: %s" ;;
-    err_not_writable) _alias_i18n_pick "Fehler: Datei ist nicht schreibbar: %s" "Error: File is not writable: %s" ;;
-    err_create_file) _alias_i18n_pick "Fehler: Konnte Datei nicht erzeugen: %s" "Error: Could not create file: %s" ;;
-    header_delta) _alias_i18n_pick "# User-Delta-Settings für bash-standard-aliases" "# User delta settings for bash-standard-aliases" ;;
-    header_delta_hint) _alias_i18n_pick "# Nur Abweichungen von settings.conf / settings.local.conf" "# Store only deviations from settings.conf / settings.local.conf" ;;
-    err_unknown_scheme) _alias_i18n_pick "Fehler: Unbekanntes Schema '%s'. Erlaubt: dark, bright" "Error: Unknown scheme '%s'. Allowed: dark, bright" ;;
-    managed_comment) _alias_i18n_pick "# Von _alias_setup_scheme verwaltet." "# Managed by _alias_setup_scheme." ;;
-    override_comment_1) _alias_i18n_pick "# Eigene Farb-Overrides. Diese Werte setzen sich immer gegen das Schema durch." "# Custom color overrides. These values always override the selected scheme." ;;
-    override_comment_2) _alias_i18n_pick "# Zum Aktivieren '#' entfernen und Wert anpassen." "# To activate, remove '#' and adjust the value." ;;
-    menu_title) _alias_i18n_pick "Farbschema auswählen (Speicherort: %s)" "Choose color scheme (target: %s)" ;;
-    menu_current) _alias_i18n_pick "Aktuell: %s" "Current: %s" ;;
-    menu_dark) _alias_i18n_pick "  1) dark   (für dunklen Terminal-Hintergrund)" "  1) dark   (for dark terminal backgrounds)" ;;
-    menu_bright) _alias_i18n_pick "  2) bright (für hellen Terminal-Hintergrund)" "  2) bright (for bright terminal backgrounds)" ;;
-    menu_quit) _alias_i18n_pick "  q) abbrechen" "  q) cancel" ;;
-    menu_prompt) _alias_i18n_pick "Auswahl [1/2/q]: " "Choice [1/2/q]: " ;;
-    canceled) _alias_i18n_pick "Abgebrochen." "Canceled." ;;
-    invalid_choice) _alias_i18n_pick "Ungültige Auswahl." "Invalid choice." ;;
-    saved) _alias_i18n_pick "Farbschema '%s' gespeichert in: %s" "Color scheme '%s' saved to: %s" ;;
-    reload_hint) _alias_i18n_pick "Für die aktuelle Shell: _alias_reload" "For the current shell: _alias_reload" ;;
-    *) printf '%s' "${key}" ;;
-  esac
+  _alias_i18n_text "color_scheme.$1"
 }
 
 _escape_regex() {

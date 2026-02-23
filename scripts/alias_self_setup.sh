@@ -13,37 +13,7 @@ _alias_setup_marker_start="# >>> bash_alias_std setup >>>"
 _alias_setup_marker_end="# <<< bash_alias_std setup <<<"
 
 _text() {
-  local key="$1"
-  case "${key}" in
-    err_no_target) _alias_i18n_pick "Fehler: Keine Zieldatei angegeben." "Error: No target file specified." ;;
-    err_not_writable) _alias_i18n_pick "Fehler: Datei ist nicht schreibbar: %s" "Error: File is not writable: %s" ;;
-    already_marker) _alias_i18n_pick "Bereits eingerichtet in %s (Marker gefunden)." "Already configured in %s (marker found)." ;;
-    already_loader) _alias_i18n_pick "Bereits eingerichtet in %s (Loader-Pfad gefunden)." "Already configured in %s (loader path found)." ;;
-    entry_added) _alias_i18n_pick "Eintrag hinzugefügt: %s" "Entry added: %s" ;;
-    prompt_yes_no_suffix) _alias_i18n_pick " [y/N]: " " [y/N]: " ;;
-    root_choose_target) _alias_i18n_pick "Root-Setup Ziel wählen:" "Choose root setup target:" ;;
-    root_skip) _alias_i18n_pick "  3) überspringen" "  3) skip" ;;
-    prompt_choice_123) _alias_i18n_pick "Auswahl [1/2/3]: " "Choice [1/2/3]: " ;;
-    err_loader_missing) _alias_i18n_pick "Fehler: Loader nicht gefunden: %s" "Error: Loader not found: %s" ;;
-    prompt_user_setup) _alias_i18n_pick "Setup in %s eintragen?" "Write setup to %s?" ;;
-    root_skipped) _alias_i18n_pick "Root-Setup übersprungen." "Root setup skipped." ;;
-    user_skipped) _alias_i18n_pick "User-Setup übersprungen." "User setup skipped." ;;
-    setup_done) _alias_i18n_pick "Setup abgeschlossen." "Setup completed." ;;
-    err_file_missing) _alias_i18n_pick "Fehler: Datei nicht gefunden: %s" "Error: File not found: %s" ;;
-    warn_mode_restore) _alias_i18n_pick "Warnung: Konnte Dateirechte nicht wiederherstellen: %s" "Warning: Could not restore file permissions: %s" ;;
-    marker_removed) _alias_i18n_pick "Marker-Block entfernt: %s" "Marker block removed: %s" ;;
-    err_marker_unfinished) _alias_i18n_pick "Fehler: Marker-Block unvollständig in %s (End-Marker fehlt)." "Error: Marker block incomplete in %s (missing end marker)." ;;
-    no_marker_in_file) _alias_i18n_pick "Kein Marker-Block gefunden in %s." "No marker block found in %s." ;;
-    err_marker_remove) _alias_i18n_pick "Fehler: Marker konnte nicht entfernt werden aus %s." "Error: Could not remove marker from %s." ;;
-    no_marker_found) _alias_i18n_pick "Kein Marker gefunden." "No marker found." ;;
-    choose_remove_target) _alias_i18n_pick "Entfernung aus Datei wählen:" "Choose file for removal:" ;;
-    remove_cancel) _alias_i18n_pick "  3) Abbrechen" "  3) cancel" ;;
-    canceled) _alias_i18n_pick "Abgebrochen." "Canceled." ;;
-    err_category_script_missing) _alias_i18n_pick "Fehler: scripts/alias_category_setup.sh nicht gefunden." "Error: scripts/alias_category_setup.sh not found." ;;
-    start_category_selection) _alias_i18n_pick "Starte Kategorie-Auswahl." "Starting category selection." ;;
-    usage) _alias_i18n_pick "Verwendung: %s [run|category|init|setup|install|remove]" "Usage: %s [run|category|init|setup|install|remove]" ;;
-    *) printf '%s' "${key}" ;;
-  esac
+  _alias_i18n_text "self_setup.$1"
 }
 
 _alias_setup_block() {

@@ -24,7 +24,7 @@ _alias_help_load_impl() {
   impl_path="${repo_dir}/lib/alias_help_impl.sh"
 
   if [ ! -f "${impl_path}" ]; then
-    printf '%s\n' "$(_alias_i18n_pick "Fehler: Hilfe-Implementierung nicht gefunden: ${impl_path}" "Error: Help implementation not found: ${impl_path}")" >&2
+    printf '%s\n' "$(_alias_i18n_text "help_loader.err_impl_missing" "${impl_path}")" >&2
     return 1
   fi
 
@@ -44,7 +44,7 @@ _alias_help_dispatch() {
   after="$(declare -f "${fn_name}" 2>/dev/null || true)"
 
   if [ -z "${after}" ] || [ "${before}" = "${after}" ]; then
-    printf '%s\n' "$(_alias_i18n_pick "Fehler: Hilfe-Funktion '${fn_name}' konnte nicht geladen werden." "Error: Failed to load help function '${fn_name}'.")" >&2
+    printf '%s\n' "$(_alias_i18n_text "help_loader.err_fn_not_loaded" "${fn_name}")" >&2
     return 1
   fi
 

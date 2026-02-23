@@ -19,37 +19,7 @@ _target_kind=""
 declare -A _module_visible_cache=()
 
 _text() {
-  local key="$1"
-  case "${key}" in
-    err_default_conf_missing) _alias_i18n_pick "Fehler: alias_files.conf nicht gefunden: %s" "Error: alias_files.conf not found: %s" ;;
-    root_target_title) _alias_i18n_pick "Root-Ausführung: Wo sollen Änderungen gespeichert werden?" "Running as root: where should changes be stored?" ;;
-    root_target_global) _alias_i18n_pick "  1) global (%s)" "  1) global (%s)" ;;
-    root_target_user) _alias_i18n_pick "  2) nur für root (%s)" "  2) root-only (%s)" ;;
-    root_target_cancel) _alias_i18n_pick "  3) abbrechen" "  3) cancel" ;;
-    root_target_prompt) _alias_i18n_pick "Auswahl [1/2/3]: " "Choice [1/2/3]: " ;;
-    canceled) _alias_i18n_pick "Abgebrochen." "Canceled." ;;
-    err_mkdir) _alias_i18n_pick "Fehler: Konnte Verzeichnis nicht erstellen: %s" "Error: Could not create directory: %s" ;;
-    err_not_writable) _alias_i18n_pick "Fehler: Datei ist nicht schreibbar: %s" "Error: File is not writable: %s" ;;
-    err_create_config) _alias_i18n_pick "Fehler: Konnte Konfiguration nicht erzeugen: %s" "Error: Could not create configuration: %s" ;;
-    cfg_header_1) _alias_i18n_pick "# Delta-Konfiguration für bash-standard-aliases" "# Delta configuration for bash-standard-aliases" ;;
-    cfg_header_2) _alias_i18n_pick "# Nur Abweichungen von alias_files.conf" "# Store only deviations from alias_files.conf" ;;
-    cfg_header_user_base) _alias_i18n_pick "# Basis: alias_files.conf + alias_files.local.conf (falls vorhanden)" "# Base: alias_files.conf + alias_files.local.conf (if present)" ;;
-    cfg_header_global_base) _alias_i18n_pick "# Basis: alias_files.conf" "# Base: alias_files.conf" ;;
-    cfg_header_enable) _alias_i18n_pick "# Aktivieren: modulname.sh" "# Enable: module_name.sh" ;;
-    cfg_header_disable) _alias_i18n_pick "# Deaktivieren: # modulname.sh" "# Disable: # module_name.sh" ;;
-    cfg_created) _alias_i18n_pick "Lokale Konfiguration erzeugt: %s" "Local configuration created: %s" ;;
-    category_on) _alias_i18n_pick "Kategorie '%s' eingeschaltet." "Category '%s' enabled." ;;
-    category_off) _alias_i18n_pick "Kategorie '%s' ausgeschaltet." "Category '%s' disabled." ;;
-    categories_in_file) _alias_i18n_pick "Kategorien in %s:" "Categories in %s:" ;;
-    no_categories_defined) _alias_i18n_pick "Keine Kategorien definiert." "No categories defined." ;;
-    no_editable_categories) _alias_i18n_pick " (keine bearbeitbaren Kategorien verfügbar)" " (no editable categories available)" ;;
-    quit_line) _alias_i18n_pick "  q) Ende" "  q) quit" ;;
-    toggle_prompt) _alias_i18n_pick "Kategorie-Nummer zum Umschalten (q zum Beenden): " "Category number to toggle (q to quit): " ;;
-    enter_valid_number) _alias_i18n_pick "Bitte eine gültige Nummer eingeben." "Please enter a valid number." ;;
-    invalid_number) _alias_i18n_pick "Nummer ungültig." "Invalid number." ;;
-    done_hint) _alias_i18n_pick "Fertig. Für die aktuelle Shell ggf. '_alias_reload' oder 'source ~/.bashrc' ausführen." "Done. For the current shell, run '_alias_reload' or 'source ~/.bashrc' if needed." ;;
-    *) printf '%s' "${key}" ;;
-  esac
+  _alias_i18n_text "category_setup.$1"
 }
 
 if [ ! -f "${_default_conf}" ]; then

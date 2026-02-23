@@ -11,12 +11,12 @@ source "${_repo_dir}/lib/alias_i18n.sh"
 repo_dir="${1:-${BASH_ALIAS_REPO_DIR:-}}"
 
 if [ -z "${repo_dir}" ]; then
-  echo "$(_alias_i18n_pick "Fehler: Repo-Pfad fehlt (Argument 1 oder BASH_ALIAS_REPO_DIR)." "Error: Repository path missing (arg 1 or BASH_ALIAS_REPO_DIR).")" >&2
+  echo "$(_alias_i18n_text "repo_pull.err_repo_path_missing")" >&2
   exit 1
 fi
 
 if [ ! -d "${repo_dir}/.git" ]; then
-  printf '%s\n' "$(_alias_i18n_pick "Fehler: Kein Git-Repository gefunden unter ${repo_dir}" "Error: No Git repository found at ${repo_dir}")" >&2
+  printf '%s\n' "$(_alias_i18n_text "repo_pull.err_not_git_repo" "${repo_dir}")" >&2
   exit 1
 fi
 

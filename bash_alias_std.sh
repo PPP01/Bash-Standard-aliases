@@ -316,7 +316,7 @@ if [ "${#_alias_config_layers[@]}" -gt 0 ]; then
       _aliases_before="$(_alias_collect_alias_names)"
       # shellcheck disable=SC1090
       if ! source "${_full_path}"; then
-        printf '%s\n' "$(_alias_i18n_pick "Fehler: Modul konnte nicht geladen werden: ${_entry}" "Error: Failed to load module: ${_entry}")" >&2
+        printf '%s\n' "$(_alias_i18n_text "core.module_load_failed" "${_entry}")" >&2
         return 1 2>/dev/null || exit 1
       fi
       _aliases_after="$(_alias_collect_alias_names)"
@@ -334,7 +334,7 @@ if [ "${#_alias_config_layers[@]}" -gt 0 ]; then
     unset _full_path _category _aliases_before _aliases_after
   done
 else
-  printf '%s\n' "$(_alias_i18n_pick "Hinweis: Konfigurationsdatei fehlt: ${_alias_config_file_default} (Basis), optional ${_alias_config_file_local}, ${_alias_config_file_user}" "Note: Configuration file missing: ${_alias_config_file_default} (base), optional ${_alias_config_file_local}, ${_alias_config_file_user}")" >&2
+  printf '%s\n' "$(_alias_i18n_text "core.config_missing_notice" "${_alias_config_file_default}" "${_alias_config_file_local}" "${_alias_config_file_user}")" >&2
 fi
 
 _alias_sort_categories

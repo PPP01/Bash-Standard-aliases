@@ -27,7 +27,7 @@ _alias_overrides_load_edit_impl() {
   impl_path="${repo_dir}/lib/alias_overrides_edit_impl.sh"
 
   if [ ! -f "${impl_path}" ]; then
-    printf '%s\n' "$(_alias_i18n_pick "Fehler: Overrides-Implementierung nicht gefunden: ${impl_path}" "Error: Overrides implementation not found: ${impl_path}")" >&2
+    printf '%s\n' "$(_alias_i18n_text "overrides_loader.err_impl_missing" "${impl_path}")" >&2
     return 1
   fi
 
@@ -45,7 +45,7 @@ alias_self_edit() {
   after="$(declare -f alias_self_edit 2>/dev/null || true)"
 
   if [ -z "${after}" ] || [ "${before}" = "${after}" ]; then
-    printf '%s\n' "$(_alias_i18n_pick "Fehler: alias_self_edit konnte nicht geladen werden." "Error: Failed to load alias_self_edit.")" >&2
+    printf '%s\n' "$(_alias_i18n_text "overrides_loader.err_self_edit_not_loaded")" >&2
     return 1
   fi
 

@@ -4,39 +4,7 @@
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/alias_i18n.sh"
 
 _alias_self_edit_text() {
-  local key="$1"
-  case "${key}" in
-    own_help_title) _alias_i18n_pick "Eigene Alias-Hilfe" "Custom alias help" ;;
-    own_help_header) _alias_i18n_pick "## Alias-Hilfe (de)" "## Alias Help (en)" ;;
-    own_help_table_short) _alias_i18n_pick "kurzbeschreibung" "short description" ;;
-    own_help_table_desc) _alias_i18n_pick "beschreibung" "description" ;;
-    own_help_table_cmd) _alias_i18n_pick "befehl" "command" ;;
-    err_help_exists) _alias_i18n_pick "Fehler: Hilfetext für '%s' ist in %s bereits vorhanden." "Error: Help text for '%s' already exists in %s." ;;
-    err_help_exists_hint) _alias_i18n_pick "Bitte Eintrag dort manuell anpassen." "Please adjust the entry manually there." ;;
-    err_repo_dir_unset) _alias_i18n_pick "Fehler: BASH_ALIAS_REPO_DIR ist nicht gesetzt." "Error: BASH_ALIAS_REPO_DIR is not set." ;;
-    choose_target_title) _alias_i18n_pick "_alias_edit: Ziel-Datei wählen" "_alias_edit: choose target file" ;;
-    choose_target_home) _alias_i18n_pick "  1) %s (root-eigen)" "  1) %s (root-only)" ;;
-    choose_target_repo) _alias_i18n_pick "  2) %s (projektweit)" "  2) %s (project-wide)" ;;
-    choose_target_prompt) _alias_i18n_pick "Auswahl [1/2, Enter=1]: " "Choice [1/2, Enter=1]: " ;;
-    err_invalid_choice) _alias_i18n_pick "Ungültige Auswahl." "Invalid choice." ;;
-    wizard_title) _alias_i18n_pick "=== Alias-Assistent ===" "=== Alias wizard ===" ;;
-    prompt_alias_name) _alias_i18n_pick "Alias-Name: " "Alias name: " ;;
-    err_alias_empty) _alias_i18n_pick "Alias-Name darf nicht leer sein." "Alias name must not be empty." ;;
-    err_alias_invalid) _alias_i18n_pick "Alias-Name darf keine Leerzeichen oder '=' enthalten." "Alias name must not contain spaces or '='." ;;
-    prompt_desc) _alias_i18n_pick "Beschreibung: " "Description: " ;;
-    default_desc) _alias_i18n_pick "(ohne Beschreibung)" "(no description)" ;;
-    prompt_cmd_for) _alias_i18n_pick "Befehl für %s: " "Command for %s: " ;;
-    err_cmd_empty) _alias_i18n_pick "Befehl darf nicht leer sein." "Command must not be empty." ;;
-    err_alias_exists) _alias_i18n_pick "Fehler: Alias '%s' ist in %s bereits vorhanden." "Error: Alias '%s' already exists in %s." ;;
-    err_alias_exists_hint) _alias_i18n_pick "Bitte Datei manuell anpassen oder anderen Alias-Namen verwenden." "Please edit the file manually or choose another alias name." ;;
-    err_help_create) _alias_i18n_pick "Fehler: Konnte %s nicht anlegen." "Error: Failed to create %s." ;;
-    err_target_write) _alias_i18n_pick "Fehler: Konnte %s nicht schreiben." "Error: Failed to write %s." ;;
-    comment_desc_prefix) _alias_i18n_pick "Beschreibung" "Description" ;;
-    msg_alias_saved) _alias_i18n_pick "Alias '%s' wurde in %s gespeichert." "Alias '%s' was saved to %s." ;;
-    msg_help_saved) _alias_i18n_pick "Hilfetext wurde in %s gespeichert." "Help text was saved to %s." ;;
-    msg_reload_done) _alias_i18n_pick "Reload abgeschlossen." "Reload completed." ;;
-    *) printf '%s' "${key}" ;;
-  esac
+  _alias_i18n_text "overrides_edit.$1"
 }
 
 _alias_self_edit_target_help_file() {

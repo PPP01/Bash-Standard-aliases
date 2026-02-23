@@ -11,17 +11,7 @@ _category_setup_script="${_repo_dir}/scripts/alias_category_setup.sh"
 source "${_repo_dir}/lib/alias_i18n.sh"
 
 _text() {
-  local key="$1"
-  case "${key}" in
-    title) _alias_i18n_pick "=== Geführtes Setup ===" "=== Guided setup ===" ;;
-    step_1) _alias_i18n_pick "1) Farbschema" "1) Color scheme" ;;
-    step_2) _alias_i18n_pick "2) Kategorien" "2) Categories" ;;
-    err_script_missing) _alias_i18n_pick "Fehler: Script nicht gefunden: %s" "Error: Script not found: %s" ;;
-    run_step_1) _alias_i18n_pick "Schritt 1/2: Farbschema einstellen" "Step 1/2: configure color scheme" ;;
-    run_step_2) _alias_i18n_pick "Schritt 2/2: Kategorien konfigurieren" "Step 2/2: configure categories" ;;
-    done) _alias_i18n_pick "Geführtes Setup abgeschlossen." "Guided setup completed." ;;
-    *) printf '%s' "${key}" ;;
-  esac
+  _alias_i18n_text "guided_setup.$1"
 }
 
 main() {
