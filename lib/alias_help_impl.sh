@@ -982,7 +982,7 @@ _alias_menu_alias_details() {
   if _alias_menu_is_back_input "${choice}"; then
     return 0
   fi
-  if [ -z "${choice}" ]; then
+  if [ -z "${choice}" ] || [ "${choice}" = "right" ]; then
     _alias_execute_by_name "${name}"
     return $?
   fi
