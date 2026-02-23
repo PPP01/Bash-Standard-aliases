@@ -86,7 +86,6 @@ _alias_menu_session_begin() {
 
 _alias_menu_handle_interrupt() {
   BASH_ALIAS_MENU_INTERRUPTED=1
-  _alias_menu_session_end
 }
 
 _alias_menu_session_end() {
