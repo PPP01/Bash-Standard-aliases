@@ -27,6 +27,7 @@ declare -g BASH_ALIAS_RUNTIME_CACHE_READY=0
 declare -gA BASH_ALIAS_MENU_SHORT_DESC=()
 declare -g BASH_ALIAS_MENU_CACHE_READY=0
 declare -g BASH_ALIAS_MENU_DISK_CACHE_TRIED=0
+declare -g BASH_ALIAS_MENU_LAST_RENDER_LINES=0
 
 : "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL:=\033[0;32m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_TITLE:=\033[0;32m}"
@@ -143,11 +144,36 @@ _alias_menu_cache_enabled() {
   esac
 }
 
-_alias_menu_clear_enabled() {
-  case "${BASH_ALIAS_MENU_CLEAR_SCREEN:-1}" in
+_alias_menu_inplace_redraw_enabled() {
+  case "${BASH_ALIAS_MENU_INPLACE_REDRAW:-1}" in
     1|true|TRUE|yes|YES|on|ON) return 0 ;;
     *) return 1 ;;
   esac
+}
+
+_alias_menu_clear_enabled() {
+  case "${BASH_ALIAS_MENU_CLEAR_SCREEN:-0}" in
+    1|true|TRUE|yes|YES|on|ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_alias_menu_redraw_reset() {
+  BASH_ALIAS_MENU_LAST_RENDER_LINES=0
+}
+
+_alias_menu_redraw_set_lines() {
+  local lines="${1:-0}"
+  BASH_ALIAS_MENU_LAST_RENDER_LINES="${lines}"
+}
+
+_alias_menu_inplace_refresh_begin() {
+  _alias_menu_inplace_redraw_enabled || return 1
+  [ -t 1 ] || return 1
+  if [ "${BASH_ALIAS_MENU_LAST_RENDER_LINES}" -gt 0 ]; then
+    printf '\033[%sA\033[J' "${BASH_ALIAS_MENU_LAST_RENDER_LINES}"
+  fi
+  return 0
 }
 
 _alias_menu_clear_screen() {
@@ -160,6 +186,11 @@ _alias_menu_clear_screen() {
   fi
 
   printf '\033[H\033[2J'
+}
+
+_alias_menu_refresh_begin() {
+  _alias_menu_inplace_refresh_begin && return 0
+  _alias_menu_clear_screen
 }
 
 _alias_menu_cache_dir() {
@@ -898,8 +929,9 @@ _alias_menu_alias_details() {
   local name="$1"
   local choice=""
 
-  _alias_menu_clear_screen
+  _alias_menu_refresh_begin
   _alias_show_alias_details "${name}" || return 1
+  _alias_menu_redraw_set_lines 5
   _alias_menu_read_input "$(_alias_text alias_detail_prompt)"
   choice="${REPLY:-}"
 
@@ -927,7 +959,7 @@ _alias_menu_category_title_line() {
   local pad=""
 
   display="$(_alias_category_display_name "${category}")"
-  printf -v header_line ' %4s | %-18s | %s' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
+  printf -v header_line '   %4s | %-18s | %s' "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
   title_line="=== ${display} ==="
   pad_len=$((${#header_line} - ${#title_line}))
   if [ "${pad_len}" -gt 0 ]; then
@@ -954,10 +986,11 @@ _alias_menu_category() {
   local marker=""
   local line_color=""
   local total=0
+  local render_lines=0
   local -a names=()
 
   while true; do
-    _alias_menu_clear_screen
+    _alias_menu_refresh_begin
     names=()
     while IFS= read -r name; do
       [ -z "${name}" ] && continue
@@ -986,7 +1019,7 @@ _alias_menu_category() {
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
         "${line_color}" 0 "$(_alias_text category_back)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     fi
-    printf '%b %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b   %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
 
     if [ "${#names[@]}" -eq 0 ]; then
       echo "$(_alias_text category_empty)"
@@ -1013,6 +1046,17 @@ _alias_menu_category() {
         idx=$((idx + 1))
       done
     fi
+    render_lines=4
+    if [ "${show_back_entry}" -eq 0 ]; then
+      render_lines=3
+    fi
+    if [ "${#names[@]}" -eq 0 ]; then
+      render_lines=$((render_lines + 1))
+    else
+      render_lines=$((render_lines + ${#names[@]}))
+    fi
+    # Prompt line is rendered by _alias_menu_read_input.
+    _alias_menu_redraw_set_lines $((render_lines + 1))
 
     _alias_menu_read_input "$(_alias_text category_prompt)"
     choice="${REPLY:-}"
@@ -1101,7 +1145,7 @@ _alias_show_all_categories() {
     _alias_category_is_visible "${category}" || continue
     echo ""
     printf '%b%s%b\n' "$(_alias_category_header_color_for_menu "${category}")" "$(_alias_menu_category_title_line "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}"
-    printf '%b %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
+    printf '%b   %4s | %-18s | %s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_HEADER}" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     found=0
     idx=1
     while IFS= read -r name; do
@@ -1130,11 +1174,14 @@ _alias_menu_all_categories() {
   local selected_number=0
   local marker=""
   local line_color=""
+  local rendered_entries=0
+  local render_lines=0
   local -a menu_categories=()
 
   while true; do
-    _alias_menu_clear_screen
+    _alias_menu_refresh_begin
     menu_categories=()
+    rendered_entries=0
     echo ""
     printf '%b=== %s ===%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_text all_categories_title)" "${BASH_ALIAS_HELP_COLOR_RESET}"
     marker=" "
@@ -1163,6 +1210,7 @@ _alias_menu_all_categories() {
       printf ' %b%s%b %b %3d) %b%s%b%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
         "${line_color}" "${number}" "$(_alias_category_color_for_menu "${category}")" "$(_alias_category_display_name "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}" "${BASH_ALIAS_HELP_COLOR_RESET}"
+      rendered_entries=$((rendered_entries + 1))
     done
 
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
@@ -1181,10 +1229,13 @@ _alias_menu_all_categories() {
       printf ' %b%s%b %b %3d) %b%s%b%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
         "${line_color}" "${number}" "$(_alias_category_color_for_menu "${category}")" "$(_alias_category_display_name "${category}")" "${BASH_ALIAS_HELP_COLOR_RESET}" "${BASH_ALIAS_HELP_COLOR_RESET}"
+      rendered_entries=$((rendered_entries + 1))
     done
     if [ "${selected}" -lt 1 ] || [ "${selected}" -gt "$((1 + ${#menu_categories[@]}))" ]; then
       selected=1
     fi
+    render_lines=$((1 + 1 + 1 + rendered_entries))
+    _alias_menu_redraw_set_lines $((render_lines + 1))
 
     _alias_menu_read_input "$(_alias_text all_categories_prompt)"
     choice="${REPLY:-}"
@@ -1261,11 +1312,14 @@ _alias_pick_category_interactive() {
   local display=""
   local state=""
   local color=""
+  local rendered_entries=0
+  local render_lines=0
   local -a menu_categories=()
 
   while true; do
-    _alias_menu_clear_screen
+    _alias_menu_refresh_begin
     menu_categories=()
+    rendered_entries=0
     echo "" >&2
     printf '%b%s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_text categories_title)" "${BASH_ALIAS_HELP_COLOR_RESET}" >&2
     marker=" "
@@ -1300,6 +1354,7 @@ _alias_pick_category_interactive() {
       printf ' %b%s%b %b%b%3d) %-12s%b [%s]%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
         "${line_color}" "${color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" "${BASH_ALIAS_HELP_COLOR_RESET}" >&2
+      rendered_entries=$((rendered_entries + 1))
     done
 
     for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
@@ -1324,10 +1379,13 @@ _alias_pick_category_interactive() {
       printf ' %b%s%b %b%b%3d) %-12s%b [%s]%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
         "${line_color}" "${color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" "${BASH_ALIAS_HELP_COLOR_RESET}" >&2
+      rendered_entries=$((rendered_entries + 1))
     done
     if [ "${selected}" -lt 1 ] || [ "${selected}" -gt "$((1 + ${#menu_categories[@]}))" ]; then
       selected=1
     fi
+    render_lines=$((1 + 1 + 1 + rendered_entries))
+    _alias_menu_redraw_set_lines $((render_lines + 1))
 
     _alias_menu_read_input "$(_alias_text categories_prompt)"
     choice="${REPLY:-}"
@@ -1414,22 +1472,26 @@ _alias_pick_category_interactive() {
 a() {
   local category=""
   local rc=0
+  _alias_menu_redraw_reset
   _alias_menu_cache_build || return 1
 
   if [ -n "${1:-}" ]; then
     if builtin alias -- "$1" >/dev/null 2>&1; then
       _alias_show_alias_details "$1"
+      _alias_menu_redraw_reset
       return $?
     fi
 
     category="$(_alias_resolve_category_input "$1")" || {
       printf '%s\n' "$(_alias_i18n_text "help.unknown_alias_or_category" "$1")"
       echo "$(_alias_i18n_text "help.use_a_for_selection")"
+      _alias_menu_redraw_reset
       return 1
     }
   else
     _alias_pick_category_interactive
     rc=$?
+    _alias_menu_redraw_reset
     case "${rc}" in
       130) return 0 ;;
       *) return "${rc}" ;;
@@ -1438,11 +1500,13 @@ a() {
 
   if [ "${category}" = "all" ]; then
     _alias_show_all_categories
+    _alias_menu_redraw_reset
     return 0
   fi
 
   _alias_menu_category "${category}" 0
   rc=$?
+  _alias_menu_redraw_reset
   case "${rc}" in
     130) return 0 ;;
     *) return "${rc}" ;;
