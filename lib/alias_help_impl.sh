@@ -4,7 +4,7 @@ source "${_alias_help_impl_dir}/alias_i18n.sh"
 
 show_aliases_functions() {
   echo ""
-  echo "$(_alias_i18n_pick "==== Verfügbare Aliase ====" "==== Available aliases ====")"
+  echo "$(_alias_i18n_text "help.available_aliases_header")"
   alias
 }
 
@@ -496,63 +496,7 @@ _alias_help_get() {
 }
 
 _alias_text() {
-  local key="$1"
-  local locale="${BASH_ALIAS_LOCALE:-de}"
-
-  case "${locale}" in
-    de*)
-      case "${key}" in
-        categories_title) printf 'Alias-Kategorien:' ;;
-        categories_prompt) printf 'Kategorie (Name/Nummer, 0 = alle, q/esc = Ende): ' ;;
-        categories_invalid) printf 'Ungültige Eingabe. Menü wird beendet.' ;;
-        categories_back) printf 'Alle Kategorien' ;;
-        all_categories_title) printf 'Alle Kategorien' ;;
-        all_categories_prompt) printf 'Kategorie wählen (0/left/backspace = Zurück, q/esc = Ende): ' ;;
-        all_categories_back) printf 'Zurück zur Hauptauswahl' ;;
-        category_prompt) printf 'Alias wählen (Nummer, 0/left/backspace = Zurück, q/esc = Ende): ' ;;
-        category_empty) printf '(keine geladenen Aliase)' ;;
-        category_back) printf 'Zurück zur Kategorienauswahl' ;;
-        table_col_no) printf 'no)' ;;
-        table_col_alias) printf 'alias' ;;
-        table_col_short) printf 'kurzbeschreibung' ;;
-        alias_invalid) printf 'Ungültige Eingabe. Menü wird beendet.' ;;
-        alias_detail_title) printf 'Alias-Details' ;;
-        alias_detail_desc) printf 'Beschreibung' ;;
-        alias_detail_cmd) printf 'Befehl' ;;
-        alias_detail_prompt) printf 'Enter = ausführen, 0/left/backspace = Zurück, q/esc = Ende: ' ;;
-        alias_unknown) printf 'Unbekannter Alias: %s' ;;
-        short_internal) printf 'Interner Helfer: %s' ;;
-        desc_fallback) printf 'Führt aus: %s' ;;
-        *) printf '%s' "${key}" ;;
-      esac
-      ;;
-    *)
-      case "${key}" in
-        categories_title) printf 'Alias categories:' ;;
-        categories_prompt) printf 'Category (name/number, 0 = all, q/esc = quit): ' ;;
-        categories_invalid) printf 'Invalid input. Exiting menu.' ;;
-        categories_back) printf 'All categories' ;;
-        all_categories_title) printf 'All categories' ;;
-        all_categories_prompt) printf 'Choose category (0/left/backspace = back, q/esc = quit): ' ;;
-        all_categories_back) printf 'Back to main menu' ;;
-        category_prompt) printf 'Choose alias (number, 0/left/backspace = back, q/esc = quit): ' ;;
-        category_empty) printf '(no loaded aliases)' ;;
-        category_back) printf 'Back to category menu' ;;
-        table_col_no) printf 'no)' ;;
-        table_col_alias) printf 'alias' ;;
-        table_col_short) printf 'short description' ;;
-        alias_invalid) printf 'Invalid input. Exiting menu.' ;;
-        alias_detail_title) printf 'Alias details' ;;
-        alias_detail_desc) printf 'Description' ;;
-        alias_detail_cmd) printf 'Command' ;;
-        alias_detail_prompt) printf 'Enter = run, 0/left/backspace = back, q/esc = quit: ' ;;
-        alias_unknown) printf 'Unknown alias: %s' ;;
-        short_internal) printf 'Internal helper: %s' ;;
-        desc_fallback) printf 'Runs: %s' ;;
-        *) printf '%s' "${key}" ;;
-      esac
-      ;;
-  esac
+  _alias_i18n_text "help.$1"
 }
 
 _alias_value_for_name() {
@@ -568,8 +512,8 @@ _alias_value_for_name() {
 _alias_short_description_for_name() {
   local name="$1"
   local cmd="$2"
-  local locale="${BASH_ALIAS_LOCALE:-de}"
   local from_docs=""
+  local key=""
 
   _alias_help_get short "${name}"
   from_docs="${REPLY:-}"
@@ -578,59 +522,20 @@ _alias_short_description_for_name() {
     return 0
   fi
 
-  case "${locale}" in
-    de*)
-      case "${name}" in
-        log) REPLY='Journal: letzte X Zeilen (Standard 50).' ;;
-        logs) REPLY='Journal: Service-Logs der letzten X Zeilen.' ;;
-        log_min) REPLY='Journal seit X Minuten (Standard 10).' ;;
-        log_hour) REPLY='Journal seit X Stunden (Standard 1).' ;;
-        log_clean) REPLY='Journal aufbewahren/bereinigen (Tage/Größe).' ;;
-        aua) REPLY='APT Update/Upgrade/Autoremove in einem Lauf.' ;;
-        _alias_update) REPLY='Repository aktualisieren und Aliase neu laden.' ;;
-        _alias_init) REPLY='Setup-Block in Bash-Startdatei eintragen.' ;;
-        _alias_setup) REPLY='Geführtes Setup: erst Farbschema, dann Kategorien.' ;;
-        _alias_setup_scheme) REPLY='Farbschema (dark/bright) in User-Settings speichern.' ;;
-        _alias_init_remove) REPLY='Setup-Marker aus Bash-Startdatei entfernen.' ;;
-        _alias_category_setup) REPLY='Interaktives Kategorie-Setup starten.' ;;
-        _alias_reload) REPLY='Alias-Module in aktueller Shell neu laden.' ;;
-        _alias_edit) REPLY='Geführter Assistent für eigenes Alias und Reload.' ;;
-        _alias_test_reload) REPLY='Reload-Konsistenztest für Alias-Kategorien.' ;;
-        *)
-          REPLY="${cmd}"
-          ;;
-      esac
-      ;;
-    *)
-      case "${name}" in
-        log) REPLY='Journal: last X lines (default 50).' ;;
-        logs) REPLY='Journal: service logs for the last X lines.' ;;
-        log_min) REPLY='Journal since X minutes (default 10).' ;;
-        log_hour) REPLY='Journal since X hours (default 1).' ;;
-        log_clean) REPLY='Journal retention/cleanup (days/size).' ;;
-        aua) REPLY='APT update/upgrade/autoremove in one run.' ;;
-        _alias_update) REPLY='Update repository and reload aliases.' ;;
-        _alias_init) REPLY='Write setup block to shell startup file.' ;;
-        _alias_setup) REPLY='Guided setup: color scheme first, then categories.' ;;
-        _alias_setup_scheme) REPLY='Save color scheme (dark/bright) in user settings.' ;;
-        _alias_init_remove) REPLY='Remove setup marker from shell startup file.' ;;
-        _alias_category_setup) REPLY='Start interactive category setup.' ;;
-        _alias_reload) REPLY='Reload alias modules in current shell.' ;;
-        _alias_edit) REPLY='Guided wizard for custom alias plus reload.' ;;
-        _alias_test_reload) REPLY='Reload consistency test for alias categories.' ;;
-        *)
-          REPLY="${cmd}"
-          ;;
-      esac
-      ;;
-  esac
+  key="help.short.alias.${name}"
+  if _alias_i18n_has_key "${key}"; then
+    REPLY="$(_alias_i18n_text "${key}")"
+    return 0
+  fi
+
+  REPLY="${cmd}"
 }
 
 _alias_description_for_name() {
   local name="$1"
   local cmd="$2"
-  local locale="${BASH_ALIAS_LOCALE:-de}"
   local from_docs=""
+  local key=""
 
   _alias_help_get desc "${name}"
   from_docs="${REPLY:-}"
@@ -639,181 +544,20 @@ _alias_description_for_name() {
     return 0
   fi
 
-  case "${locale}" in
-    de*)
-      case "${name}" in
-        ls) REPLY='Listet Dateien im aktuellen Verzeichnis farbig auf.' ;;
-        la) REPLY='Listet alle Dateien inkl. versteckter Dateien im langen, menschenlesbaren Format.' ;;
-        ll) REPLY='Listet alle Dateien inkl. versteckter Dateien im langen, menschenlesbaren Format.' ;;
-        grep) REPLY='Sucht Textmuster farbig hervorgehoben.' ;;
-        rm) REPLY='Löscht interaktiv mit Rückfrage.' ;;
-        ..) REPLY='Wechselt ein Verzeichnis nach oben.' ;;
-        ...) REPLY='Wechselt zwei Verzeichnisse nach oben.' ;;
-        ....) REPLY='Wechselt drei Verzeichnisse nach oben.' ;;
-        .....) REPLY='Wechselt vier Verzeichnisse nach oben.' ;;
-        .2) REPLY='Wechselt zwei Verzeichnisse nach oben.' ;;
-        .3) REPLY='Wechselt drei Verzeichnisse nach oben.' ;;
-        .4) REPLY='Wechselt vier Verzeichnisse nach oben.' ;;
-        .5) REPLY='Wechselt fünf Verzeichnisse nach oben.' ;;
-        '~') REPLY='Wechselt ins Home-Verzeichnis.' ;;
-        -) REPLY='Wechselt ins vorherige Verzeichnis.' ;;
-        cdl) REPLY='Zeigt den Verzeichnis-Stack mit Indizes.' ;;
-        p) REPLY='Legt Verzeichnisse per pushd auf den Stack.' ;;
-        o) REPLY='Nimmt das oberste Verzeichnis per popd vom Stack.' ;;
-        +1|+2|+3|+4|-1|-2|-3|-4) REPLY='Springt zu einem Eintrag im Verzeichnis-Stack.' ;;
-        h) REPLY='Zeigt die Shell-History.' ;;
-        dfh) REPLY='Zeigt Dateisystem-Auslastung in menschenlesbarer Form.' ;;
-        duh) REPLY='Zeigt Speicherverbrauch pro Unterordner bis Tiefe 1.' ;;
-        freeh) REPLY='Zeigt RAM- und Swap-Auslastung in menschenlesbarer Form.' ;;
-        psg) REPLY='Sucht Prozesse per grep in der Prozessliste.' ;;
-        psmem) REPLY='Zeigt Top-Prozesse nach RAM-Verbrauch.' ;;
-        pscpu) REPLY='Zeigt Top-Prozesse nach CPU-Verbrauch.' ;;
-        g) REPLY='Kurzform für git.' ;;
-        gs) REPLY='Zeigt den Git-Status kurz inkl. Branch-Info.' ;;
-        ga) REPLY='Fügt Dateien zur Git-Staging-Area hinzu.' ;;
-        gaa) REPLY='Fügt alle Änderungen zur Git-Staging-Area hinzu.' ;;
-        gb) REPLY='Zeigt lokale Git-Branches.' ;;
-        gba) REPLY='Zeigt lokale und Remote-Branches.' ;;
-        gbd) REPLY='Löscht einen lokalen Branch.' ;;
-        gco) REPLY='Wechselt auf einen Branch oder Commit.' ;;
-        gcb) REPLY='Erstellt einen neuen Branch und wechselt darauf.' ;;
-        gc) REPLY='Erstellt einen neuen Commit (Editor).' ;;
-        gcm) REPLY='Erstellt einen Commit mit direkter Nachricht.' ;;
-        gca) REPLY='Ändert den letzten Commit (amend).' ;;
-        gcan) REPLY='Ändert den letzten Commit ohne neue Nachricht.' ;;
-        gd) REPLY='Zeigt nicht gestagte Änderungen.' ;;
-        gds) REPLY='Zeigt gestagte Änderungen.' ;;
-        gl) REPLY='Zeigt kompakten Git-Graph-Log.' ;;
-        gf) REPLY='Holt alle Remotes und bereinigt veraltete Referenzen.' ;;
-        gpl) REPLY='Führt git pull nur als Fast-Forward aus.' ;;
-        gp) REPLY='Führt git push auf das konfigurierte Ziel aus.' ;;
-        gpf) REPLY='Führt git push mit --force-with-lease aus (sicherer Force-Push).' ;;
-        gr) REPLY='Setzt Änderungen im Working Tree auf HEAD Zurück.' ;;
-        grs) REPLY='Entfernt Dateien aus der Staging-Area.' ;;
-        gst) REPLY='Speichert den aktuellen Arbeitsstand in einem Stash.' ;;
-        gstp) REPLY='Spielt den letzten Git-Stash wieder ein.' ;;
-        ports) REPLY='Zeigt offene Ports und zugehörige Prozesse.' ;;
-        myip) REPLY='Zeigt lokale IP-Adressen kompakt an.' ;;
-        pingg) REPLY='Testet Netzwerkverbindung zu google.com.' ;;
-        log) REPLY='Zeigt die letzten Journal-Logs (Standard 50 Zeilen, root-Funktion).' ;;
-        logs) REPLY='Zeigt Journal-Logs für einen Dienst mit optionaler Zeilenanzahl (root-Funktion).' ;;
-        log_min) REPLY='Zeigt Journal-Logs der letzten X Minuten (Standard 10, root-Funktion).' ;;
-        log_hour) REPLY='Zeigt Journal-Logs der letzten X Stunden (Standard 1, root-Funktion).' ;;
-        log_clean) REPLY='Bereinigt Journal-Logs nach Aufbewahrungszeit/Größe (root-Funktion).' ;;
-        agi) REPLY='Installiert ein Paket via apt install (root).' ;;
-        agr) REPLY='Entfernt ein Paket via apt remove (root).' ;;
-        acs) REPLY='Sucht Pakete via apt search.' ;;
-        agu) REPLY='Aktualisiert Paketlisten via apt update (root).' ;;
-        agg) REPLY='Führt Paket-Upgrade via apt upgrade aus (root).' ;;
-        aga) REPLY='Entfernt unnötige Pakete via apt autoremove (root).' ;;
-        agl) REPLY='Zeigt alle upgradefähigen Pakete.' ;;
-        aua) REPLY='Führt apt update, upgrade und autoremove als Gesamt-Update aus (root).' ;;
-        my) REPLY='Startet die MySQL-CLI.' ;;
-        mya) REPLY='Startet mysqladmin für Admin-Operationen.' ;;
-        myping) REPLY='Prüft, ob der MySQL-Server antwortet.' ;;
-        _alias_update) REPLY='Aktualisiert dieses Alias-Repository per git pull und lädt neu.' ;;
-        _alias_init) REPLY='Trägt den markierten Setup-Block in die passende Bash-Startdatei ein.' ;;
-        _alias_setup) REPLY='Startet das geführte Setup (Farbschema, danach Kategorien).' ;;
-        _alias_setup_scheme) REPLY='Wählt ein Farbschema und speichert es nur in ~/.config/bash-standard-aliases/settings.conf.' ;;
-        _alias_init_remove) REPLY='Entfernt den markierten Setup-Block aus der erkannten Bash-Startdatei.' ;;
-        _alias_category_setup) REPLY='Startet den interaktiven Kategorie-Setup-Assistenten.' ;;
-        _alias_reload) REPLY='Lädt die Alias-Module in der aktuellen Shell neu (Repo-Reload).' ;;
-        _alias_edit) REPLY='Startet einen Assistenten und legt ein Alias mit Beschreibung an; danach Reload.' ;;
-        _alias_test_reload) REPLY='Prüft automatisiert, ob Alias-Kategorien nach Reload konsistent bleiben.' ;;
-        *) REPLY="$(printf "$(_alias_text desc_fallback)" "${cmd}")" ;;
-      esac
-      ;;
-    *)
-      case "${name}" in
-        ls) REPLY='Lists files in the current directory with colors.' ;;
-        la) REPLY='Lists all files including hidden ones in long, human-readable format.' ;;
-        ll) REPLY='Lists all files including hidden ones in long, human-readable format.' ;;
-        grep) REPLY='Searches text patterns with colored highlights.' ;;
-        rm) REPLY='Deletes interactively with confirmation.' ;;
-        ..) REPLY='Moves one directory up.' ;;
-        ...) REPLY='Moves two directories up.' ;;
-        ....) REPLY='Moves three directories up.' ;;
-        .....) REPLY='Moves four directories up.' ;;
-        .2) REPLY='Moves two directories up.' ;;
-        .3) REPLY='Moves three directories up.' ;;
-        .4) REPLY='Moves four directories up.' ;;
-        .5) REPLY='Moves five directories up.' ;;
-        '~') REPLY='Switches to the home directory.' ;;
-        -) REPLY='Switches to the previous directory.' ;;
-        cdl) REPLY='Shows the directory stack with indices.' ;;
-        p) REPLY='Pushes directories onto the stack using pushd.' ;;
-        o) REPLY='Pops the top directory from the stack using popd.' ;;
-        +1|+2|+3|+4|-1|-2|-3|-4) REPLY='Jumps to a directory stack entry.' ;;
-        h) REPLY='Shows shell history.' ;;
-        dfh) REPLY='Shows filesystem usage in human-readable format.' ;;
-        duh) REPLY='Shows disk usage per subdirectory up to depth 1.' ;;
-        freeh) REPLY='Shows RAM and swap usage in human-readable format.' ;;
-        psg) REPLY='Searches processes via grep in the process list.' ;;
-        psmem) REPLY='Shows top processes by RAM usage.' ;;
-        pscpu) REPLY='Shows top processes by CPU usage.' ;;
-        g) REPLY='Short form for git.' ;;
-        gs) REPLY='Shows short git status including branch info.' ;;
-        ga) REPLY='Adds files to the git staging area.' ;;
-        gaa) REPLY='Adds all changes to the git staging area.' ;;
-        gb) REPLY='Shows local git branches.' ;;
-        gba) REPLY='Shows local and remote git branches.' ;;
-        gbd) REPLY='Deletes a local branch.' ;;
-        gco) REPLY='Checks out a branch or commit.' ;;
-        gcb) REPLY='Creates a new branch and switches to it.' ;;
-        gc) REPLY='Creates a new commit (editor).' ;;
-        gcm) REPLY='Creates a commit with direct message.' ;;
-        gca) REPLY='Amends the last commit.' ;;
-        gcan) REPLY='Amends the last commit without changing the message.' ;;
-        gd) REPLY='Shows unstaged changes.' ;;
-        gds) REPLY='Shows staged changes.' ;;
-        gl) REPLY='Shows compact git graph log.' ;;
-        gf) REPLY='Fetches all remotes and prunes stale refs.' ;;
-        gpl) REPLY='Runs git pull in fast-forward-only mode.' ;;
-        gp) REPLY='Runs git push to the configured target.' ;;
-        gpf) REPLY='Runs git push with --force-with-lease (safer force push).' ;;
-        gr) REPLY='Resets working tree changes back to HEAD.' ;;
-        grs) REPLY='Unstages files from the staging area.' ;;
-        gst) REPLY='Stores current work in a git stash.' ;;
-        gstp) REPLY='Applies the latest git stash.' ;;
-        ports) REPLY='Shows open ports and owning processes.' ;;
-        myip) REPLY='Shows local IP addresses in compact form.' ;;
-        pingg) REPLY='Tests network connectivity to google.com.' ;;
-        log) REPLY='Shows recent journal logs (default 50 lines, root function).' ;;
-        logs) REPLY='Shows journal logs for a service with optional line count (root function).' ;;
-        log_min) REPLY='Shows journal logs for the last X minutes (default 10, root function).' ;;
-        log_hour) REPLY='Shows journal logs for the last X hours (default 1, root function).' ;;
-        log_clean) REPLY='Cleans journal logs by retention time/size (root function).' ;;
-        agi) REPLY='Installs a package via apt install (root).' ;;
-        agr) REPLY='Removes a package via apt remove (root).' ;;
-        acs) REPLY='Searches packages via apt search.' ;;
-        agu) REPLY='Updates package lists via apt update (root).' ;;
-        agg) REPLY='Runs apt upgrade (root).' ;;
-        aga) REPLY='Runs apt autoremove to remove unnecessary packages (root).' ;;
-        agl) REPLY='Shows all upgradable packages.' ;;
-        aua) REPLY='Runs apt update, upgrade and autoremove as one update flow (root).' ;;
-        my) REPLY='Starts the MySQL CLI.' ;;
-        mya) REPLY='Starts mysqladmin for admin operations.' ;;
-        myping) REPLY='Checks whether the MySQL server responds.' ;;
-        _alias_update) REPLY='Updates this alias repository via git pull and reloads.' ;;
-        _alias_init) REPLY='Writes the marked setup block to the detected Bash startup file.' ;;
-        _alias_setup) REPLY='Starts guided setup (color scheme, then categories).' ;;
-        _alias_setup_scheme) REPLY='Selects a color scheme and saves it only to ~/.config/bash-standard-aliases/settings.conf.' ;;
-        _alias_init_remove) REPLY='Removes the marked setup block from the detected Bash startup file.' ;;
-        _alias_category_setup) REPLY='Starts the interactive category setup wizard.' ;;
-        _alias_reload) REPLY='Reloads alias modules in the current shell (repo reload).' ;;
-        _alias_edit) REPLY='Starts a wizard and creates an alias with description, then reloads.' ;;
-        _alias_test_reload) REPLY='Checks automatically whether alias categories stay consistent after reload.' ;;
-        *) REPLY="$(printf "$(_alias_text desc_fallback)" "${cmd}")" ;;
-      esac
-      ;;
-  esac
+  key="help.desc.alias.${name}"
+  if _alias_i18n_has_key "${key}"; then
+    REPLY="$(_alias_i18n_text "${key}")"
+    return 0
+  fi
+
+  REPLY="$(printf "$(_alias_text desc_fallback)" "${cmd}")"
 }
 
 _alias_detail_command_for_name() {
   local name="$1"
   local cmd="$2"
-  local locale="${BASH_ALIAS_LOCALE:-de}"
   local from_docs=""
+  local key=""
 
   _alias_help_get cmd "${name}"
   from_docs="${REPLY:-}"
@@ -822,48 +566,13 @@ _alias_detail_command_for_name() {
     return 0
   fi
 
-  case "${locale}" in
-    de*)
-      case "${name}" in
-        log) REPLY='journalctl -n <X> --no-pager  (Standard: X=50)' ;;
-        logs) REPLY='journalctl -u <service> -n <X> --no-pager  (Standard: X=50)' ;;
-        log_min) REPLY='journalctl --since \"<X> minutes ago\" --no-pager  (Standard: X=10)' ;;
-        log_hour) REPLY='journalctl --since \"<X> hours ago\" --no-pager  (Standard: X=1)' ;;
-        log_clean) REPLY='journalctl --vacuum-time=<tage>d --vacuum-size=<größe>  (Standard: 2d, 100M)' ;;
-        aua) REPLY='apt update && apt upgrade [-y] && apt autoremove [-y]' ;;
-        _alias_update) REPLY='git pull --ff-only && alias_repo_reload  (Standardmodus)' ;;
-        _alias_reload) REPLY='alias_repo_reload  (Alias-Loader in aktueller Shell neu laden)' ;;
-        _alias_init) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --init' ;;
-        _alias_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_guided_setup.sh\"' ;;
-        _alias_setup_scheme) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_color_scheme_setup.sh\" [dark|bright]' ;;
-        _alias_init_remove) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --remove' ;;
-        _alias_category_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
-        _alias_test_reload) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"' ;;
-        _alias_edit) REPLY='alias_self_edit  (Alias-Assistent mit Ziel-Datei-Auswahl und Reload)' ;;
-        *) REPLY="${cmd}" ;;
-      esac
-      ;;
-    *)
-      case "${name}" in
-        log) REPLY='journalctl -n <X> --no-pager  (default: X=50)' ;;
-        logs) REPLY='journalctl -u <service> -n <X> --no-pager  (default: X=50)' ;;
-        log_min) REPLY='journalctl --since \"<X> minutes ago\" --no-pager  (default: X=10)' ;;
-        log_hour) REPLY='journalctl --since \"<X> hours ago\" --no-pager  (default: X=1)' ;;
-        log_clean) REPLY='journalctl --vacuum-time=<days>d --vacuum-size=<size>  (default: 2d, 100M)' ;;
-        aua) REPLY='apt update && apt upgrade [-y] && apt autoremove [-y]' ;;
-        _alias_update) REPLY='git pull --ff-only && alias_repo_reload  (default mode)' ;;
-        _alias_reload) REPLY='alias_repo_reload  (reload alias loader in current shell)' ;;
-        _alias_init) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --init' ;;
-        _alias_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_guided_setup.sh\"' ;;
-        _alias_setup_scheme) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_color_scheme_setup.sh\" [dark|bright]' ;;
-        _alias_init_remove) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --remove' ;;
-        _alias_category_setup) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"' ;;
-        _alias_test_reload) REPLY='bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"' ;;
-        _alias_edit) REPLY='alias_self_edit  (alias wizard with target-file selection and reload)' ;;
-        *) REPLY="${cmd}" ;;
-      esac
-      ;;
-  esac
+  key="help.cmd.alias.${name}"
+  if _alias_i18n_has_key "${key}"; then
+    REPLY="$(_alias_i18n_text "${key}")"
+    return 0
+  fi
+
+  REPLY="${cmd}"
 }
 
 _alias_resolve_category_input() {
@@ -1419,8 +1128,8 @@ a() {
     fi
 
     category="$(_alias_resolve_category_input "$1")" || {
-      printf '%s\n' "$(_alias_i18n_pick "Unbekannter Alias oder Kategorie: $1" "Unknown alias or category: $1")"
-      echo "$(_alias_i18n_pick "Nutze 'a' für Auswahl." "Use 'a' for selection.")"
+      printf '%s\n' "$(_alias_i18n_text "help.unknown_alias_or_category" "$1")"
+      echo "$(_alias_i18n_text "help.use_a_for_selection")"
       return 1
     }
   else
@@ -1478,7 +1187,7 @@ complete -F _alias_category_completion a
 
 alias_self_test_reload() {
   if [ -z "${BASH_ALIAS_REPO_DIR:-}" ]; then
-    echo "$(_alias_i18n_pick "Fehler: BASH_ALIAS_REPO_DIR ist nicht gesetzt." "Error: BASH_ALIAS_REPO_DIR is not set.")"
+    echo "$(_alias_i18n_text "help.err_repo_dir_unset")"
     return 1
   fi
 

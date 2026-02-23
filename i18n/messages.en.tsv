@@ -1,0 +1,267 @@
+core.module_load_failed	Error: Failed to load module: %s
+core.config_missing_notice	Note: Configuration file missing: %s (base), optional %s, %s
+repo_pull.err_repo_path_missing	Error: Repository path missing (arg 1 or BASH_ALIAS_REPO_DIR).
+repo_pull.err_not_git_repo	Error: No Git repository found at %s
+mysql_dump.usage_script	Usage: mysql_dump.sh [--gzip] <database> [output]
+mysql_impl.usage_dump	Usage: mysql_dump <database> [output.sql]
+mysql_impl.usage_dump_gz	Usage: mysql_dump_gz <database> [output.sql.gz]
+mysql.common.err_script_not_found	Error: Script not found: %s
+help_loader.err_impl_missing	Error: Help implementation not found: %s
+help_loader.err_fn_not_loaded	Error: Failed to load help function '%s'.
+overrides_loader.err_impl_missing	Error: Overrides implementation not found: %s
+overrides_loader.err_self_edit_not_loaded	Error: Failed to load alias_self_edit.
+reload_test.fail_loader_missing	FAIL: Loader not found: %s
+reload_test.fail_first_load_empty	FAIL: First load produced no alias-category mappings.
+reload_test.fail_reload_empty	FAIL: Reload produced no alias-category mappings.
+reload_test.fail_alias_missing_after_reload	FAIL: Alias no longer registered after reload: %s
+reload_test.fail_category_changed_after_reload	FAIL: Category changed after reload for %s: %s -> %s
+reload_test.ok_consistent	OK: Alias-category mapping remains consistent after reload.
+self_setup.err_no_target	Error: No target file specified.
+self_setup.err_not_writable	Error: File is not writable: %s
+self_setup.already_marker	Already configured in %s (marker found).
+self_setup.already_loader	Already configured in %s (loader path found).
+self_setup.entry_added	Entry added: %s
+self_setup.prompt_yes_no_suffix	 [y/N]: 
+self_setup.root_choose_target	Choose root setup target:
+self_setup.root_skip	  3) skip
+self_setup.prompt_choice_123	Choice [1/2/3]: 
+self_setup.err_loader_missing	Error: Loader not found: %s
+self_setup.prompt_user_setup	Write setup to %s?
+self_setup.root_skipped	Root setup skipped.
+self_setup.user_skipped	User setup skipped.
+self_setup.setup_done	Setup completed.
+self_setup.err_file_missing	Error: File not found: %s
+self_setup.warn_mode_restore	Warning: Could not restore file permissions: %s
+self_setup.marker_removed	Marker block removed: %s
+self_setup.err_marker_unfinished	Error: Marker block incomplete in %s (missing end marker).
+self_setup.no_marker_in_file	No marker block found in %s.
+self_setup.err_marker_remove	Error: Could not remove marker from %s.
+self_setup.no_marker_found	No marker found.
+self_setup.choose_remove_target	Choose file for removal:
+self_setup.remove_cancel	  3) cancel
+self_setup.canceled	Canceled.
+self_setup.err_category_script_missing	Error: scripts/alias_category_setup.sh not found.
+self_setup.start_category_selection	Starting category selection.
+self_setup.usage	Usage: %s [run	category	init	setup	install	remove]
+category_setup.err_default_conf_missing	Error: alias_files.conf not found: %s
+category_setup.root_target_title	Running as root: where should changes be stored?
+category_setup.root_target_global	  1) global (%s)
+category_setup.root_target_user	  2) root-only (%s)
+category_setup.root_target_cancel	  3) cancel
+category_setup.root_target_prompt	Choice [1/2/3]: 
+category_setup.canceled	Canceled.
+category_setup.err_mkdir	Error: Could not create directory: %s
+category_setup.err_not_writable	Error: File is not writable: %s
+category_setup.err_create_config	Error: Could not create configuration: %s
+category_setup.cfg_header_1	# Delta configuration for bash-standard-aliases
+category_setup.cfg_header_2	# Store only deviations from alias_files.conf
+category_setup.cfg_header_user_base	# Base: alias_files.conf + alias_files.local.conf (if present)
+category_setup.cfg_header_global_base	# Base: alias_files.conf
+category_setup.cfg_header_enable	# Enable: module_name.sh
+category_setup.cfg_header_disable	# Disable: # module_name.sh
+category_setup.cfg_created	Local configuration created: %s
+category_setup.category_on	Category '%s' enabled.
+category_setup.category_off	Category '%s' disabled.
+category_setup.categories_in_file	Categories in %s:
+category_setup.no_categories_defined	No categories defined.
+category_setup.no_editable_categories	 (no editable categories available)
+category_setup.quit_line	  q) quit
+category_setup.toggle_prompt	Category number to toggle (q to quit): 
+category_setup.enter_valid_number	Please enter a valid number.
+category_setup.invalid_number	Invalid number.
+category_setup.done_hint	Done. For the current shell, run '_alias_reload' or 'source ~/.bashrc' if needed.
+color_scheme.err_mkdir	Error: Could not create directory: %s
+color_scheme.err_not_writable	Error: File is not writable: %s
+color_scheme.err_create_file	Error: Could not create file: %s
+color_scheme.header_delta	# User delta settings for bash-standard-aliases
+color_scheme.header_delta_hint	# Store only deviations from settings.conf / settings.local.conf
+color_scheme.err_unknown_scheme	Error: Unknown scheme '%s'. Allowed: dark, bright
+color_scheme.managed_comment	# Managed by _alias_setup_scheme.
+color_scheme.override_comment_1	# Custom color overrides. These values always override the selected scheme.
+color_scheme.override_comment_2	# To activate, remove '#' and adjust the value.
+color_scheme.menu_title	Choose color scheme (target: %s)
+color_scheme.menu_current	Current: %s
+color_scheme.menu_dark	  1) dark   (for dark terminal backgrounds)
+color_scheme.menu_bright	  2) bright (for bright terminal backgrounds)
+color_scheme.menu_quit	  q) cancel
+color_scheme.menu_prompt	Choice [1/2/q]: 
+color_scheme.canceled	Canceled.
+color_scheme.invalid_choice	Invalid choice.
+color_scheme.saved	Color scheme '%s' saved to: %s
+color_scheme.reload_hint	For the current shell: _alias_reload
+guided_setup.title	=== Guided setup ===
+guided_setup.step_1	1) Color scheme
+guided_setup.step_2	2) Categories
+guided_setup.err_script_missing	Error: Script not found: %s
+guided_setup.run_step_1	Step 1/2: configure color scheme
+guided_setup.run_step_2	Step 2/2: configure categories
+guided_setup.done	Guided setup completed.
+overrides_edit.own_help_title	Custom alias help
+overrides_edit.own_help_header	## Alias Help (en)
+overrides_edit.own_help_table_short	short description
+overrides_edit.own_help_table_desc	description
+overrides_edit.own_help_table_cmd	command
+overrides_edit.err_help_exists	Error: Help text for '%s' already exists in %s.
+overrides_edit.err_help_exists_hint	Please adjust the entry manually there.
+overrides_edit.err_repo_dir_unset	Error: BASH_ALIAS_REPO_DIR is not set.
+overrides_edit.choose_target_title	_alias_edit: choose target file
+overrides_edit.choose_target_home	  1) %s (root-only)
+overrides_edit.choose_target_repo	  2) %s (project-wide)
+overrides_edit.choose_target_prompt	Choice [1/2, Enter=1]: 
+overrides_edit.err_invalid_choice	Invalid choice.
+overrides_edit.wizard_title	=== Alias wizard ===
+overrides_edit.prompt_alias_name	Alias name: 
+overrides_edit.err_alias_empty	Alias name must not be empty.
+overrides_edit.err_alias_invalid	Alias name must not contain spaces or '='.
+overrides_edit.prompt_desc	Description: 
+overrides_edit.default_desc	(no description)
+overrides_edit.prompt_cmd_for	Command for %s: 
+overrides_edit.err_cmd_empty	Command must not be empty.
+overrides_edit.err_alias_exists	Error: Alias '%s' already exists in %s.
+overrides_edit.err_alias_exists_hint	Please edit the file manually or choose another alias name.
+overrides_edit.err_help_create	Error: Failed to create %s.
+overrides_edit.err_target_write	Error: Failed to write %s.
+overrides_edit.comment_desc_prefix	Description
+overrides_edit.msg_alias_saved	Alias '%s' was saved to %s.
+overrides_edit.msg_help_saved	Help text was saved to %s.
+overrides_edit.msg_reload_done	Reload completed.
+help.available_aliases_header	==== Available aliases ====
+help.unknown_alias_or_category	Unknown alias or category: %s
+help.use_a_for_selection	Use 'a' for selection.
+help.err_repo_dir_unset	Error: BASH_ALIAS_REPO_DIR is not set.
+help.categories_title	Alias categories:
+help.categories_prompt	Category (name/number, 0 = all, q/esc = quit): 
+help.categories_invalid	Invalid input. Exiting menu.
+help.categories_back	All categories
+help.all_categories_title	All categories
+help.all_categories_prompt	Choose category (0/left/backspace = back, q/esc = quit): 
+help.all_categories_back	Back to main menu
+help.category_prompt	Choose alias (number, 0/left/backspace = back, q/esc = quit): 
+help.category_empty	(no loaded aliases)
+help.category_back	Back to category menu
+help.table_col_no	no)
+help.table_col_alias	alias
+help.table_col_short	short description
+help.alias_invalid	Invalid input. Exiting menu.
+help.alias_detail_title	Alias details
+help.alias_detail_desc	Description
+help.alias_detail_cmd	Command
+help.alias_detail_prompt	Enter = run, 0/left/backspace = back, q/esc = quit: 
+help.alias_unknown	Unknown alias: %s
+help.short_internal	Internal helper: %s
+help.desc_fallback	Runs: %s
+help.short.alias.log	Journal: last X lines (default 50).
+help.short.alias.logs	Journal: service logs for the last X lines.
+help.short.alias.log_min	Journal since X minutes (default 10).
+help.short.alias.log_hour	Journal since X hours (default 1).
+help.short.alias.log_clean	Journal retention/cleanup (days/size).
+help.short.alias.aua	APT update/upgrade/autoremove in one run.
+help.short.alias._alias_update	Update repository and reload aliases.
+help.short.alias._alias_init	Write setup block to shell startup file.
+help.short.alias._alias_setup	Guided setup: color scheme first, then categories.
+help.short.alias._alias_setup_scheme	Save color scheme (dark/bright) in user settings.
+help.short.alias._alias_init_remove	Remove setup marker from shell startup file.
+help.short.alias._alias_category_setup	Start interactive category setup.
+help.short.alias._alias_reload	Reload alias modules in current shell.
+help.short.alias._alias_edit	Guided wizard for custom alias plus reload.
+help.short.alias._alias_test_reload	Reload consistency test for alias categories.
+help.desc.alias.ls	Lists files in the current directory with colors.
+help.desc.alias.la	Lists all files including hidden ones in long, human-readable format.
+help.desc.alias.ll	Lists all files including hidden ones in long, human-readable format.
+help.desc.alias.grep	Searches text patterns with colored highlights.
+help.desc.alias.rm	Deletes interactively with confirmation.
+help.desc.alias...	Moves one directory up.
+help.desc.alias....	Moves two directories up.
+help.desc.alias.....	Moves three directories up.
+help.desc.alias......	Moves four directories up.
+help.desc.alias..2	Moves two directories up.
+help.desc.alias..3	Moves three directories up.
+help.desc.alias..4	Moves four directories up.
+help.desc.alias..5	Moves five directories up.
+help.desc.alias.~	Switches to the home directory.
+help.desc.alias.-	Switches to the previous directory.
+help.desc.alias.cdl	Shows the directory stack with indices.
+help.desc.alias.p	Pushes directories onto the stack using pushd.
+help.desc.alias.o	Pops the top directory from the stack using popd.
+help.desc.alias.+1	Jumps to a directory stack entry.
+help.desc.alias.+2	Jumps to a directory stack entry.
+help.desc.alias.+3	Jumps to a directory stack entry.
+help.desc.alias.+4	Jumps to a directory stack entry.
+help.desc.alias.-1	Jumps to a directory stack entry.
+help.desc.alias.-2	Jumps to a directory stack entry.
+help.desc.alias.-3	Jumps to a directory stack entry.
+help.desc.alias.-4	Jumps to a directory stack entry.
+help.desc.alias.h	Shows shell history.
+help.desc.alias.dfh	Shows filesystem usage in human-readable format.
+help.desc.alias.duh	Shows disk usage per subdirectory up to depth 1.
+help.desc.alias.freeh	Shows RAM and swap usage in human-readable format.
+help.desc.alias.psg	Searches processes via grep in the process list.
+help.desc.alias.psmem	Shows top processes by RAM usage.
+help.desc.alias.pscpu	Shows top processes by CPU usage.
+help.desc.alias.g	Short form for git.
+help.desc.alias.gs	Shows short git status including branch info.
+help.desc.alias.ga	Adds files to the git staging area.
+help.desc.alias.gaa	Adds all changes to the git staging area.
+help.desc.alias.gb	Shows local git branches.
+help.desc.alias.gba	Shows local and remote git branches.
+help.desc.alias.gbd	Deletes a local branch.
+help.desc.alias.gco	Checks out a branch or commit.
+help.desc.alias.gcb	Creates a new branch and switches to it.
+help.desc.alias.gc	Creates a new commit (editor).
+help.desc.alias.gcm	Creates a commit with direct message.
+help.desc.alias.gca	Amends the last commit.
+help.desc.alias.gcan	Amends the last commit without changing the message.
+help.desc.alias.gd	Shows unstaged changes.
+help.desc.alias.gds	Shows staged changes.
+help.desc.alias.gl	Shows compact git graph log.
+help.desc.alias.gf	Fetches all remotes and prunes stale refs.
+help.desc.alias.gpl	Runs git pull in fast-forward-only mode.
+help.desc.alias.gp	Runs git push to the configured target.
+help.desc.alias.gpf	Runs git push with --force-with-lease (safer force push).
+help.desc.alias.gr	Resets working tree changes back to HEAD.
+help.desc.alias.grs	Unstages files from the staging area.
+help.desc.alias.gst	Stores current work in a git stash.
+help.desc.alias.gstp	Applies the latest git stash.
+help.desc.alias.ports	Shows open ports and owning processes.
+help.desc.alias.myip	Shows local IP addresses in compact form.
+help.desc.alias.pingg	Tests network connectivity to google.com.
+help.desc.alias.log	Shows recent journal logs (default 50 lines, root function).
+help.desc.alias.logs	Shows journal logs for a service with optional line count (root function).
+help.desc.alias.log_min	Shows journal logs for the last X minutes (default 10, root function).
+help.desc.alias.log_hour	Shows journal logs for the last X hours (default 1, root function).
+help.desc.alias.log_clean	Cleans journal logs by retention time/size (root function).
+help.desc.alias.agi	Installs a package via apt install (root).
+help.desc.alias.agr	Removes a package via apt remove (root).
+help.desc.alias.acs	Searches packages via apt search.
+help.desc.alias.agu	Updates package lists via apt update (root).
+help.desc.alias.agg	Runs apt upgrade (root).
+help.desc.alias.aga	Runs apt autoremove to remove unnecessary packages (root).
+help.desc.alias.agl	Shows all upgradable packages.
+help.desc.alias.aua	Runs apt update, upgrade and autoremove as one update flow (root).
+help.desc.alias.my	Starts the MySQL CLI.
+help.desc.alias.mya	Starts mysqladmin for admin operations.
+help.desc.alias.myping	Checks whether the MySQL server responds.
+help.desc.alias._alias_update	Updates this alias repository via git pull and reloads.
+help.desc.alias._alias_init	Writes the marked setup block to the detected Bash startup file.
+help.desc.alias._alias_setup	Starts guided setup (color scheme, then categories).
+help.desc.alias._alias_setup_scheme	Selects a color scheme and saves it only to ~/.config/bash-standard-aliases/settings.conf.
+help.desc.alias._alias_init_remove	Removes the marked setup block from the detected Bash startup file.
+help.desc.alias._alias_category_setup	Starts the interactive category setup wizard.
+help.desc.alias._alias_reload	Reloads alias modules in the current shell (repo reload).
+help.desc.alias._alias_edit	Starts a wizard and creates an alias with description, then reloads.
+help.desc.alias._alias_test_reload	Checks automatically whether alias categories stay consistent after reload.
+help.cmd.alias.log	journalctl -n <X> --no-pager  (default: X=50)
+help.cmd.alias.logs	journalctl -u <service> -n <X> --no-pager  (default: X=50)
+help.cmd.alias.log_min	journalctl --since \"<X> minutes ago\" --no-pager  (default: X=10)
+help.cmd.alias.log_hour	journalctl --since \"<X> hours ago\" --no-pager  (default: X=1)
+help.cmd.alias.log_clean	journalctl --vacuum-time=<days>d --vacuum-size=<size>  (default: 2d, 100M)
+help.cmd.alias.aua	apt update && apt upgrade [-y] && apt autoremove [-y]
+help.cmd.alias._alias_update	git pull --ff-only && alias_repo_reload  (default mode)
+help.cmd.alias._alias_reload	alias_repo_reload  (reload alias loader in current shell)
+help.cmd.alias._alias_init	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --init
+help.cmd.alias._alias_setup	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_guided_setup.sh\"
+help.cmd.alias._alias_setup_scheme	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_color_scheme_setup.sh\" [dark|bright]
+help.cmd.alias._alias_init_remove	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_self_setup.sh\" --remove
+help.cmd.alias._alias_category_setup	bash \"$BASH_ALIAS_REPO_DIR/scripts/alias_category_setup.sh\"
+help.cmd.alias._alias_test_reload	bash \"$BASH_ALIAS_REPO_DIR/scripts/test_reload_category_mapping.sh\"
+help.cmd.alias._alias_edit	alias_self_edit  (alias wizard with target-file selection and reload)
