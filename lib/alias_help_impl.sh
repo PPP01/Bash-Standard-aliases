@@ -269,6 +269,12 @@ _alias_menu_read_input() {
   REPLY="${value}"
 }
 
+_alias_menu_was_interrupted() {
+  [ "${BASH_ALIAS_MENU_INTERRUPTED}" -eq 1 ] || return 1
+  BASH_ALIAS_MENU_INTERRUPTED=0
+  return 0
+}
+
 _alias_runtime_cache_reset() {
   BASH_ALIAS_RUNTIME_VALUE=()
   BASH_ALIAS_RUNTIME_SORTED_NAMES=()
@@ -1129,7 +1135,9 @@ _alias_menu_category() {
   local -a names=()
 
   while true; do
+    _alias_menu_was_interrupted && return 130
     _alias_menu_refresh_begin
+    _alias_menu_was_interrupted && return 130
     names=()
     while IFS= read -r name; do
       [ -z "${name}" ] && continue
@@ -1304,7 +1312,9 @@ _alias_menu_all_categories() {
   local -a menu_categories=()
 
   while true; do
+    _alias_menu_was_interrupted && return 130
     _alias_menu_refresh_begin
+    _alias_menu_was_interrupted && return 130
     menu_categories=()
     rendered_entries=0
     echo ""
@@ -1449,7 +1459,9 @@ _alias_pick_category_interactive() {
   local -a menu_categories=()
 
   while true; do
+    _alias_menu_was_interrupted && return 130
     _alias_menu_refresh_begin
+    _alias_menu_was_interrupted && return 130
     menu_categories=()
     rendered_entries=0
     echo ""
