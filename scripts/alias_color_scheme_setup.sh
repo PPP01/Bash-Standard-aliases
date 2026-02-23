@@ -87,8 +87,8 @@ _write_scheme_block() {
       menu_header="'\\033[1;30m'"
       menu_setup="'\\033[0;90m'"
       menu_category_header="'\\033[1;38;5;22m'"
-      menu_highlight_line="'\\033[1;97;100m'"
-      menu_highlight_marker="'\\033[1;34m'"
+      menu_highlight_line="'\\033[1;30;47m'"
+      menu_highlight_marker="'\\033[1;37m'"
       ;;
     *)
       printf "$(_text err_unknown_scheme)\n" "${scheme}"
