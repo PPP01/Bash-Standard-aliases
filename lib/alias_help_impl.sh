@@ -1116,7 +1116,7 @@ _alias_menu_category_title_line() {
   local pad=""
 
   display="$(_alias_category_display_name "${category}")"
-  printf -v header_line ' %1s %4s | %-18s | %s' "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
+  printf -v header_line ' %1s %5s | %-18s | %s' "" "$(_alias_text table_col_no)" "$(_alias_text table_col_alias)" "$(_alias_text table_col_short)"
   title_line="=== ${display} ==="
   pad_len=$((${#header_line} - ${#title_line}))
   if [ "${pad_len}" -gt 0 ]; then
