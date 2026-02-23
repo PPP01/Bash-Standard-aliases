@@ -143,6 +143,25 @@ _alias_menu_cache_enabled() {
   esac
 }
 
+_alias_menu_clear_enabled() {
+  case "${BASH_ALIAS_MENU_CLEAR_SCREEN:-1}" in
+    1|true|TRUE|yes|YES|on|ON) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+_alias_menu_clear_screen() {
+  _alias_menu_clear_enabled || return 0
+  [ -t 1 ] || return 0
+
+  if command -v tput >/dev/null 2>&1; then
+    tput clear 2>/dev/null || printf '\033[H\033[2J'
+    return 0
+  fi
+
+  printf '\033[H\033[2J'
+}
+
 _alias_menu_cache_dir() {
   printf '%s/bash-standard-aliases' "${XDG_CACHE_HOME:-${HOME}/.cache}"
 }
@@ -879,6 +898,7 @@ _alias_menu_alias_details() {
   local name="$1"
   local choice=""
 
+  _alias_menu_clear_screen
   _alias_show_alias_details "${name}" || return 1
   _alias_menu_read_input "$(_alias_text alias_detail_prompt)"
   choice="${REPLY:-}"
@@ -937,6 +957,7 @@ _alias_menu_category() {
   local -a names=()
 
   while true; do
+    _alias_menu_clear_screen
     names=()
     while IFS= read -r name; do
       [ -z "${name}" ] && continue
@@ -1112,6 +1133,7 @@ _alias_menu_all_categories() {
   local -a menu_categories=()
 
   while true; do
+    _alias_menu_clear_screen
     menu_categories=()
     echo ""
     printf '%b=== %s ===%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_text all_categories_title)" "${BASH_ALIAS_HELP_COLOR_RESET}"
@@ -1242,6 +1264,7 @@ _alias_pick_category_interactive() {
   local -a menu_categories=()
 
   while true; do
+    _alias_menu_clear_screen
     menu_categories=()
     echo "" >&2
     printf '%b%s%b\n' "${BASH_ALIAS_HELP_COLOR_MENU_TITLE}" "$(_alias_text categories_title)" "${BASH_ALIAS_HELP_COLOR_RESET}" >&2
