@@ -78,10 +78,10 @@ _alias_menu_tty_raw_enabled() {
 
 _alias_menu_session_begin() {
   BASH_ALIAS_MENU_INTERRUPTED=0
-  _alias_menu_tty_raw_enter
   BASH_ALIAS_MENU_SAVED_TRAP_INT="$(trap -p INT || true)"
   BASH_ALIAS_MENU_SAVED_TRAP_TERM="$(trap -p TERM || true)"
   trap '_alias_menu_handle_interrupt' INT TERM
+  _alias_menu_tty_raw_enter
 }
 
 _alias_menu_handle_interrupt() {
@@ -1066,6 +1066,11 @@ _alias_menu_alias_details() {
   _alias_show_alias_details "${name}" || return 1
   _alias_menu_redraw_set_lines 5
   _alias_menu_read_input "$(_alias_text alias_detail_prompt)"
+  case "$?" in
+    130) return 130 ;;
+    0) ;;
+    *) return 1 ;;
+  esac
   choice="${REPLY:-}"
 
   if _alias_menu_is_quit_input "${choice}"; then
@@ -1184,6 +1189,11 @@ _alias_menu_category() {
     _alias_menu_redraw_set_lines $((render_lines + 1))
 
     _alias_menu_read_input "$(_alias_text category_prompt)"
+    case "$?" in
+      130) return 130 ;;
+      0) ;;
+      *) return 1 ;;
+    esac
     choice="${REPLY:-}"
     if _alias_menu_is_quit_input "${choice}"; then
       return 130
@@ -1353,6 +1363,11 @@ _alias_menu_all_categories() {
     _alias_menu_redraw_set_lines $((render_lines + 1))
 
     _alias_menu_read_input "$(_alias_text all_categories_prompt)"
+    case "$?" in
+      130) return 130 ;;
+      0) ;;
+      *) return 1 ;;
+    esac
     choice="${REPLY:-}"
     if _alias_menu_is_quit_input "${choice}"; then
       return 130
@@ -1505,6 +1520,11 @@ _alias_pick_category_interactive() {
     _alias_menu_redraw_set_lines $((render_lines + 1))
 
     _alias_menu_read_input "$(_alias_text categories_prompt)"
+    case "$?" in
+      130) return 130 ;;
+      0) ;;
+      *) return 1 ;;
+    esac
     choice="${REPLY:-}"
     if _alias_menu_is_quit_input "${choice}"; then
       return 0
