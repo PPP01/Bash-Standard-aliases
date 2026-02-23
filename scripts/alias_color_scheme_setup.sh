@@ -57,6 +57,56 @@ _remove_block() {
   sed -i -E "/${start_regex}/,/${end_regex}/d" "${_user_settings_file}"
 }
 
+_collect_active_color_overrides_outside_managed() {
+  awk -v managed_start="${_scheme_block_start}" -v managed_end="${_scheme_block_end}" '
+    BEGIN { in_managed=0 }
+    $0 == managed_start { in_managed=1; next }
+    $0 == managed_end { in_managed=0; next }
+    !in_managed && $0 ~ /^[[:space:]]*BASH_ALIAS_HELP_COLOR_(DETAIL_LABEL|MENU_TITLE|MENU_META|MENU_HEADER|MENU_CATEGORY_HEADER|MENU_CATEGORY_SETUP|MENU_HIGHLIGHT_LINE|MENU_HIGHLIGHT_MARKER|RESET)[[:space:]]*=/ {
+      print $0
+    }
+  ' "${_user_settings_file}"
+}
+
+_dedupe_color_override_lines_keep_last() {
+  awk '
+    /^[[:space:]]*BASH_ALIAS_HELP_COLOR_(DETAIL_LABEL|MENU_TITLE|MENU_META|MENU_HEADER|MENU_CATEGORY_HEADER|MENU_CATEGORY_SETUP|MENU_HIGHLIGHT_LINE|MENU_HIGHLIGHT_MARKER|RESET)[[:space:]]*=/ {
+      key=$1
+      sub(/[[:space:]]*=.*/, "", key)
+      if (!(key in seen)) {
+        order[++count]=key
+        seen[key]=1
+      }
+      values[key]=$0
+      next
+    }
+    { next }
+    END {
+      for (i=1; i<=count; i++) {
+        key=order[i]
+        if (key in values) {
+          print values[key]
+        }
+      }
+    }
+  '
+}
+
+_strip_active_color_overrides_outside_managed() {
+  local tmp_file=""
+  tmp_file="$(mktemp)" || return 1
+
+  awk -v managed_start="${_scheme_block_start}" -v managed_end="${_scheme_block_end}" '
+    BEGIN { in_managed=0 }
+    $0 == managed_start { in_managed=1; print; next }
+    $0 == managed_end { in_managed=0; print; next }
+    !in_managed && $0 ~ /^[[:space:]]*BASH_ALIAS_HELP_COLOR_(DETAIL_LABEL|MENU_TITLE|MENU_META|MENU_HEADER|MENU_CATEGORY_HEADER|MENU_CATEGORY_SETUP|MENU_HIGHLIGHT_LINE|MENU_HIGHLIGHT_MARKER|RESET)[[:space:]]*=/ {
+      next
+    }
+    { print }
+  ' "${_user_settings_file}" > "${tmp_file}" && mv "${tmp_file}" "${_user_settings_file}"
+}
+
 _write_scheme_block() {
   local scheme="$1"
   local detail_label=""
@@ -162,15 +212,10 @@ _ensure_override_block() {
       ;;
   esac
 
-  preserved_active="$(awk -v start="${_override_block_start}" -v end="${_override_block_end}" '
-    $0 == start { in_block=1; next }
-    $0 == end { in_block=0; next }
-    in_block && $0 ~ /^[[:space:]]*BASH_ALIAS_HELP_COLOR_(DETAIL_LABEL|MENU_TITLE|MENU_META|MENU_HEADER|MENU_CATEGORY_HEADER|MENU_CATEGORY_SETUP|MENU_HIGHLIGHT_LINE|MENU_HIGHLIGHT_MARKER|RESET)[[:space:]]*=/ {
-      print $0
-    }
-  ' "${_user_settings_file}")"
+  preserved_active="$(_collect_active_color_overrides_outside_managed | _dedupe_color_override_lines_keep_last)"
 
   _remove_block "${_override_block_start}" "${_override_block_end}"
+  _strip_active_color_overrides_outside_managed
 
   {
     echo ""
