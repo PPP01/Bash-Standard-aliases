@@ -34,6 +34,7 @@ declare -g BASH_ALIAS_MENU_TTY_MODE_ACTIVE=0
 declare -g BASH_ALIAS_MENU_TTY_MODE_SAVED=""
 declare -g BASH_ALIAS_MENU_SAVED_TRAP_INT=""
 declare -g BASH_ALIAS_MENU_SAVED_TRAP_TERM=""
+declare -g BASH_ALIAS_MENU_INTERRUPTED=0
 
 : "${BASH_ALIAS_HELP_COLOR_DETAIL_LABEL:=\033[0;32m}"
 : "${BASH_ALIAS_HELP_COLOR_MENU_TITLE:=\033[0;32m}"
@@ -76,10 +77,16 @@ _alias_menu_tty_raw_enabled() {
 }
 
 _alias_menu_session_begin() {
+  BASH_ALIAS_MENU_INTERRUPTED=0
   _alias_menu_tty_raw_enter
   BASH_ALIAS_MENU_SAVED_TRAP_INT="$(trap -p INT || true)"
   BASH_ALIAS_MENU_SAVED_TRAP_TERM="$(trap -p TERM || true)"
-  trap '_alias_menu_session_end' INT TERM
+  trap '_alias_menu_handle_interrupt' INT TERM
+}
+
+_alias_menu_handle_interrupt() {
+  BASH_ALIAS_MENU_INTERRUPTED=1
+  _alias_menu_session_end
 }
 
 _alias_menu_session_end() {
@@ -116,7 +123,9 @@ _alias_menu_tty_raw_enter() {
 
 _alias_menu_tty_raw_leave() {
   _alias_menu_tty_raw_enabled || return 0
-  [ "${BASH_ALIAS_MENU_TTY_MODE_ACTIVE}" -eq 1 ] || return 0
+  if [ "${BASH_ALIAS_MENU_TTY_MODE_ACTIVE}" -ne 1 ] && [ -z "${BASH_ALIAS_MENU_TTY_MODE_SAVED}" ]; then
+    return 0
+  fi
   command -v stty >/dev/null 2>&1 || return 0
 
   if [ -n "${BASH_ALIAS_MENU_TTY_MODE_SAVED}" ]; then
@@ -185,6 +194,7 @@ _alias_menu_read_input() {
   local seq=""
   local csi=""
   local value=""
+  local read_rc=0
 
   printf '%s' "${prompt}"
   while IFS= read -r -s -n 1 key; do
@@ -247,6 +257,13 @@ _alias_menu_read_input() {
         ;;
     esac
   done
+  read_rc=$?
+
+  if [ "${BASH_ALIAS_MENU_INTERRUPTED}" -eq 1 ] || [ "${read_rc}" -eq 130 ]; then
+    BASH_ALIAS_MENU_INTERRUPTED=0
+    echo ""
+    return 130
+  fi
 
   echo ""
   REPLY="${value}"
