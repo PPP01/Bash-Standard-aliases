@@ -166,13 +166,30 @@ _alias_collect_alias_names() {
   compgen -A alias
 }
 
+_alias_collect_declared_alias_names() {
+  local file_path="$1"
+  local line=""
+  local alias_name=""
+
+  [ -f "${file_path}" ] || return 0
+
+  while IFS= read -r line; do
+    if [[ "${line}" =~ ^[[:space:]]*alias([[:space:]]+--)?[[:space:]]+([^=[:space:]]+)= ]]; then
+      alias_name="${BASH_REMATCH[2]}"
+      [ -n "${alias_name}" ] && printf '%s\n' "${alias_name}"
+    fi
+  done < "${file_path}"
+}
+
 _alias_register_aliases_for_category() {
   local category="$1"
   local aliases_before="$2"
   local aliases_after="$3"
+  local declared_aliases="$4"
   local alias_name=""
   local mapped_category=""
   local -A aliases_before_map=()
+  local -A declared_aliases_map=()
 
   while IFS= read -r alias_name; do
     [ -z "${alias_name}" ] && continue
@@ -181,8 +198,13 @@ _alias_register_aliases_for_category() {
 
   while IFS= read -r alias_name; do
     [ -z "${alias_name}" ] && continue
+    declared_aliases_map["${alias_name}"]=1
+  done <<< "${declared_aliases}"
 
-    if [ -n "${aliases_before_map[${alias_name}]:-}" ]; then
+  while IFS= read -r alias_name; do
+    [ -z "${alias_name}" ] && continue
+
+    if [ -n "${aliases_before_map[${alias_name}]:-}" ] && [ -z "${declared_aliases_map[${alias_name}]:-}" ]; then
       continue
     fi
     if [ -n "${BASH_ALIAS_ALIAS_CATEGORY[${alias_name}]:-}" ]; then
@@ -313,6 +335,7 @@ if [ "${#_alias_config_layers[@]}" -gt 0 ]; then
         _alias_profile_module_start_us="$(_alias_profile_now_us)"
       fi
 
+      _declared_aliases="$(_alias_collect_declared_alias_names "${_full_path}")"
       _aliases_before="$(_alias_collect_alias_names)"
       # shellcheck disable=SC1090
       if ! source "${_full_path}"; then
@@ -320,7 +343,7 @@ if [ "${#_alias_config_layers[@]}" -gt 0 ]; then
         return 1 2>/dev/null || exit 1
       fi
       _aliases_after="$(_alias_collect_alias_names)"
-      _alias_register_aliases_for_category "${_category}" "${_aliases_before}" "${_aliases_after}"
+      _alias_register_aliases_for_category "${_category}" "${_aliases_before}" "${_aliases_after}" "${_declared_aliases}"
 
       if [ "${_alias_profile_enabled}" -eq 1 ]; then
         _alias_profile_module_us=$(( $(_alias_profile_now_us) - _alias_profile_module_start_us ))
@@ -331,7 +354,7 @@ if [ "${#_alias_config_layers[@]}" -gt 0 ]; then
       fi
     fi
 
-    unset _full_path _category _aliases_before _aliases_after
+    unset _full_path _category _declared_aliases _aliases_before _aliases_after
   done
 else
   printf '%s\n' "$(_alias_i18n_text "core.config_missing_notice" "${_alias_config_file_default}" "${_alias_config_file_local}" "${_alias_config_file_user}")" >&2
@@ -344,8 +367,8 @@ if [ "${_alias_profile_enabled}" -eq 1 ]; then
   printf 'alias-profile: total %4d ms | modules=%d\n' "$((_alias_profile_total_elapsed_us / 1000))" "${_alias_profile_modules_count}" >&2
 fi
 
-unset _entry _layer _full_path _category _aliases_before _aliases_after line entry
+unset _entry _layer _full_path _category _declared_aliases _aliases_before _aliases_after line entry
 unset _alias_profile_enabled _alias_profile_total_start_us _alias_profile_total_elapsed_us _alias_profile_module_start_us _alias_profile_module_us _alias_profile_modules_count _alias_profile_min_ms
 unset _alias_settings_layers _alias_config_layers _alias_module_order _alias_module_enabled
 unset _alias_config_file_default _alias_config_file_local _alias_config_file_user _alias_settings_file_default _alias_settings_file_local _alias_settings_file_user _alias_base_dir _alias_categories_file
-unset -f _alias_add_category_if_missing _alias_add_module_if_missing _alias_sort_key_for_category _alias_sort_categories _alias_init_categories _alias_collect_alias_names _alias_register_aliases_for_category _alias_apply_config_layer _alias_apply_settings_layer _alias_profile_is_enabled _alias_profile_now_us _alias_profile_print_module
+unset -f _alias_add_category_if_missing _alias_add_module_if_missing _alias_sort_key_for_category _alias_sort_categories _alias_init_categories _alias_collect_alias_names _alias_collect_declared_alias_names _alias_register_aliases_for_category _alias_apply_config_layer _alias_apply_settings_layer _alias_profile_is_enabled _alias_profile_now_us _alias_profile_print_module
