@@ -7,6 +7,8 @@ _script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _repo_dir="$(cd "${_script_dir}/.." && pwd)"
 # shellcheck disable=SC1090
 source "${_repo_dir}/lib/alias_i18n.sh"
+# shellcheck disable=SC1090
+source "${_repo_dir}/lib/alias_menu_engine.sh"
 _default_conf="${_repo_dir}/alias_files.conf"
 _local_conf="${_repo_dir}/alias_files.local.conf"
 _user_conf_dir="${HOME}/.config/bash-standard-aliases"
@@ -36,8 +38,117 @@ _escape_regex() {
   printf '%s' "$1" | sed -E 's/[][(){}.^$*+?|\\/]/\\&/g'
 }
 
+_select_root_target_interactive() {
+  local answer=""
+  local selected=2
+  local status=1
+  local feedback=""
+  local marker_global=" "
+  local marker_user=" "
+  local marker_cancel=" "
+  local render_lines=0
+
+  _alias_menu_session_begin
+  while true; do
+    _alias_menu_was_interrupted && {
+      status=130
+      break
+    }
+
+    _alias_menu_refresh_begin
+    marker_global=" "
+    marker_user=" "
+    marker_cancel=" "
+    [ "${selected}" -eq 1 ] && marker_global=">"
+    [ "${selected}" -eq 2 ] && marker_user=">"
+    [ "${selected}" -eq 3 ] && marker_cancel=">"
+
+    echo ""
+    echo "$(_text root_target_title)"
+    printf ' %s ' "${marker_global}"
+    printf "$(_text root_target_global)\n" "${_local_conf}"
+    printf ' %s ' "${marker_user}"
+    printf "$(_text root_target_user)\n" "${_user_conf}"
+    printf ' %s %s\n' "${marker_cancel}" "$(_text root_target_cancel)"
+    if [ -n "${feedback}" ]; then
+      echo "${feedback}"
+    fi
+    render_lines=5
+    if [ -n "${feedback}" ]; then
+      render_lines=$((render_lines + 1))
+    fi
+    _alias_menu_redraw_set_lines $((render_lines + 1))
+
+    _alias_menu_read_input "$(_text root_target_prompt)"
+    case "$?" in
+      130)
+        status=130
+        break
+        ;;
+      0) ;;
+      *)
+        status=1
+        break
+        ;;
+    esac
+    answer="${REPLY:-}"
+
+    if _alias_menu_is_quit_input "${answer}" || _alias_menu_is_back_input "${answer}"; then
+      status=2
+      break
+    fi
+
+    case "${answer}" in
+      up)
+        if [ "${selected}" -le 1 ]; then
+          selected=3
+        else
+          selected=$((selected - 1))
+        fi
+        feedback=""
+        ;;
+      down)
+        if [ "${selected}" -ge 3 ]; then
+          selected=1
+        else
+          selected=$((selected + 1))
+        fi
+        feedback=""
+        ;;
+      right|'')
+        REPLY="${selected}"
+        status=0
+        break
+        ;;
+      1|2|3)
+        REPLY="${answer}"
+        status=0
+        break
+        ;;
+      *)
+        feedback="$(_text enter_valid_number)"
+        ;;
+    esac
+  done
+  _alias_menu_session_end
+
+  if [ "${status}" -eq 0 ]; then
+    return 0
+  fi
+  if [ "${status}" -eq 2 ]; then
+    echo "$(_text canceled)"
+    return 2
+  fi
+  if [ "${status}" -eq 130 ]; then
+    echo "$(_text canceled)"
+    return 130
+  fi
+  return 1
+}
+
 _select_target_conf() {
   local answer=""
+  local select_rc=0
 
   if [ "${EUID}" -ne 0 ]; then
     _target_kind="user"
@@ -45,12 +156,13 @@ _select_target_conf() {
     return 0
   fi
 
-  echo ""
-  echo "$(_text root_target_title)"
-  printf "$(_text root_target_global)\n" "${_local_conf}"
-  printf "$(_text root_target_user)\n" "${_user_conf}"
-  echo "$(_text root_target_cancel)"
-  read -r -p "$(_text root_target_prompt)" answer
+  _select_root_target_interactive
+  select_rc=$?
+  case "${select_rc}" in
+    0) answer="${REPLY}" ;;
+    2|130) exit 1 ;;
+    *) exit 1 ;;
+  esac
 
   case "${answer}" in
     1)
@@ -286,6 +398,7 @@ _toggle_category() {
   local desired_state=""
   local modules=""
   local module=""
+  local message=""
 
   state="$(_category_state "${category}")"
   if [ "${state}" = "on" ]; then
@@ -304,84 +417,162 @@ _toggle_category() {
   done
 
   if [ "${desired_state}" = "on" ]; then
-    printf "$(_text category_on)\n" "${category}"
+    message="$(printf "$(_text category_on)" "${category}")"
   else
-    printf "$(_text category_off)\n" "${category}"
+    message="$(printf "$(_text category_off)" "${category}")"
   fi
+  REPLY="${message}"
 }
 
-_list_categories() {
-  local idx=1
-  local category=""
-  local state=""
-  local shown=0
-
-  echo ""
-  printf "$(_text categories_in_file)\n" "${_target_conf}"
-
-  if declare -F alias_categories_list >/dev/null 2>&1; then
-    while IFS= read -r category; do
-      [ -z "${category}" ] && continue
-      _category_is_visible "${category}" || continue
-      state="$(_category_state "${category}")"
-      printf ' %2d) %-12s [%s]\n' "${idx}" "${category}" "${state}"
-      shown=1
-      idx=$((idx + 1))
-    done < <(alias_categories_list)
-  else
-    echo "$(_text no_categories_defined)"
-  fi
-
-  if [ "${shown}" -eq 0 ]; then
-    echo "$(_text no_editable_categories)"
-  fi
-
-  echo "$(_text quit_line)"
-}
-
-_resolve_category_by_index() {
-  local wanted="$1"
-  local idx=1
+_collect_visible_categories() {
   local category=""
 
-  if declare -F alias_categories_list >/dev/null 2>&1; then
-    while IFS= read -r category; do
-      [ -z "${category}" ] && continue
-      _category_is_visible "${category}" || continue
-      if [ "${idx}" -eq "${wanted}" ]; then
-        printf '%s' "${category}"
-        return 0
-      fi
-      idx=$((idx + 1))
-    done < <(alias_categories_list)
+  if ! declare -F alias_categories_list >/dev/null 2>&1; then
+    return 0
   fi
 
-  return 1
+  while IFS= read -r category; do
+    [ -z "${category}" ] && continue
+    _category_is_visible "${category}" || continue
+    printf '%s\n' "${category}"
+  done < <(alias_categories_list)
 }
 
 _select_target_conf
 _prepare_target_conf
 
-while true; do
-  _list_categories
-  read -r -p "$(_text toggle_prompt)" _choice
+_choice=""
+_category=""
+_status=0
+_selected=1
+_feedback=""
+_render_lines=0
+declare -a _visible_categories=()
 
-  case "${_choice}" in
-    q|Q|quit|QUIT|exit|EXIT)
+_alias_menu_session_begin
+while true; do
+  _alias_menu_was_interrupted && {
+    _status=130
+    break
+  }
+
+  _alias_menu_refresh_begin
+  _visible_categories=()
+  while IFS= read -r _category; do
+    [ -z "${_category}" ] && continue
+    _visible_categories+=("${_category}")
+  done < <(_collect_visible_categories)
+
+  if [ "${#_visible_categories[@]}" -eq 0 ]; then
+    _selected=0
+  elif [ "${_selected}" -lt 1 ] || [ "${_selected}" -gt "${#_visible_categories[@]}" ]; then
+    _selected=1
+  fi
+
+  echo ""
+  printf "$(_text categories_in_file)\n" "${_target_conf}"
+  if [ "${#_visible_categories[@]}" -eq 0 ]; then
+    echo "$(_text no_editable_categories)"
+  else
+    _idx=1
+    for _category in "${_visible_categories[@]}"; do
+      _state="$(_category_state "${_category}")"
+      _marker=" "
+      if [ "${_idx}" -eq "${_selected}" ]; then
+        _marker=">"
+      fi
+      printf ' %s %2d) %-12s [%s]\n' "${_marker}" "${_idx}" "${_category}" "${_state}"
+      _idx=$((_idx + 1))
+    done
+  fi
+  echo "   $(_text quit_line)"
+  if [ -n "${_feedback}" ]; then
+    echo "${_feedback}"
+  fi
+
+  _render_lines=3
+  if [ "${#_visible_categories[@]}" -gt 0 ]; then
+    _render_lines=$((_render_lines + ${#_visible_categories[@]}))
+  else
+    _render_lines=$((_render_lines + 1))
+  fi
+  if [ -n "${_feedback}" ]; then
+    _render_lines=$((_render_lines + 1))
+  fi
+  _alias_menu_redraw_set_lines $((_render_lines + 1))
+
+  _alias_menu_read_input "$(_text toggle_prompt)"
+  case "$?" in
+    130)
+      _status=130
       break
       ;;
-    ''|*[!0-9]*)
-      echo "$(_text enter_valid_number)"
-      ;;
+    0) ;;
     *)
-      _category="$(_resolve_category_by_index "${_choice}")" || {
-        echo "$(_text invalid_number)"
+      _status=1
+      break
+      ;;
+  esac
+  _choice="${REPLY:-}"
+
+  if _alias_menu_is_quit_input "${_choice}" || _alias_menu_is_back_input "${_choice}"; then
+    break
+  fi
+
+  case "${_choice}" in
+    up)
+      if [ "${#_visible_categories[@]}" -gt 0 ]; then
+        if [ "${_selected}" -le 1 ]; then
+          _selected="${#_visible_categories[@]}"
+        else
+          _selected=$((_selected - 1))
+        fi
+      fi
+      _feedback=""
+      continue
+      ;;
+    down)
+      if [ "${#_visible_categories[@]}" -gt 0 ]; then
+        if [ "${_selected}" -ge "${#_visible_categories[@]}" ]; then
+          _selected=1
+        else
+          _selected=$((_selected + 1))
+        fi
+      fi
+      _feedback=""
+      continue
+      ;;
+    right|'')
+      if [ "${#_visible_categories[@]}" -le 0 ] || [ "${_selected}" -lt 1 ]; then
+        _feedback="$(_text invalid_number)"
         continue
-      }
+      fi
+      _category="${_visible_categories[$((_selected - 1))]}"
       _toggle_category "${_category}"
+      _feedback="${REPLY:-}"
+      continue
       ;;
   esac
 
+  if [[ ! "${_choice}" =~ ^[0-9]+$ ]]; then
+    _feedback="$(_text enter_valid_number)"
+    continue
+  fi
+  if [ "${_choice}" -lt 1 ] || [ "${_choice}" -gt "${#_visible_categories[@]}" ]; then
+    _feedback="$(_text invalid_number)"
+    continue
+  fi
+
+  _category="${_visible_categories[$((_choice - 1))]}"
+  _selected="${_choice}"
+  _toggle_category "${_category}"
+  _feedback="${REPLY:-}"
 done
+_alias_menu_session_end
+
+if [ "${_status}" -eq 130 ]; then
+  echo "$(_text canceled)"
+  exit 130
+fi
 
 echo "$(_text done_hint)"

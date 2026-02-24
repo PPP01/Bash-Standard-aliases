@@ -9,6 +9,8 @@ _loader_path="${_repo_dir}/bash_alias_std.sh"
 _category_setup_script="${_repo_dir}/scripts/alias_category_setup.sh"
 # shellcheck disable=SC1090
 source "${_repo_dir}/lib/alias_i18n.sh"
+# shellcheck disable=SC1090
+source "${_repo_dir}/lib/alias_menu_engine.sh"
 _alias_setup_marker_start="# >>> bash_alias_std setup >>>"
 _alias_setup_marker_end="# <<< bash_alias_std setup <<<"
 
@@ -127,22 +129,200 @@ _alias_setup_find_marker_target() {
 _alias_setup_prompt_yes_no() {
   local question="$1"
   local answer=""
-  read -r -p "${question}$(_text prompt_yes_no_suffix)" answer
-  case "${answer}" in
-    y|Y|yes|YES) return 0 ;;
-    *) return 1 ;;
-  esac
+  local selected=2
+  local status=1
+  local marker_yes=" "
+  local marker_no=" "
+  local feedback=""
+  local render_lines=0
+
+  _alias_menu_session_begin
+  while true; do
+    _alias_menu_was_interrupted && {
+      status=130
+      break
+    }
+
+    _alias_menu_refresh_begin
+    marker_yes=" "
+    marker_no=" "
+    [ "${selected}" -eq 1 ] && marker_yes=">"
+    [ "${selected}" -eq 2 ] && marker_no=">"
+
+    echo ""
+    echo "${question}"
+    printf ' %s 1) yes\n' "${marker_yes}"
+    printf ' %s 2) no\n' "${marker_no}"
+    if [ -n "${feedback}" ]; then
+      echo "${feedback}"
+    fi
+    render_lines=4
+    if [ -n "${feedback}" ]; then
+      render_lines=$((render_lines + 1))
+    fi
+    _alias_menu_redraw_set_lines $((render_lines + 1))
+
+    _alias_menu_read_input "${question}$(_text prompt_yes_no_suffix)"
+    case "$?" in
+      130)
+        status=130
+        break
+        ;;
+      0) ;;
+      *)
+        status=1
+        break
+        ;;
+    esac
+    answer="${REPLY:-}"
+
+    if _alias_menu_is_quit_input "${answer}" || _alias_menu_is_back_input "${answer}"; then
+      status=2
+      break
+    fi
+
+    case "${answer}" in
+      up|left)
+        if [ "${selected}" -le 1 ]; then
+          selected=2
+        else
+          selected=1
+        fi
+        feedback=""
+        ;;
+      down|right)
+        if [ "${selected}" -ge 2 ]; then
+          selected=1
+        else
+          selected=2
+        fi
+        feedback=""
+        ;;
+      ''|1|y|Y|yes|YES)
+        if [ "${answer}" = "" ] && [ "${selected}" -eq 2 ]; then
+          status=2
+        else
+          status=0
+        fi
+        break
+        ;;
+      2|n|N|no|NO)
+        status=2
+        break
+        ;;
+      *)
+        feedback="$(_text canceled)"
+        ;;
+    esac
+  done
+  _alias_menu_session_end
+
+  if [ "${status}" -eq 0 ]; then
+    return 0
+  fi
+  if [ "${status}" -eq 130 ]; then
+    return 130
+  fi
+  return 1
 }
 
 _alias_setup_prompt_choice_root_target() {
   local user_target="$1"
   local answer=""
+  local selected=1
+  local status=1
+  local feedback=""
+  local marker_user=" "
+  local marker_global=" "
+  local marker_skip=" "
+  local render_lines=0
 
-  echo "$(_text root_choose_target)" >&2
-  echo "  1) ${user_target}" >&2
-  echo "  2) /etc/bash.bashrc" >&2
-  echo "$(_text root_skip)" >&2
-  read -r -p "$(_text prompt_choice_123)" answer
+  _alias_menu_session_begin
+  while true; do
+    _alias_menu_was_interrupted && {
+      status=130
+      break
+    }
+
+    _alias_menu_refresh_begin
+    marker_user=" "
+    marker_global=" "
+    marker_skip=" "
+    [ "${selected}" -eq 1 ] && marker_user=">"
+    [ "${selected}" -eq 2 ] && marker_global=">"
+    [ "${selected}" -eq 3 ] && marker_skip=">"
+
+    echo "$(_text root_choose_target)"
+    printf ' %s 1) %s\n' "${marker_user}" "${user_target}"
+    printf ' %s 2) /etc/bash.bashrc\n' "${marker_global}"
+    printf ' %s %s\n' "${marker_skip}" "$(_text root_skip)"
+    if [ -n "${feedback}" ]; then
+      echo "${feedback}"
+    fi
+    render_lines=4
+    if [ -n "${feedback}" ]; then
+      render_lines=$((render_lines + 1))
+    fi
+    _alias_menu_redraw_set_lines $((render_lines + 1))
+
+    _alias_menu_read_input "$(_text prompt_choice_123)"
+    case "$?" in
+      130)
+        status=130
+        break
+        ;;
+      0) ;;
+      *)
+        status=1
+        break
+        ;;
+    esac
+    answer="${REPLY:-}"
+
+    if _alias_menu_is_quit_input "${answer}" || _alias_menu_is_back_input "${answer}"; then
+      status=2
+      break
+    fi
+
+    case "${answer}" in
+      up)
+        if [ "${selected}" -le 1 ]; then
+          selected=3
+        else
+          selected=$((selected - 1))
+        fi
+        feedback=""
+        ;;
+      down)
+        if [ "${selected}" -ge 3 ]; then
+          selected=1
+        else
+          selected=$((selected + 1))
+        fi
+        feedback=""
+        ;;
+      right|'')
+        answer="${selected}"
+        status=0
+        break
+        ;;
+      1|2|3)
+        status=0
+        break
+        ;;
+      *)
+        feedback="$(_text canceled)"
+        ;;
+    esac
+  done
+  _alias_menu_session_end
+
+  if [ "${status}" -eq 130 ]; then
+    return 130
+  fi
+  if [ "${status}" -ne 0 ]; then
+    return 2
+  fi
 
   case "${answer}" in
     1) printf "%s" "${user_target}" ;;
@@ -155,6 +335,7 @@ alias_setup() {
   local user_rc="${HOME}/.bashrc"
   local user_target=""
   local final_target=""
+  local prompt_rc=0
 
   if [ ! -f "${_loader_path}" ]; then
     printf "$(_text err_loader_missing)\n" "${_loader_path}"
@@ -168,15 +349,27 @@ alias_setup() {
 
   if [ "${EUID}" -eq 0 ] && [ -f /etc/bash.bashrc ]; then
     final_target="$(_alias_setup_prompt_choice_root_target "${user_target}")"
+    prompt_rc=$?
+    if [ "${prompt_rc}" -eq 130 ]; then
+      echo "$(_text canceled)"
+      return 130
+    fi
     if [ -n "${final_target}" ]; then
       _alias_setup_add_to_file "${final_target}" "${_loader_path}" || return 1
     else
       echo "$(_text root_skipped)"
     fi
-  elif _alias_setup_prompt_yes_no "$(printf "$(_text prompt_user_setup)" "${user_target}")"; then
-    _alias_setup_add_to_file "${user_target}" "${_loader_path}" || return 1
   else
-    echo "$(_text user_skipped)"
+    if _alias_setup_prompt_yes_no "$(printf "$(_text prompt_user_setup)" "${user_target}")"; then
+      _alias_setup_add_to_file "${user_target}" "${_loader_path}" || return 1
+    else
+      prompt_rc=$?
+      if [ "${prompt_rc}" -eq 130 ]; then
+        echo "$(_text canceled)"
+        return 130
+      fi
+      echo "$(_text user_skipped)"
+    fi
   fi
 
   echo "$(_text setup_done)"
@@ -267,6 +460,13 @@ alias_setup_remove() {
   local target_file=""
   local user_target=""
   local answer=""
+  local selected=3
+  local status=0
+  local feedback=""
+  local marker_global=" "
+  local marker_user=" "
+  local marker_cancel=" "
+  local render_lines=0
 
   if _alias_setup_find_marker_target; then
     target_file="${REPLY}"
@@ -280,12 +480,87 @@ alias_setup_remove() {
   fi
 
   if [ "${EUID}" -eq 0 ] && [ -f /etc/bash.bashrc ]; then
-    echo "$(_text no_marker_found)"
-    echo "$(_text choose_remove_target)"
-    echo "  1) /etc/bash.bashrc"
-    echo "  2) ${user_target}"
-    echo "$(_text remove_cancel)"
-    read -r -p "$(_text prompt_choice_123)" answer
+    _alias_menu_session_begin
+    while true; do
+      _alias_menu_was_interrupted && {
+        status=130
+        break
+      }
+
+      _alias_menu_refresh_begin
+      marker_global=" "
+      marker_user=" "
+      marker_cancel=" "
+      [ "${selected}" -eq 1 ] && marker_global=">"
+      [ "${selected}" -eq 2 ] && marker_user=">"
+      [ "${selected}" -eq 3 ] && marker_cancel=">"
+
+      echo "$(_text no_marker_found)"
+      echo "$(_text choose_remove_target)"
+      printf ' %s 1) /etc/bash.bashrc\n' "${marker_global}"
+      printf ' %s 2) %s\n' "${marker_user}" "${user_target}"
+      printf ' %s %s\n' "${marker_cancel}" "$(_text remove_cancel)"
+      if [ -n "${feedback}" ]; then
+        echo "${feedback}"
+      fi
+      render_lines=5
+      if [ -n "${feedback}" ]; then
+        render_lines=$((render_lines + 1))
+      fi
+      _alias_menu_redraw_set_lines $((render_lines + 1))
+
+      _alias_menu_read_input "$(_text prompt_choice_123)"
+      case "$?" in
+        130)
+          status=130
+          break
+          ;;
+        0) ;;
+        *)
+          status=1
+          break
+          ;;
+      esac
+      answer="${REPLY:-}"
+      if _alias_menu_is_quit_input "${answer}" || _alias_menu_is_back_input "${answer}"; then
+        answer=3
+        break
+      fi
+      case "${answer}" in
+        up)
+          if [ "${selected}" -le 1 ]; then
+            selected=3
+          else
+            selected=$((selected - 1))
+          fi
+          feedback=""
+          ;;
+        down)
+          if [ "${selected}" -ge 3 ]; then
+            selected=1
+          else
+            selected=$((selected + 1))
+          fi
+          feedback=""
+          ;;
+        right|'')
+          answer="${selected}"
+          break
+          ;;
+        1|2|3)
+          break
+          ;;
+        *)
+          feedback="$(_text canceled)"
+          ;;
+      esac
+    done
+    _alias_menu_session_end
+
+    if [ "${status}" -eq 130 ]; then
+      echo "$(_text canceled)"
+      return 1
+    fi
     case "${answer}" in
       1) _alias_setup_remove_from_file "/etc/bash.bashrc" ;;
       2) _alias_setup_remove_from_file "${user_target}" ;;

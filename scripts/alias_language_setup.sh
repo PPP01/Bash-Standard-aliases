@@ -7,6 +7,8 @@ _script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _repo_dir="$(cd "${_script_dir}/.." && pwd)"
 # shellcheck disable=SC1090
 source "${_repo_dir}/lib/alias_i18n.sh"
+# shellcheck disable=SC1090
+source "${_repo_dir}/lib/alias_menu_engine.sh"
 
 _user_settings_dir="${HOME}/.config/bash-standard-aliases"
 _user_settings_file="${_user_settings_dir}/settings.conf"
@@ -77,38 +79,136 @@ _write_language_block() {
   } >> "${_user_settings_file}"
 }
 
-_print_menu() {
-  local current_locale="${BASH_ALIAS_LOCALE:-de}"
-  echo ""
-  printf "$(_text menu_title)\n" "${_user_settings_file}"
-  printf "$(_text menu_current)\n" "${current_locale}"
-  echo "$(_text menu_de)"
-  echo "$(_text menu_en)"
-  echo "$(_text menu_quit)"
-}
-
 _select_language_interactive() {
   local answer=""
+  local current_locale=""
+  local selected=1
+  local status=1
+  local feedback=""
+  local marker_de=" "
+  local marker_en=" "
+  local render_lines=0
 
+  _alias_menu_session_begin
   while true; do
-    _print_menu
-    read -r -p "$(_text menu_prompt)" answer
+    _alias_menu_was_interrupted && {
+      status=130
+      break
+    }
+
+    _alias_menu_refresh_begin
+    current_locale="${BASH_ALIAS_LOCALE:-de}"
+    marker_de=" "
+    marker_en=" "
+    [ "${selected}" -eq 1 ] && marker_de=">"
+    [ "${selected}" -eq 2 ] && marker_en=">"
+
+    echo ""
+    printf "$(_text menu_title)\n" "${_user_settings_file}"
+    printf "$(_text menu_current)\n" "${current_locale}"
+    printf ' %s %s\n' "${marker_de}" "$(_text menu_de)"
+    printf ' %s %s\n' "${marker_en}" "$(_text menu_en)"
+    echo "   $(_text menu_quit)"
+    if [ -n "${feedback}" ]; then
+      echo "${feedback}"
+    fi
+    render_lines=6
+    if [ -n "${feedback}" ]; then
+      render_lines=$((render_lines + 1))
+    fi
+    _alias_menu_redraw_set_lines $((render_lines + 1))
+
+    _alias_menu_read_input "$(_text menu_prompt)"
+    case "$?" in
+      130)
+        status=130
+        break
+        ;;
+      0) ;;
+      *)
+        status=1
+        break
+        ;;
+    esac
+    answer="${REPLY:-}"
+
+    if _alias_menu_is_quit_input "${answer}" || _alias_menu_is_back_input "${answer}"; then
+      status=2
+      break
+    fi
+
     case "${answer}" in
-      1|de|DE) REPLY="de"; return 0 ;;
-      2|en|EN) REPLY="en"; return 0 ;;
-      q|Q|quit|QUIT|exit|EXIT) echo "$(_text canceled)"; exit 0 ;;
-      *) echo "$(_text invalid_choice)" ;;
+      up)
+        if [ "${selected}" -le 1 ]; then
+          selected=2
+        else
+          selected=$((selected - 1))
+        fi
+        feedback=""
+        ;;
+      down)
+        if [ "${selected}" -ge 2 ]; then
+          selected=1
+        else
+          selected=$((selected + 1))
+        fi
+        feedback=""
+        ;;
+      right|'')
+        if [ "${selected}" -eq 1 ]; then
+          REPLY="de"
+        else
+          REPLY="en"
+        fi
+        status=0
+        break
+        ;;
+      1|de|DE)
+        REPLY="de"
+        status=0
+        break
+        ;;
+      2|en|EN)
+        REPLY="en"
+        status=0
+        break
+        ;;
+      *)
+        feedback="$(_text invalid_choice)"
+        ;;
     esac
   done
+
+  _alias_menu_session_end
+  if [ "${status}" -eq 0 ]; then
+    return 0
+  fi
+  if [ "${status}" -eq 2 ]; then
+    echo "$(_text canceled)"
+    return 2
+  fi
+  if [ "${status}" -eq 130 ]; then
+    echo "$(_text canceled)"
+    return 130
+  fi
+  return 1
 }
 
 main() {
   local locale="${1:-}"
+  local select_rc=0
 
   _ensure_user_settings_file
 
   if [ -z "${locale}" ]; then
     _select_language_interactive
+    select_rc=$?
+    case "${select_rc}" in
+      0) ;;
+      2) return 0 ;;
+      130) return 130 ;;
+      *) return 1 ;;
+    esac
     locale="${REPLY}"
   fi
 

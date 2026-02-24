@@ -7,6 +7,8 @@ _script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 _repo_dir="$(cd "${_script_dir}/.." && pwd)"
 # shellcheck disable=SC1090
 source "${_repo_dir}/lib/alias_i18n.sh"
+# shellcheck disable=SC1090
+source "${_repo_dir}/lib/alias_menu_engine.sh"
 
 _user_settings_dir="${HOME}/.config/bash-standard-aliases"
 _user_settings_file="${_user_settings_dir}/settings.conf"
@@ -238,38 +240,136 @@ _ensure_override_block() {
   } >> "${_user_settings_file}"
 }
 
-_print_menu() {
-  local current_scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
-  echo ""
-  printf "$(_text menu_title)\n" "${_user_settings_file}"
-  printf "$(_text menu_current)\n" "${current_scheme}"
-  echo "$(_text menu_dark)"
-  echo "$(_text menu_bright)"
-  echo "$(_text menu_quit)"
-}
-
 _select_scheme_interactive() {
   local answer=""
+  local current_scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
+  local selected=1
+  local status=1
+  local feedback=""
+  local marker_dark=" "
+  local marker_bright=" "
+  local render_lines=0
 
+  _alias_menu_session_begin
   while true; do
-    _print_menu
-    read -r -p "$(_text menu_prompt)" answer
+    _alias_menu_was_interrupted && {
+      status=130
+      break
+    }
+
+    _alias_menu_refresh_begin
+    current_scheme="${BASH_ALIAS_COLOR_SCHEME:-dark}"
+    marker_dark=" "
+    marker_bright=" "
+    [ "${selected}" -eq 1 ] && marker_dark=">"
+    [ "${selected}" -eq 2 ] && marker_bright=">"
+
+    echo ""
+    printf "$(_text menu_title)\n" "${_user_settings_file}"
+    printf "$(_text menu_current)\n" "${current_scheme}"
+    printf ' %s %s\n' "${marker_dark}" "$(_text menu_dark)"
+    printf ' %s %s\n' "${marker_bright}" "$(_text menu_bright)"
+    echo "   $(_text menu_quit)"
+    if [ -n "${feedback}" ]; then
+      echo "${feedback}"
+    fi
+    render_lines=6
+    if [ -n "${feedback}" ]; then
+      render_lines=$((render_lines + 1))
+    fi
+    _alias_menu_redraw_set_lines $((render_lines + 1))
+
+    _alias_menu_read_input "$(_text menu_prompt)"
+    case "$?" in
+      130)
+        status=130
+        break
+        ;;
+      0) ;;
+      *)
+        status=1
+        break
+        ;;
+    esac
+    answer="${REPLY:-}"
+
+    if _alias_menu_is_quit_input "${answer}" || _alias_menu_is_back_input "${answer}"; then
+      status=2
+      break
+    fi
+
     case "${answer}" in
-      1|dark|DARK) REPLY="dark"; return 0 ;;
-      2|bright|BRIGHT|light|LIGHT) REPLY="bright"; return 0 ;;
-      q|Q|quit|QUIT|exit|EXIT) echo "$(_text canceled)"; exit 0 ;;
-      *) echo "$(_text invalid_choice)" ;;
+      up)
+        if [ "${selected}" -le 1 ]; then
+          selected=2
+        else
+          selected=$((selected - 1))
+        fi
+        feedback=""
+        ;;
+      down)
+        if [ "${selected}" -ge 2 ]; then
+          selected=1
+        else
+          selected=$((selected + 1))
+        fi
+        feedback=""
+        ;;
+      right|'')
+        if [ "${selected}" -eq 1 ]; then
+          REPLY="dark"
+        else
+          REPLY="bright"
+        fi
+        status=0
+        break
+        ;;
+      1|dark|DARK)
+        REPLY="dark"
+        status=0
+        break
+        ;;
+      2|bright|BRIGHT|light|LIGHT)
+        REPLY="bright"
+        status=0
+        break
+        ;;
+      *)
+        feedback="$(_text invalid_choice)"
+        ;;
     esac
   done
+
+  _alias_menu_session_end
+  if [ "${status}" -eq 0 ]; then
+    return 0
+  fi
+  if [ "${status}" -eq 2 ]; then
+    echo "$(_text canceled)"
+    return 2
+  fi
+  if [ "${status}" -eq 130 ]; then
+    echo "$(_text canceled)"
+    return 130
+  fi
+  return 1
 }
 
 main() {
   local scheme="${1:-}"
+  local select_rc=0
 
   _ensure_user_settings_file
 
   if [ -z "${scheme}" ]; then
     _select_scheme_interactive
+    select_rc=$?
+    case "${select_rc}" in
+      0) ;;
+      2) return 0 ;;
+      130) return 130 ;;
+      *) return 1 ;;
+    esac
     scheme="${REPLY}"
   fi
 
