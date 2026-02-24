@@ -936,6 +936,23 @@ _alias_category_is_visible() {
   [ -n "${names_block}" ]
 }
 
+_alias_category_alias_count_for_menu() {
+  local category="$1"
+  local names_block=""
+  local name=""
+  local count=0
+
+  _alias_runtime_cache_build
+  names_block="${BASH_ALIAS_RUNTIME_CATEGORY_NAMES[${category}]:-}"
+  while IFS= read -r name; do
+    [ -n "${name}" ] || continue
+    count=$((count + 1))
+    [ "${count}" -lt 99 ] || break
+  done <<< "${names_block}"
+
+  printf '%02d' "${count}"
+}
+
 _alias_reserved_number_for_category() {
   local category="$1"
 
@@ -1470,7 +1487,7 @@ _alias_pick_category_interactive() {
   local selected=1
   local selected_number=0
   local display=""
-  local state=""
+  local alias_count=""
   local color=""
   local display_color=""
   local rendered_entries=0
@@ -1495,12 +1512,9 @@ _alias_pick_category_interactive() {
       _alias_is_setup_category "${category}" && continue
       _alias_category_is_visible "${category}" || continue
       menu_categories+=("${category}")
-      state="off"
-      if [ "${BASH_ALIAS_CATEGORY_ENABLED[${category}]:-0}" -eq 1 ]; then
-        state="on"
-      fi
       number="$(_alias_category_number_for_name "${category}")" || continue
       display="$(_alias_category_display_name "${category}")"
+      alias_count="$(_alias_category_alias_count_for_menu "${category}")"
       color="$(_alias_category_color_for_menu "${category}")"
       selected_number="${#menu_categories[@]}"
       marker=" "
@@ -1513,7 +1527,7 @@ _alias_pick_category_interactive() {
       fi
       printf ' %b%s%b %b%b%3d) %-12s%b [%s]%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
-        "${line_color}" "${display_color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" "${BASH_ALIAS_HELP_COLOR_RESET}"
+        "${line_color}" "${display_color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${alias_count}" "${BASH_ALIAS_HELP_COLOR_RESET}"
       rendered_entries=$((rendered_entries + 1))
     done
 
@@ -1521,12 +1535,9 @@ _alias_pick_category_interactive() {
       _alias_is_setup_category "${category}" || continue
       _alias_category_is_visible "${category}" || continue
       menu_categories+=("${category}")
-      state="off"
-      if [ "${BASH_ALIAS_CATEGORY_ENABLED[${category}]:-0}" -eq 1 ]; then
-        state="on"
-      fi
       number="$(_alias_category_number_for_name "${category}")" || continue
       display="$(_alias_category_display_name "${category}")"
+      alias_count="$(_alias_category_alias_count_for_menu "${category}")"
       color="$(_alias_category_color_for_menu "${category}")"
       selected_number="${#menu_categories[@]}"
       marker=" "
@@ -1539,7 +1550,7 @@ _alias_pick_category_interactive() {
       fi
       printf ' %b%s%b %b%b%3d) %-12s%b [%s]%b\n' \
         "$(_alias_menu_highlight_marker_color)" "${marker}" "${BASH_ALIAS_HELP_COLOR_RESET}" \
-        "${line_color}" "${display_color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" "${BASH_ALIAS_HELP_COLOR_RESET}"
+        "${line_color}" "${display_color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${alias_count}" "${BASH_ALIAS_HELP_COLOR_RESET}"
       rendered_entries=$((rendered_entries + 1))
     done
 
