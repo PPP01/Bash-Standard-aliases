@@ -1542,6 +1542,19 @@ _alias_pick_category_interactive() {
         "${line_color}" "${display_color}" "${number}" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "${state}" "${BASH_ALIAS_HELP_COLOR_RESET}"
       rendered_entries=$((rendered_entries + 1))
     done
+
+    for category in "${BASH_ALIAS_CATEGORY_ORDER[@]}"; do
+      [ "${category}" = "_own" ] && continue
+      [ "${category}" = "misc" ] && continue
+      _alias_is_setup_category "${category}" && continue
+      _alias_category_is_visible "${category}" && continue
+      [ "${BASH_ALIAS_CATEGORY_ENABLED[${category}]:-0}" -eq 0 ] || continue
+      display="$(_alias_category_display_name "${category}")"
+      printf ' %b%s%b %b%3s) %-12s%b [%s]%b\n' \
+        "$(_alias_menu_highlight_marker_color)" " " "${BASH_ALIAS_HELP_COLOR_RESET}" \
+        "${BASH_ALIAS_HELP_COLOR_MENU_CATEGORY_SETUP}" "-" "${display}" "${BASH_ALIAS_HELP_COLOR_RESET}" "off" "${BASH_ALIAS_HELP_COLOR_RESET}"
+      rendered_entries=$((rendered_entries + 1))
+    done
     if [ "${#menu_categories[@]}" -le 0 ]; then
       selected=0
     elif [ "${selected}" -lt 1 ] || [ "${selected}" -gt "${#menu_categories[@]}" ]; then

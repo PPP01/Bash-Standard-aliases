@@ -75,8 +75,9 @@ Hinweis: Es werden Delta-Änderungen gespeichert (nur Abweichungen), nicht die k
 a
 ```
 
-Oeffnet ein interaktives Menü mit sichtbaren Kategorien und Alias-Details.
-Kategorien ohne verfügbare Aliase für den aktuellen User werden ausgeblendet.
+Öffnet ein interaktives Menü mit sichtbaren Kategorien und Alias-Details.
+Ausgeschaltete Kategorien werden unterhalb von `setup` ausgegraut angezeigt.
+Andere Kategorien ohne verfügbare Aliase für den aktuellen User werden ausgeblendet.
 In der Detailansicht startet `Enter` den ausgewählten Alias direkt.
 
 Navigationstasten im interaktiven Menü:

@@ -69,7 +69,8 @@ a
 ```
 
 Opens an interactive menu with visible categories and alias details.
-Categories without available aliases for the current user are hidden.
+Disabled categories are shown grayed out below `setup`.
+Other categories without available aliases for the current user are hidden.
 In details view, `Enter` runs the selected alias directly.
 
 Navigation keys in interactive menus:
