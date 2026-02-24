@@ -72,6 +72,12 @@ Opens an interactive menu with visible categories and alias details.
 Categories without available aliases for the current user are hidden.
 In details view, `Enter` runs the selected alias directly.
 
+Navigation keys in interactive menus:
+- `Up` / `Down`: move selection
+- `Right` / `Enter`: open selected item (or run in detail view)
+- `Left` / `Backspace` / `0`: go back one level
+- `q` / `Esc`: quit menu
+
 ### 4.1.1 `a [category]`
 ```bash
 a git
@@ -106,8 +112,9 @@ Disable (optional):
 export BASH_ALIAS_MENU_DISK_CACHE=0
 ```
 
-### 4.1.4 Detail colors
-`Description` and `Command` labels are green by default.
+### 4.1.4 Menu and detail colors
+Colors for menu and detail output are configurable via `BASH_ALIAS_HELP_COLOR_*`
+(for example `..._DETAIL_LABEL`, `..._MENU_TITLE`, `..._MENU_HIGHLIGHT_LINE`).
 Override via settings layers:
 
 ```bash
@@ -205,6 +212,15 @@ Settings layers (in this order):
 1. `settings.conf` (base, versioned)
 2. `settings.local.conf` (global delta settings)
 3. `~/.config/bash-standard-aliases/settings.conf` (user delta settings)
+
+`_alias_setup_scheme` writes two marker blocks into the user settings file:
+- `# >>> _alias_setup_scheme managed >>>`: generated scheme values
+- `# >>> _alias_setup_scheme user-overrides >>>`: your active manual overrides
+
+Important behavior:
+- Active `BASH_ALIAS_HELP_COLOR_*` lines outside the managed block are normalized
+  into the `user-overrides` block on the next `_alias_setup_scheme` run.
+- This ensures manual color overrides are not shadowed by generated managed values.
 
 Example (delta only):
 ```bash

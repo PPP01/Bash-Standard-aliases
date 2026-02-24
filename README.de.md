@@ -79,6 +79,12 @@ Oeffnet ein interaktives Menü mit sichtbaren Kategorien und Alias-Details.
 Kategorien ohne verfügbare Aliase für den aktuellen User werden ausgeblendet.
 In der Detailansicht startet `Enter` den ausgewählten Alias direkt.
 
+Navigationstasten im interaktiven Menü:
+- `Pfeil hoch` / `Pfeil runter`: Auswahl bewegen
+- `Pfeil rechts` / `Enter`: ausgewählten Eintrag öffnen (oder in der Detailansicht ausführen)
+- `Pfeil links` / `Backspace` / `0`: eine Ebene zurück
+- `q` / `Esc`: Menü beenden
+
 ### 4.1.1 Menü `a [kategorie]`
 ```bash
 a git
@@ -113,9 +119,10 @@ Deaktivieren (optional):
 export BASH_ALIAS_MENU_DISK_CACHE=0
 ```
 
-### 4.1.4 Farben der Detailansicht
-Die Labels `Beschreibung` und `Befehl` sind standardmaessig grün.
-Sie koennen über Settings-Layer überschrieben werden:
+### 4.1.4 Menü- und Detailfarben
+Farben für Menü und Detailansicht sind über `BASH_ALIAS_HELP_COLOR_*` konfigurierbar
+(z. B. `..._DETAIL_LABEL`, `..._MENU_TITLE`, `..._MENU_HIGHLIGHT_LINE`).
+Sie können über Settings-Layer überschrieben werden:
 
 ```bash
 # globales Delta (root/host)
@@ -194,6 +201,15 @@ Konfigurations-Layer für Settings (in dieser Reihenfolge):
 1. `settings.conf` (Basis, versioniert)
 2. `settings.local.conf` (globale Delta-Settings)
 3. `~/.config/bash-standard-aliases/settings.conf` (user Delta-Settings)
+
+`_alias_setup_scheme` schreibt zwei Marker-Blöcke in die User-Settings:
+- `# >>> _alias_setup_scheme managed >>>`: generierte Schema-Werte
+- `# >>> _alias_setup_scheme user-overrides >>>`: aktive manuelle Overrides
+
+Wichtiges Verhalten:
+- Aktive `BASH_ALIAS_HELP_COLOR_*`-Zeilen außerhalb des Managed-Blocks werden beim
+  nächsten Lauf von `_alias_setup_scheme` in den `user-overrides`-Block normalisiert.
+- Dadurch werden manuelle Farb-Overrides nicht von generierten Managed-Werten überschrieben.
 
 Beispiel (nur Delta):
 ```bash
